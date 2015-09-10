@@ -37,14 +37,14 @@
     sql: ${first_name} || ' ' || ${last_name}
     html: |
       {{ linked_value }}
-      <a href="/dashboards/463?Salesrep={{ value | encode_uri }}&SalesSegment={{ salesrep.business_segment._value }}" target="_blank">
+      <a href="/dashboards/5?Sales%20Rep={{ value | encode_uri }}&Sales%20Segment={{ salesrep.business_segment._value }}" target="_blank">
       <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
   
   - dimension: business_segment
     sql: COALESCE(${TABLE}.business_segment, 'Top of Funnel/Not Assigned')
     html: |
       {{ linked_value }}
-      <a href="/dashboards/526?BusinessSegment={{ value | encode_uri }}" target="_blank">
+      <a href="/dashboards/4?Business%20Segment={{ value | encode_uri }}" target="_blank">
       <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
       
   - filter: rep_select
