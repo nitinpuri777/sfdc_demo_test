@@ -48,14 +48,23 @@
       <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
       
   - filter: rep_select
+    view_label: 'Salesrep comparisons'
     suggest_dimension: name
       
+  - filter: segment_select
+    view_label: 'Salesrep comparisons'
+    suggest_dimension: business_segment    
+      
   - dimension: rep_comparitor
+    view_label: 'Salesrep comparisons'
     description: Use in conjunction with rep select filter to compare to other sales reps
     sql: |
-          CASE WHEN {% condition rep_select %} ${name} {% endcondition %}
-          THEN ${name}
-          ELSE 'Sales Team Avg'
+          CASE 
+            WHEN {% condition rep_select %} ${name} {% endcondition %}
+              THEN '1 - ' || ${name}
+            WHEN {% condition segment_select %} ${business_segment} {% endcondition %}          
+              THEN '2 - Rest of ' || ${business_segment}
+          ELSE '3 - Rest of Sales Team'
           END
     
 # MEASURES #
