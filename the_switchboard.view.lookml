@@ -334,6 +334,22 @@
   - dimension: opportunity_id
     hidden: true
     sql: ${TABLE}.opportunity_id
+    
+  - dimension: days_to_convert_to_opp
+    type: number
+    hidden: true
+    sql: datediff('day',${meeting.raw_meeting_date},${opportunity.raw_created_date}) 
+  
+  - dimension: converts_to_opp_7d
+    type: yesno
+    hidden: true
+    sql: ${days_to_convert_to_opp} <= 7
+  
+  - dimension: converts_to_opp_30d
+    type: yesno
+    hidden: true
+    sql: ${days_to_convert_to_opp} <= 30
+
   
 # MEASURES #
 
@@ -365,6 +381,41 @@
     type: number
     sql: 1.00 * ${total_customers} / NULLIF(${meeting.count}, 0)
     value_format: '#0.00%'
+  
+  - measure: intro_meetings_converted_to_opp_within_7d
+    type: count_distinct
+    sql: ${meeting.id}
+    hidden: true
+    filters:
+      meeting.status: 'Completed'
+      converts_to_opp_7d: 'Yes'  
+    
+  - measure: intro_meetings_converted_to_opp_within_30d
+    type: count_distinct
+    sql: ${meeting.id}
+    hidden: true
+    filters:
+      meeting.status: 'Completed'
+      converts_to_opp_30d: 'Yes'
+
+  - measure: meeting_to_opp_conversion_rate_07d
+    label: 'Meeting to Opportunity Conversion within 07 days'
+    view_label: 'Meeting'
+    description: 'What percent of meetings converted to opportunities within 7 days of the meeting?'
+    type: number
+    value_format: '#.#\%'
+    sql: 100.0 * ${intro_meetings_converted_to_opp_within_7d} / nullif(${meeting.meetings_completed},0)
+    drill_fields: [name, meeting.meeting_date, account_representative_meeting.name, opportunity.created_date, opportunity.name, opportunity.stage_name]
+
+    
+  - measure: meeting_to_opp_conversion_rate_30d
+    label: 'Meeting to Opportunity Conversion within 30 days'
+    view_label: 'Meeting'
+    description: 'What percent of meetings converted to opportunities within 30 days of the meeting?'
+    type: number
+    value_format: '#.#\%'
+    sql: 100.0 * ${intro_meetings_converted_to_opp_within_30d} / nullif(${meeting.meetings_completed},0)
+    drill_fields: [name, meeting.meeting_date, account_representative_meeting.name, opportunity.created_date, opportunity.name, opportunity.stage_name]  
   
 # SETS #
 
