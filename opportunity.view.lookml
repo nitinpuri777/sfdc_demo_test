@@ -271,7 +271,7 @@
     sql: ${acv}   
     filters:
       is_won: No
-    value_format: '$#,##0' 
+    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
     drill_fields: opportunity_set*
     
   - measure: total_pipeline_acv
