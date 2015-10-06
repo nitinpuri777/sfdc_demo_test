@@ -6,26 +6,30 @@
 
   - dimension: id
     primary_key: true
+    hidden: true
     sql: ${TABLE}.id
 
   - dimension: account_id
     hidden: true
     sql: ${TABLE}.account_id
 
-  - dimension: contact_type
-    sql: ${TABLE}.contact_type_c
+# sparsely populated
+#   - dimension: contact_type
+#     sql: ${TABLE}.contact_type_c
 
   - dimension_group: created
     type: time
     timeframes: [time, date, week, month]
     sql: ${TABLE}.created_at
 
-  - dimension: current_customer
-    type: yesno
-    sql: ${TABLE}.current_customer_c
+#  not consistent with account.is_customer
+#   - dimension: current_customer
+#     type: yesno
+#     sql: ${TABLE}.current_customer_c
 
-  - dimension: department
-    sql: ${TABLE}.department
+# Extremely sparse
+#   - dimension: department
+#     sql: ${TABLE}.department
 
   - dimension: department_picklist
     sql: ${TABLE}.department_picklist_c
@@ -67,8 +71,9 @@
   - dimension: title
     sql: ${TABLE}.title
 
-  - dimension: zendesk_organization
-    sql: ${TABLE}.zendesk_organization
+#  Numeric field, doesn't seem useful
+#   - dimension: zendesk_organization
+#     sql: ${TABLE}.zendesk_organization
 
 # MEASURES #
 

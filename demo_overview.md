@@ -4,7 +4,7 @@
 
 **Overview**
 
- <i>Cloudly</i>  is the fictitious SaaS company used for this Salesforce demo. The demo primarily demonstrates the combination of desperate data into a consolidated database. The different data sources are Salesforce data, application data, and support (ticket) data. 
+ <i>Cloudly</i>  is the fictitious SaaS company used for this Salesforce demo. The demo primarily demonstrates the combination of disparate data into a consolidated database. The different data sources are Salesforce data, application data, and support (ticket) data. 
 
 **Demo Flow**
 
