@@ -27,29 +27,34 @@
     hidden: true
     sql: ${TABLE}.what_id
 
-  - dimension: subject
-    sql: ${TABLE}.subject
+# Custom text field, Nearly always just "Intro Meeting"
+#   - dimension: subject
+#     sql: ${TABLE}.subject
 
-  - dimension_group: activity
-    type: time
-    timeframes: [date, week, month, year]
-    sql: ${TABLE}.activity_date
+#  This is nearly always the same or before the meeting date. I'm going to therefore assume that the meeting date is the actual date the meeting ocurred, since it it later
+#   - dimension_group: activity
+#     type: time
+#     timeframes: [date, week, month, year]
+#     sql: ${TABLE}.activity_date
 
   - dimension: status
     sql: ${TABLE}.status
 
-  - dimension: priority
-    sql: ${TABLE}.priority
+# Always Normal
+#   - dimension: priority
+#     sql: ${TABLE}.priority
 
   - dimension: owner_id
     hidden: true
     sql: ${TABLE}.owner_id
 
-  - dimension: description
-    sql: ${TABLE}.description
+# This contains actual Looker notes, so we should hide it
+#   - dimension: description
+#     sql: ${TABLE}.description
 
-  - dimension: type
-    sql: ${TABLE}.type
+#  Always "Intro Meeting"
+#   - dimension: type
+#     sql: ${TABLE}.type
 
   - dimension: account_id
     hidden: true
@@ -86,14 +91,16 @@
   - dimension: call_type
     hidden: true
     sql: ${TABLE}.calltype
+    
+# Nearly all are demo meetings
+#   - dimension: meeting_type
+#     sql: COALESCE(${TABLE}.meeting__type___c, 'Demo')
 
-  - dimension: meeting_type
-    sql: COALESCE(${TABLE}.meeting__type___c, 'Demo')
-
-  - dimension_group: completed
-    type: time
-    timeframes: [date, week, month, year]
-    sql: ${TABLE}.completed__date___c
+# Always null
+#   - dimension_group: completed
+#     type: time
+#     timeframes: [date, week, month, year]
+#     sql: ${TABLE}.completed__date___c
 
   - dimension_group: meeting
     type: time
@@ -107,9 +114,10 @@
     hidden: true
     sql: ${TABLE}.sdr__meeting__assist___c
 
-  - dimension: is_high_priority
-    type: yesno
-    sql: ${TABLE}.is_high_priority
+#  Always No
+#   - dimension: is_high_priority
+#     type: yesno
+#     sql: ${TABLE}.is_high_priority
 
 #   - dimension: call_duration_in_seconds
 #     sql: ${TABLE}.call_duration_in_seconds
@@ -120,22 +128,26 @@
 #   - dimension: call_object
 #     sql: ${TABLE}.call_object
 
-  - dimension_group: reminder
-    type: time
-    timeframes: [time, date, week, month]
-    sql: ${TABLE}.reminder_date_time
+# Has data, but I don't know what it is...
+#   - dimension_group: reminder
+#     type: time
+#     timeframes: [time, date, week, month]
+#     sql: ${TABLE}.reminder_date_time
 
-  - dimension: is_reminder_set
-    type: yesno
-    sql: ${TABLE}.is_reminder_set
+# Always no
+#   - dimension: is_reminder_set
+#     type: yesno
+#     sql: ${TABLE}.is_reminder_set
+
 
   - dimension: recurrence_activity_id
     hidden: true
     sql: ${TABLE}.recurrence_activity_id
 
-  - dimension: is_recurrence
-    type: yesno
-    sql: ${TABLE}.is_recurrence
+# Always no
+#   - dimension: is_recurrence
+#     type: yesno
+#     sql: ${TABLE}.is_recurrence
 
   - dimension: number_of_no_shows
     sql: ${TABLE}.number__of__no__shows___c
@@ -186,28 +198,21 @@
   sets:
     meeting_set:
       - id
-      - subject
       - status
       - account.name
       - is_closed
       - created_date
-      - meeting_type
       
     export_set:
       - id
       - who_id
       - what_id
-      - subject
-      - activity_date
-      - status
-      - priority
       - account_id
       - lead_id
       - is_closed
       - created_date
       - completed_date
       - meeting_date_time
-      - meeting_type
       - count
       - percent_to_goal
 
