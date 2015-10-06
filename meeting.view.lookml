@@ -139,12 +139,22 @@
 
   - dimension: number_of_no_shows
     sql: ${TABLE}.number__of__no__shows___c
+    
+  - dimension: raw_meeting_date
+    hidden: true
+    sql: CASE WHEN ${status} = 'Completed' THEN ${TABLE}.meeting__date__time___c ELSE NULL END  
 
 # MEASURES #
 
   - measure: count
     type: count
     drill_fields: meeting_set*
+    
+  - measure: meetings_completed
+    type: count
+    filters:
+      status: 'Completed'
+    drill_fields: meeting_set*  
     
   - measure: percent_to_goal
     type: number

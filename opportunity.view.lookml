@@ -69,6 +69,21 @@
   - dimension: days_open
     type: number
     sql: DATEDIFF(DAYS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date) )
+    
+  - dimension: days_to_close
+    hidden: true
+    type: number
+    sql: |
+      CASE
+        WHEN ${closed_date} IS NOT NULL
+        THEN DATEDIFF(DAYS, ${meeting.raw_meeting_date}, ${closed_date} )
+        ELSE 0
+      END
+      
+  - dimension:  opp_to_closed_60d 
+    hidden: true
+    type: yesno
+    sql: ${days_to_close} <=60
 
   - dimension: is_cancelled
     type: yesno
@@ -138,6 +153,10 @@
     sql: (${probability} / 100.00) * ${contract_value}
     decimals: 2
     drill_fields: [detail*]    
+    
+  - dimension: raw_created_date
+    hidden: true
+    sql: ${TABLE}.created_at  
 
 # MEASURES #
 
@@ -148,6 +167,9 @@
 #       account.type: Customer
 #       opportunity.type: New Business
       
+  - measure: avg_days_to_close
+    type: avg
+    sql: ${days_to_close}
     
   - measure: cumulative_total
     type: running_total
@@ -275,6 +297,24 @@
     sql: ${total_acv}     
     drill_fields: opportunity_set*
     
+  - measure: meetings_converted_to_close_within_60d
+    type: count_distinct
+    sql: ${meeting.id}
+    hidden: true
+    filters:
+      meeting.status: 'Completed'
+      opp_to_closed_60d: 'Yes' 
+      is_won: 'Yes'
+      
+      
+  - measure: meeting_to_close_conversion_rate_60d
+    label: 'Meeting to Close/Won Conversion within 60 days'
+    view_label: 'Meeting'
+    description: 'What percent of meetings converted to closed within 60 days of the meeting?'
+    type: number
+    value_format: '#.#\%'
+    sql: 100.0 * ${meetings_converted_to_close_within_60d} / nullif(${meeting.meetings_completed},0)
+    drill_fields: [name, meeting.meeting_date, account_representative_meeting.name, opportunity.created_date, opportunity.name, opportunity.stage_name]      
 
 #REP VS TEAM METRICS. Could use extends functionality for this.
     
