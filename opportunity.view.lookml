@@ -85,9 +85,10 @@
     type: yesno
     sql: ${days_to_close} <=60
 
-  - dimension: is_cancelled
-    type: yesno
-    sql: ${TABLE}.is_cancelled_c
+#  Always No
+#   - dimension: is_cancelled
+#     type: yesno
+#     sql: ${TABLE}.is_cancelled_c
 
   - dimension: is_closed
     type: yesno
@@ -120,9 +121,10 @@
     type: int
     sql: ${TABLE}.probability
 
-  - dimension: renewal_number
-    type: int
-    sql: ${TABLE}.renewal_number_c
+# Always null
+#   - dimension: renewal_number
+#     type: int
+#     sql: ${TABLE}.renewal_number_c
 
   - dimension: renewal_opportunity_id
     sql: ${TABLE}.renewal_opportunity_id
