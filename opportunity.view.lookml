@@ -71,14 +71,19 @@
     sql: DATEDIFF(DAYS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date) )
     
   - dimension: days_to_close
-    hidden: true
     type: number
     sql: |
       CASE
+        WHEN ${meeting.raw_meeting_date} IS NULL 
+        THEN 0
+        WHEN ${closed_date} IS NULL
+        THEN 0
         WHEN ${closed_date} IS NOT NULL
-        THEN DATEDIFF(DAYS, ${meeting.raw_meeting_date}, ${closed_date} )
+        THEN 
+        DATEDIFF(DAYS, ${meeting.raw_meeting_date},${closed_date})
         ELSE 0
       END
+      
       
   - dimension:  opp_to_closed_60d 
     hidden: true
@@ -172,6 +177,11 @@
   - measure: avg_days_to_close
     type: avg
     sql: ${days_to_close}
+    
+  - measure: avg_days_open
+    type: avg
+    sql: ${days_open}  
+
     
   - measure: cumulative_total
     type: running_total
@@ -273,7 +283,7 @@
     sql: ${acv}   
     filters:
       is_won: No
-    value_format: '$#,##0' 
+    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
     drill_fields: opportunity_set*
     
   - measure: total_pipeline_acv
