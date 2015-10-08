@@ -54,8 +54,9 @@
       relationship: many_to_one
       
     - join: opportunity
-      sql_on: ${opportunity.id} = ${the_switchboard.opportunity_id}
       relationship: many_to_one
+      sql_on: ${opportunity.id} = ${the_switchboard.opportunity_id}
+      
       
     - join: opportunity_zendesk_facts
       view_label: 'Opportunity'
