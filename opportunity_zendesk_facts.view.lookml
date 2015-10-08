@@ -80,6 +80,7 @@
     sql: ${zendesk_ticket_count}
     
   - measure: avg_days_open
+    hidden: true
     type: average
     sql: ${days_open}
     
