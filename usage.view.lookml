@@ -114,17 +114,17 @@
     
   - dimension: concentration
     type: number
-    decimals: 2
+    value_format: '#.0%'
     sql: ROUND(${TABLE}.concentration, 2)
     
   - dimension: percent_change_usage
     type: number
-    decimals: 2
+    value_format: '#.0%'
     sql: ${TABLE}.percent_change_usage
     
   - dimension: usage_change_percentile
     type: number
-    decimals: 2
+    value_format: '#.0%'
     sql: ${TABLE}.usage_change_percentile    
     
   - dimension: percent_change_users
@@ -134,7 +134,7 @@
     
   - dimension: user_change_percentile
     type: number
-    decimals: 2
+    value_format: '#.0%'
     sql: ${TABLE}.user_change_percentile
     
   - dimension: approximate_usage_in_minutes_lifetime
@@ -142,43 +142,29 @@
     sql: ${TABLE}.approximate_usage_in_minutes_lifetime
     
   - dimension: account_health
-    # simplifying logic until discussing data with Hoover 
     sql: |
-      CASE 
-        WHEN ${concentration} < 0.35 AND ${approximate_usage_in_minutes_lifetime} < 5000
-  
-        THEN 'At Risk'
-        
-        WHEN ${concentration} < 0.50 AND ${approximate_usage_in_minutes_lifetime} < 50000
-        THEN 'Safe'
-        
-        else 'Solid'
-      end  
+      case
+              when ${TABLE}.approximate_usage_in_minutes_lifetime <= 0
+                      then 'At Risk'
+              else (
+                      case
+                              when ${TABLE}.usage_change_percentile < 0.10
+                                      then 'At Risk'
+                              when ${TABLE}.usage_change_percentile < 0.50
+                                              and ${TABLE}.concentration > 0.80
+                                              and ${TABLE}.total_current_users > 10
+                                      then 'At Risk'
+                              when ${TABLE}.usage_change_percentile < 0.50
+                                      then 'Safe'
+                              when ${TABLE}.concentration > 0.80
+                                              and ${TABLE}.total_current_users > 10
+                                      then 'Safe'
+                              else 'Solid'
+                      end
+              )
+      end
 
-#     sql: |
-#       case
-#               when ${TABLE}.approximate_usage_in_minutes_lifetime <= 0
-#                       then 'At Risk'
-#               else (
-#                       case
-#                               when ${TABLE}.usage_change_percentile < 0.10
-#                                               or ${TABLE}.user_change_percentile < 0.10
-#                                       then 'At Risk'
-#                               when (${TABLE}.usage_change_percentile < 0.50
-#                                               or ${TABLE}.user_change_percentile < 0.50)
-#                                               and ${TABLE}.concentration > 0.80
-#                                               and ${TABLE}.total_current_users > 10
-#                                       then 'At Risk'
-#                               when ${TABLE}.usage_change_percentile < 0.50
-#                                               or ${TABLE}.user_change_percentile < 0.50
-#                                       then 'Safe'
-#                               when ${TABLE}.concentration > 0.80
-#                                               and ${TABLE}.total_current_users > 10
-#                                       then 'Safe'
-#                               else 'Solid'
-#                       end
-#               )
-#       end
+
     html: |
       {% if value == 'At Risk' %}
         <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
