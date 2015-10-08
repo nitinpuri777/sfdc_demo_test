@@ -22,9 +22,9 @@
   - dimension: account_status
     sql: COALESCE(${TABLE}.account_status_c, 'Unknown')
 
-  - dimension: annual_revenue
-    type: number
-    sql: ${TABLE}.annual_revenue::NUMERIC
+#   - dimension: annual_revenue
+#     type: number
+#     sql: ${TABLE}.annual_revenue::NUMERIC
   
   - dimension: campaign
     hidden: true
@@ -45,11 +45,11 @@
     type: yesno
     sql: ${TABLE}.current_customer_c
 
-  - dimension_group: customer_end
-    type: time
-    timeframes: [date, week, month]
-    convert_tz: false
-    sql: ${TABLE}.customer_end_date_c
+#   - dimension_group: customer_end
+#     type: time
+#     timeframes: [date, week, month]
+#     convert_tz: false
+#     sql: ${TABLE}.customer_end_date_c
 
   - dimension: customer_reference
     type: yesno
@@ -67,12 +67,14 @@
       'Engaged': ${current_customer} = 'No' AND ${TABLE}.engagement_stage_c IS NOT NULL
       else: 'Prospecting'
 
-  - dimension: is_partner
-    type: yesno
-    sql: ${TABLE}.is_partner
+# only 3 partners, deleting
+#   - dimension: is_partner
+#     type: yesno
+#     sql: ${TABLE}.is_partner
 
-  - dimension: market_segment
-    sql: COALESCE(${TABLE}.market_segment_c, 'Other')
+#  nearly all are tech or "other", we should use Account Vertical or Salesrep Business Segment instead
+#   - dimension: market_segment
+#     sql: COALESCE(${TABLE}.market_segment_c, 'Other')
 
   - dimension: name
     sql: ${TABLE}.name
@@ -88,6 +90,7 @@
   - dimension: state
     sql: ${TABLE}.state
     
+# We should consider removing this, unless we really want to build something around partnerships    
   - dimension: type
     sql: NVL(${TABLE}.type,'Customer')    # default the type to customer
 
@@ -103,10 +106,10 @@
     hidden: true
     sql: ${TABLE}.zendesk_organization
 
-  - dimension: annual_revenue_tier
-    type: tier
-    tiers: [0,10000,100000,1000000,10000000,100000000]
-    sql: ${TABLE}.annual_revenue  
+#   - dimension: annual_revenue_tier
+#     type: tier
+#     tiers: [0,10000,100000,1000000,10000000,100000000]
+#     sql: ${TABLE}.annual_revenue  
     
   - dimension: number_of_employees_tier
     type: tier
@@ -122,11 +125,11 @@
   - measure: percent_of_accounts
     type: percent_of_total
     sql: ${count}
-    
-  - measure: average_annual_revenue
-    type: average
-    sql: ${annual_revenue}
-    value_format: '$#,##0'
+#     
+#   - measure: average_annual_revenue
+#     type: average
+#     sql: ${annual_revenue}
+#     value_format: '$#,##0'
     
   - measure: total_number_of_employees
     type: sum
@@ -143,15 +146,11 @@
       - id
       - company_id
       - account_status
-      - annual_revenue
       - city
       - created_date
       - current_customer
-      - customer_end_date
       - customer_start_date
       - engagement_stage
-      - is_partner
-      - market_segment
       - name
       - number_of_employees
       - state
@@ -159,11 +158,9 @@
       - url
       - vertical
       - zendesk_organization
-      - annual_revenue_tier
       - number_of_employees_tier
       - count
       - percent_of_accounts
-      - average_annual_revenue
       - total_number_of_employees
       - average_number_of_employees  
       - owner_id

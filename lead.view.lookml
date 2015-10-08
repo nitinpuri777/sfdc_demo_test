@@ -23,12 +23,14 @@
     hidden: true
     sql: ${TABLE}.account_id
 
-  - dimension: analyst_name
-    sql: ${TABLE}.analyst_name_c
+# Extremely sparsely populated
+#   - dimension: analyst_name
+#     sql: ${TABLE}.analyst_name_c
 
-  - dimension: annual_revenue
-    type: number
-    sql: ${TABLE}.annual_revenue
+# Extremely sparsely populated
+#   - dimension: annual_revenue
+#     type: number
+#     sql: ${TABLE}.annual_revenue
 
   - dimension: city
     sql: ${TABLE}.city
@@ -56,9 +58,11 @@
     type: yesno
     sql: EXTRACT(QUARTER FROM ${TABLE}.created_at) || EXTRACT(YEAR FROM ${TABLE}.created_at) = EXTRACT(QUARTER FROM CURRENT_DATE) || EXTRACT(YEAR FROM CURRENT_DATE)    
 
-  - dimension: current_customer
-    type: yesno
-    sql: ${TABLE}.current_customer_c
+# use dimension from account table instead
+#   - dimension: current_customer
+#     type: yesno
+#     sql: ${TABLE}.current_customer_c
+
 
   - dimension: department
     sql: ${TABLE}.department_c
@@ -102,8 +106,9 @@
   - dimension: title
     sql: ${TABLE}.title
 
-  - dimension: year_founded
-    sql: ${TABLE}.year_founded_c
+#  extremely sparse, especially for leads that converted
+#   - dimension: year_founded
+#     sql: ${TABLE}.year_founded_c
 
   - dimension: zendesk_organization
     hidden: true
@@ -142,4 +147,3 @@
       - title
       - zendesk_organization
       - count  
-      - created_current_quarter
