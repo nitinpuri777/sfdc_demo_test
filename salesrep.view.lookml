@@ -46,6 +46,7 @@
       {{ linked_value }}
       <a href="/dashboards/4?Business%20Segment={{ value | encode_uri }}" target="_blank">
       <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
+    suggestions: ['Enterprise','Mid-Market','Small Business','Top of Funnel/Not Assigned']
       
   - filter: rep_select
     view_label: 'Salesrep comparisons'

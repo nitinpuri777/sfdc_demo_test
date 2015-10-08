@@ -123,8 +123,9 @@
     value_format: '$#,##0.00'
 
   - dimension: probability
-    type: int
-    sql: ${TABLE}.probability
+    type: number
+    sql: ${TABLE}.probability/100.0
+    value_format: "#%"
 
 # Always null
 #   - dimension: renewal_number
