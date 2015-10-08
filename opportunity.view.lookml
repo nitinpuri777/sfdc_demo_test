@@ -70,25 +70,12 @@
     type: number
     sql: DATEDIFF(DAYS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date) )
     
-  - dimension: days_to_close
-    type: number
-    sql: |
-      CASE
-        WHEN ${meeting.raw_meeting_date} IS NULL 
-        THEN 0
-        WHEN ${closed_date} IS NULL
-        THEN 0
-        WHEN ${closed_date} IS NOT NULL
-        THEN 
-        DATEDIFF(DAYS, ${meeting.raw_meeting_date},${closed_date})
-        ELSE 0
-      END
       
       
   - dimension:  opp_to_closed_60d 
     hidden: true
     type: yesno
-    sql: ${days_to_close} <=60
+    sql: ${days_open} <=60 AND ${is_closed} = 'yes' AND ${is_won} = 'yes'
 
 #  Always No
 #   - dimension: is_cancelled
@@ -126,6 +113,13 @@
     type: number
     sql: ${TABLE}.probability/100.0
     value_format: "#%"
+
+  - dimension: probablity_tier
+    type: tier
+    tiers: [0,.01,.20,.40,.60,.80,1]
+    style: integer
+    sql: ${probability}
+
 
 # Always null
 #   - dimension: renewal_number
@@ -174,10 +168,6 @@
 #     filters:
 #       account.type: Customer
 #       opportunity.type: New Business
-      
-  - measure: avg_days_to_close
-    type: avg
-    sql: ${days_to_close}
     
   - measure: avg_days_open
     type: avg
@@ -221,6 +211,15 @@
       is_won: Yes    
     drill_fields: opportunity_set*
     value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    
+  - measure: total_pipeline_mrr
+    type: sum
+    sql: ${mrr}
+    filters:
+      is_closed: No
+    drill_fields: opportunity_set*  
+    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+      
     
   - measure: average_mrr
     label: 'Average MRR (Closed/Won)'

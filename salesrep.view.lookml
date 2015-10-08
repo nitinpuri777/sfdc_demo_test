@@ -91,4 +91,10 @@
     sql: ${opportunity.total_pipeline_acv}/NULLIF(${count},0)  
     value_format: '[>=1000000]$0.00,,"M";[>=1000]$0.00,"K";$0.00'
     drill_fields: [account.name, opportunity.type, opportunity.closed_date, opportunity.total_acv]
+    
+  - measure: avg_mrr_pipeline
+    type: number
+    sql: ${opportunity.total_pipeline_mrr}/ NULLIF(${count},0)
+    value_format: '[>=1000000]$0.00,,"M";[>=1000]$0.00,"K";$0.00'
+    drill_fields: [account.name, opportunity.type, opportunity.closed_date, opportunity.total_acv]
 
