@@ -119,6 +119,16 @@
     tiers: [0,.01,.20,.40,.60,.80,1]
 #     style: integer
     sql: ${probability}
+    
+  - dimension: probability_group
+    sql_case:
+      'Won': ${probability} = 1
+      'Above 80%': ${probability} > .8
+      '60 - 80%': ${probability} > .6
+      '40 - 60%': ${probability} > .4
+      '20 - 40%': ${probability} > .2
+      'Under 20%': ${probability} > 0
+      'Lost': ${probability} = 0
 
 
 # Always null
