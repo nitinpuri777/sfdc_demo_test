@@ -117,7 +117,7 @@
   - dimension: probablity_tier
     type: tier
     tiers: [0,.01,.20,.40,.60,.80,1]
-    style: integer
+#     style: integer
     sql: ${probability}
 
 
