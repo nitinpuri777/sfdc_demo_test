@@ -29,11 +29,11 @@
     description: Aggregated score of opportunity health (out of 100)
     sql: |
           (CASE
-            WHEN ${days_open} < 40 THEN 33
-            WHEN ${days_open} < 60 THEN 27
-            WHEN ${days_open} < 80 THEN 20
-            WHEN ${days_open} < 100 THEN 15
-            WHEN ${days_open} < 130 THEN 7
+            WHEN ${days_open} < 40 THEN 31
+            WHEN ${days_open} < 60 THEN 25
+            WHEN ${days_open} < 80 THEN 18
+            WHEN ${days_open} < 100 THEN 13
+            WHEN ${days_open} < 130 THEN 5
             ELSE 0 END)  
           +
           
@@ -48,11 +48,11 @@
           +   
           
           (CASE
-            WHEN ${opportunity.days_open} < 5 THEN 33
-            WHEN ${opportunity.days_open} < 20 THEN 27
-            WHEN ${opportunity.days_open} > 50 THEN 20
-            WHEN ${opportunity.days_open} > 80 THEN 15
-            WHEN ${opportunity.days_open} > 110 THEN 7
+            WHEN ${opportunity.days_open} < 5 THEN 35
+            WHEN ${opportunity.days_open} < 20 THEN 29
+            WHEN ${opportunity.days_open} > 50 THEN 22
+            WHEN ${opportunity.days_open} > 80 THEN 17
+            WHEN ${opportunity.days_open} > 110 THEN 9
             ELSE 0 END)  
             
     html: |
