@@ -1,14 +1,4 @@
 - view: opportunity
-  derived_table:
-    sql: |
-      SELECT opportunity.*
-        , MD5(TRIM(BOTH ' ' FROM REGEXP_REPLACE(LOWER(account.name), '([[:space:]]|\\,)+([iInNcC]|[lLcC]).*$', ''))) AS company_id
-      FROM public.opportunity AS opportunity
-      LEFT JOIN public.account AS account
-      ON account.id = opportunity.account_id    
-    sql_trigger_value: SELECT CURRENT_DATE
-    sortkeys: [account_id]
-    distkey: account_id
   fields:
 
 # DIMENSIONS #
@@ -443,6 +433,7 @@
     
 # SETS #
 
+
   sets:
     opportunity_set:
       - account.name
@@ -493,5 +484,16 @@
       - total_acv_running_sum
       - count_lost
       - total_mrr_k
+      
+  derived_table:
+    sql: |
+      SELECT opportunity.*
+        , MD5(TRIM(BOTH ' ' FROM REGEXP_REPLACE(LOWER(account.name), '([[:space:]]|\\,)+([iInNcC]|[lLcC]).*$', ''))) AS company_id
+      FROM public.opportunity AS opportunity
+      LEFT JOIN public.account AS account
+      ON account.id = opportunity.account_id    
+    sql_trigger_value: SELECT CURRENT_DATE
+    sortkeys: [account_id]
+    distkey: account_id  
     
     
