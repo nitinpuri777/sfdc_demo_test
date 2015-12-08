@@ -1,5 +1,8 @@
 - view: historical_snapshot
   derived_table:
+    sql_trigger_value: select current_date
+    sortkeys: [observation_date]
+    distkey: opportunity_id
     sql: |
       WITH snapshot_window
       AS
@@ -17,6 +20,7 @@
                 AND dates.date <= snapshot_window.stage_end
       
       WHERE dates.date <= getdate()
+      AND   snapshot_window.opportunity_id not in ('006E000000PpVkjIAF-1', '006E000000LGyvPIAT-2', '006E000000LGyvPIAT-1')
       
 
   fields:
@@ -49,6 +53,7 @@
     description: 'At the time of snapshot, what was the total projected ACV?'
     sql: ${amount}
     value_format: '$#,##0'
+    drill_fields: [opportunity.name, snapshot_date, amount, close_date]
 
   - dimension: stage_name
     type: string
@@ -76,8 +81,8 @@
     type: time
     description: 'At the time of snapshot, what was the projected close date?'
     timeframes: [date, week, month]
-    datatype: yyyymmdd
-    sql: ${TABLE}.close_date
+    sql:  to_date (${TABLE}.close_date, 'YYYY-MM-DD')
+#     sql: ${TABLE}.close_date
 
   - dimension_group: stage_end
     type: time
