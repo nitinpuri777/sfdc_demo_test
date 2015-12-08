@@ -107,9 +107,6 @@
     timeframes: [date, week, month, year]  
     sql: ${TABLE}.meeting__date__time___c
 
-  - dimension: demo_analyst_assigned
-    sql: ${TABLE}.demo__analyst__assigned___c
-
   - dimension: sdr_meeting_assist
     hidden: true
     sql: ${TABLE}.sdr__meeting__assist___c
