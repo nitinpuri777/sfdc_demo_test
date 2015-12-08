@@ -483,7 +483,6 @@
       - total_acv
       - total_acv_running_sum
       - count_lost
-      - total_mrr_k
       
   derived_table:
     sql: |

@@ -122,6 +122,35 @@
       sql_on: ${opportunity.account_id} = ${company.account_id}
       relationship: one_to_many
       type: inner
+
+- explore: historical_snapshot    
+  joins:
+    - join: opportunity
+      view_label: 'Current Opportunity State'
+      sql_on: ${historical_snapshot.opportunity_id} = ${opportunity.id}
+      relationship: many_to_one
+      fields: [export_set*]
+      type: inner
+      
+    - join: account
+      sql_on: ${opportunity.account_id} = ${account.id}
+      relationship: many_to_one
+      fields: [export_set*]
+       
+    - join: account_facts
+      view_label: 'Account'
+      sql_on: ${account_facts.account_id} = ${account.id}
+      relationship: many_to_one
+      
+    - join: opportunity_zendesk_facts
+      view_label: 'Opportunity'
+      sql_on: ${opportunity.id} = ${opportunity_zendesk_facts.id}
+      relationship: one_to_one      
+      
+    - join: salesrep
+      sql_on: ${salesrep.id} = ${account.owner_id}
+      relationship: many_to_one 
+      
       
             
 
