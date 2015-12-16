@@ -84,6 +84,7 @@
       relationship: many_to_one   
     
     - join: salesrep
+      view_label: 'Sales Representative'
       sql_on: ${salesrep.id} = ${account.owner_id}
       relationship: many_to_one 
       

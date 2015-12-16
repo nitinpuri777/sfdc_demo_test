@@ -71,6 +71,20 @@
       Lost: ${stage_name} like '%Closed%' 
       Unknown: true
 
+  - dimension: probability
+    type: number
+    sql: ${TABLE}.probability
+  
+  - dimension: probability_tier
+    sql_case:
+      'Won': ${probability} = 100
+      '80 - 99%': ${probability} >= 80
+      '60 - 79%': ${probability} >= 60
+      '40 - 59%': ${probability} >= 40
+      '20 - 39%': ${probability} >= 20
+      '1 - 19%': ${probability} > 0
+      'Lost': ${probability} = 0
+
   - dimension_group: created_at
     type: time
     hidden: true
