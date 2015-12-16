@@ -14,6 +14,7 @@
       sql_on: ${first_campaign.id} = ${the_switchboard.attributable_campaign_id}
       relationship: many_to_one
       
+      
     - join: campaign
       sql_on: ${campaign.id} = ${the_switchboard.campaign_id}
       relationship: many_to_one
