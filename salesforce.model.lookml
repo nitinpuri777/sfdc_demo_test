@@ -7,7 +7,7 @@
 # VIEWS TO EXPLORE——i.e., "BASE VIEWS" #
 
 - explore: the_switchboard
-  label: 'Company'
+  label: '(1) The Switchboard'
   joins:
     - join: first_campaign
       from: campaign
@@ -94,6 +94,7 @@
       relationship: one_to_one      
       
 - explore: funnel
+  label: '(2) Lead Funnel'
   joins: 
     - join: company
       sql_on: ${funnel.company_id} = ${company.company_id}
@@ -125,6 +126,7 @@
       type: inner
 
 - explore: historical_snapshot    
+  label: '(3) Historical Opportunity Snapshot'
   joins:
     - join: opportunity
       view_label: 'Current Opportunity State'
@@ -153,77 +155,4 @@
       relationship: many_to_one 
       
       
-            
-
-# - explore: company
-#   joins:
-#     - join: lead
-#       sql_on: ${lead.company_id} = ${company.company_id}
-#       relationship: one_to_many
-#       fields: [export_set*]
-#       
-#     - join: lead_facts
-#       view_label: 'Lead'
-#       sql_on: ${lead_facts.company_id} = ${company.company_id}
-#       relationship: many_to_one
-# 
-#     - join: account
-#       sql_on: ${account.company_id} = ${company.company_id}
-#       relationship: one_to_many
-#       fields: [export_set*]
-#       
-#     - join: salesrep
-#       foreign_key: account.owner_id
-#     
-#     - join: account_facts
-#       view_label: 'Account'
-#       sql_on: ${account_facts.account_id} = ${account.id}
-#       relationship: many_to_one
-#       
-#     - join: opportunity
-#       sql_on: ${opportunity.account_id} = ${account.id}
-#       relationship: one_to_many
-#       
-#     - join: opportunity_facts
-#       view_label: 'Opportunity'
-#       sql_on: ${opportunity_facts.account_id} = ${opportunity.account_id}
-#       relationship: one_to_one
-#       
-#     - join: opportunity_zendesk_facts
-#       view_label: 'Opportunity'
-#       sql_on: ${opportunity.id} = ${opportunity_zendesk_facts.id}
-#       relationship: one_to_one
-# 
-#     - join: lead_campaign
-#       sql_on: ${lead_campaign.lead_id} =  ${lead.id}
-#       relationship: one_to_one
-#       fields: []      # expose no fields; used strictly as a map for campaign join
-#       
-#     - join: campaign
-#       sql_on: ${lead_campaign.first_campaign_id} = ${campaign.id}
-#       relationship: one_to_one
-#       
-#     - join: contact
-#       sql_on: ${contact.account_id} = ${account.id}
-#       relationship: one_to_many
-#       fields: [export_set*]
-#       
-#     - join: meeting
-#       sql_on: ${meeting.account_id} = company.account_id
-#       relationship: one_to_many
-#       
-#     - join: zendesk_ticket
-#       sql_on: ${contact.id} = ${zendesk_ticket.requester}
-#       relationship: one_to_many
-#     
-#     - join: usage
-#       sql_on: ${usage.salesforce_account_id} = ${account.id}
-#       type: inner   # to omit accounts for whom there is no usage due to no license mapping
-#       relationship: one_to_one
-#       
-#     - join: country_region_map
-#       view_label: 'Account'
-#       sql_on: ${account.country} = ${country_region_map.three_char_code}
-#       relationship: one_to_one
-#       fields: [country_name, continent_name]
             

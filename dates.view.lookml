@@ -39,7 +39,6 @@
     primary_key: true
     type: int
 
-- explore: dates
 - view: dates
   derived_table:
     persist_for: 500 hours
