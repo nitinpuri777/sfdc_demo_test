@@ -1,4 +1,4 @@
-- explore: usage
+# - explore: usage
 - view: usage
   derived_table:
     sql: |
