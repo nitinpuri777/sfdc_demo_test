@@ -53,7 +53,7 @@
     description: 'At the time of snapshot, what was the total projected ACV?'
     sql: ${amount}
     value_format: '$#,##0'
-    drill_fields: [opportunity.name, snapshot_date, amount, close_date]
+    drill_fields: [account.name, snapshot_date, close_date, amount, probability, stage_name_funnel]
 
   - dimension: stage_name
     type: string
