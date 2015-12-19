@@ -427,5 +427,6 @@
       - first_seen_date
       - attributable_campaign.grouping
       - attributable_campaign.name
+      - salesrep.name
 
   
