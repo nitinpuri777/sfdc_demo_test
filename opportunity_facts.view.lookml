@@ -16,7 +16,7 @@
       GROUP BY 1
     sortkeys: [account_id]
     distkey: account_id
-    sql_trigger_value: SELECT CURRENT_DATE
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
   fields:
   
 # DIMENSIONS #

@@ -21,7 +21,7 @@
            END)
            
     sortkeys: [campaignmember_id, lead_id, created]
-    sql_trigger_value: SELECT CURDATE()
+    sql_trigger_value: SELECT TRUNC(CONVERT_TIMEZONE('US/Pacific',GETDATE()))
   fields:
     - measure: count
       type: count
@@ -36,7 +36,7 @@
       FROM ${lead_campaignmember_spread.SQL_TABLE_NAME} AS lcs
       WHERE lcs.lead_id IS NULL
     sortkeys: [campaignmember_id, contact_id, created]
-    sql_trigger_value: SELECT CURDATE()
+    sql_trigger_value: SELECT TRUNC(CONVERT_TIMEZONE('US/Pacific',GETDATE()))
   fields:
     - measure: count
       type: count
@@ -70,7 +70,7 @@
       ON tcm.task_id = sptm.task_id
       AND sptm.map_type = 'lead'
     indexes: [lead_id]
-    sql_trigger_value: SELECT CURDATE()
+    sql_trigger_value: SELECT TRUNC(CONVERT_TIMEZONE('US/Pacific',GETDATE()))
   fields:
     - measure: count
       type: count
@@ -86,7 +86,7 @@
       ON l.ConvertedContactId
       WHERE l.Id IS NULL
     indexes: [contact_id]
-    sql_trigger_value: SELECT CURDATE()
+    sql_trigger_value: SELECT TRUNC(CONVERT_TIMEZONE('US/Pacific',GETDATE()))
   fields:
     - measure: count
       type: count
@@ -120,7 +120,7 @@
       ON tcm.task_id = sptm.task_id
       AND sptm.map_type = 'contact'
     indexes: [contact_id]
-    sql_trigger_value: SELECT CURDATE()
+    sql_trigger_value: SELECT TRUNC(CONVERT_TIMEZONE('US/Pacific',GETDATE()))
   fields:
     - measure: count
       type: count
@@ -146,7 +146,7 @@
         ,ccc.prior_campaignmember_id AS prior_campaignmember_id
       FROM ${sf_contact_campaignmember_map.SQL_TABLE_NAME} ccc
     indexes: [lead_id, contact_id]
-    sql_trigger_value: SELECT CURDATE()
+    sql_trigger_value: SELECT TRUNC(CONVERT_TIMEZONE('US/Pacific',GETDATE()))
   fields:
     - measure: count
       type: count
