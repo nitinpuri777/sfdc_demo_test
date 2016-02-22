@@ -105,7 +105,7 @@
             ON first_reference_contact.account_id = second_technical_contact.account_id
             LEFT JOIN second_economic_contact
             ON first_reference_contact.account_id = second_economic_contact.account_id
-    sql_trigger_value: SELECT CURRENT_DATE
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     sortkeys: [account_id]
     distkey: account_id
   fields:

@@ -11,7 +11,7 @@
         , LAST_VALUE(email) OVER(PARTITION BY company ORDER BY created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_lead_email
         , LAST_VALUE(created_at) OVER(PARTITION BY company ORDER BY created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_lead_created_date
       FROM lead
-    sql_trigger_value: SELECT CURRENT_DATE
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     sortkeys: [company_name]
     distkey: company_name
   fields:

@@ -1,6 +1,6 @@
 - view: historical_snapshot
   derived_table:
-    sql_trigger_value: select current_date
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     sortkeys: [observation_date]
     distkey: opportunity_id
     sql: |
@@ -120,4 +120,3 @@
       - created_at_time
       - close_date
       - stage_end_time
-

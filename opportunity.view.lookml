@@ -491,7 +491,7 @@
       FROM public.opportunity AS opportunity
       LEFT JOIN public.account AS account
       ON account.id = opportunity.account_id    
-    sql_trigger_value: SELECT CURRENT_DATE
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     sortkeys: [account_id]
     distkey: account_id  
     

@@ -44,7 +44,7 @@
         , MAX(last_reference_campaign_id) AS last_reference_campaign_id
       FROM campaign_summary
       GROUP BY account_id
-    sql_trigger_value: SELECT CURRENT_DATE
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     sortkeys: [account_id]
     distkey: account_id
   fields:
@@ -101,7 +101,7 @@
         , LAST_VALUE(campaign_id) OVER(PARTITION BY campaign_member.lead_id 
                                        ORDER BY campaign_member.created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_campaign_id  
       FROM public.campaign_member AS campaign_member
-    sql_trigger_value: SELECT CURRENT_DATE
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     sortkeys: [lead_id]
     distkey: lead_id
   fields:
