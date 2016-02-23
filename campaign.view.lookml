@@ -39,6 +39,7 @@
     sql: ${TABLE}.is_active
 
   - dimension: name
+    description: "Acq = customer acquisition campaign, Cnv = customer conversion action such as sign-up or form fill"
     sql: REGEXP_REPLACE(${TABLE}.name, '(looker|lookml|lookandtell)[^a-zA-Z0-9\.]*', 'acme_software')
     
   - dimension: offer_type
