@@ -84,7 +84,7 @@
     sql: ${TABLE}.name
 
   - dimension: number_of_employees
-    type: int
+    type: number
     sql: ${TABLE}.number_of_employees
 
   - dimension: owner_id
@@ -168,4 +168,3 @@
       - total_number_of_employees
       - average_number_of_employees  
       - owner_id
-

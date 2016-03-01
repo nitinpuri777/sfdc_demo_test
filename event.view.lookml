@@ -20,7 +20,7 @@
     sql: ${TABLE}.license_slug
 
   - dimension: user_id
-    type: int
+    type: number
     hidden: true
     sql: ${TABLE}.user_id
 

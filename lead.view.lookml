@@ -91,7 +91,7 @@
     sql: ${TABLE}.name
 
   - dimension: number_of_employees
-    type: int
+    type: number
     sql: ${TABLE}.number_of_employees
 
   - dimension: state

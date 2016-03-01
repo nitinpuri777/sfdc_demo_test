@@ -35,7 +35,7 @@
   - dimension: auto_id
     primary_key: true
     hidden: true
-    type: int
+    type: number
     sql: ${TABLE}.auto_id
     
   - dimension: company_id
