@@ -129,7 +129,7 @@
     
   - dimension: percent_change_users
     type: number
-    decimals: 2
+    value_format_name: decimal_2
     sql: ${TABLE}.percent_change_users
     
   - dimension: user_change_percentile
@@ -233,4 +233,3 @@
       - events_yesterday
       - total_current_users
       - unique_months_with_events
-

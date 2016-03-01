@@ -123,7 +123,7 @@
 
 # Always null
 #   - dimension: renewal_number
-#     type: int
+#     type: number
 #     sql: ${TABLE}.renewal_number_c
 
   - dimension: renewal_opportunity_id
@@ -153,7 +153,7 @@
   - dimension: probable_contract_value
     type: number
     sql: (${probability} / 100.00) * ${contract_value}
-    decimals: 2
+    value_format_name: decimal_2
     drill_fields: [detail*]    
     
   - dimension: raw_created_date
@@ -296,7 +296,7 @@
   
   - measure: total_pipeline_acv_m
     type: sum
-    decimals: 1
+    value_format_name: decimal_1
     sql: ${acv}/1000000.0
     filters:
       is_closed: No
