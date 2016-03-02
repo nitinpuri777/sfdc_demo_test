@@ -14,10 +14,10 @@
   - dimension: id
     primary_key: true
     sql: ${TABLE}.id
-    html: |
-      {{ value }}
-      <a href="https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg" target="_new">
-      <img src="http://www.salesforce.com/favicon.ico" height=16></a>
+    links:
+      - label: Salesforce Account
+        url: https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg
+        icon_url: http://www.salesforce.com/favicon.ico
 
   - dimension: company_id
     hidden: true
@@ -100,8 +100,10 @@
 
   - dimension: url
     sql: ${TABLE}.url
-    html: |
-      <a href="{{ value }}" target= _new>{{ value }}</a>
+    links:
+      - label: Website
+        url: '{{ value }}'
+        icon_url: http://www.google.com/s2/favicons?domain_url={{ value | encode_uri }}
              
   - dimension: vertical
     sql: ${TABLE}.vertical_c

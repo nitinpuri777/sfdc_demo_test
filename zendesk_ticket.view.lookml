@@ -7,10 +7,10 @@
   - dimension: id
     primary_key: true
     sql: ${TABLE}.id
-    html: |
-      {{ value }}
-      <a href="https://d16cvnquvjw7pr.cloudfront.net/www/img/p-brand/downloads/Logo/Zendesk_logo_on_green_RGB.png" target="_new">
-      <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
+    links: 
+      - label: Zendesk Ticket
+        url: https://d16cvnquvjw7pr.cloudfront.net/www/img/p-brand/downloads/Logo/Zendesk_logo_on_green_RGB.png
+        icon_url: http://www.google.com/s2/favicons?domain=www.zendesk.com
 
   - dimension_group: created
     type: time
