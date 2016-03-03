@@ -6,10 +6,11 @@
   - dimension: id
     primary_key: true
     sql: ${TABLE}.id
-    html: |
-      {{ value }}
-      <a href="https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg" target="_new">
-      <img src="http://www.salesforce.com/favicon.ico" height=16></a>
+    links: 
+      - label: Salesforce Opportunity
+        url: https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg
+        icon_url: http://www.salesforce.com/favicon.ico
+
 
   - dimension: account_id
     hidden: true
