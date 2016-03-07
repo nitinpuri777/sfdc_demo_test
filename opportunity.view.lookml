@@ -59,6 +59,10 @@
   - dimension: days_open
     type: number
     sql: DATEDIFF(DAYS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date) )
+
+  - dimension: months_open
+    type: number
+    sql: DATEDIFF(MONTHS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date) )
     
       
       
