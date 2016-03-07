@@ -104,7 +104,8 @@
       <a href="{{ value }}" target= _new>{{ value }}</a>
              
   - dimension: vertical
-    sql: ${TABLE}.vertical_c
+    type: string
+    sql: COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c)
 
   - dimension: zendesk_organization
     hidden: true
