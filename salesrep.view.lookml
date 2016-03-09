@@ -35,17 +35,17 @@
 
   - dimension: name
     sql: ${first_name} || ' ' || ${last_name}
-    html: |
-      {{ linked_value }}
-      <a href="/dashboards/5?Sales%20Rep={{ value | encode_uri }}&Sales%20Segment={{ salesrep.business_segment._value }}" target="_blank">
-      <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
+    links: 
+      - label: Sales Rep Performance Dashboard
+        url: http://demonew.looker.com/dashboards/5?Sales%20Rep={{ value | encode_uri }}&Sales%20Segment={{ salesrep.business_segment._value }}
+        icon_url: http://www.looker.com/favicon.ico
   
   - dimension: business_segment
     sql: COALESCE(${TABLE}.business_segment, 'Top of Funnel/Not Assigned')
-    html: |
-      {{ linked_value }}
-      <a href="/dashboards/4?Business%20Segment={{ value | encode_uri }}" target="_blank">
-      <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
+    links: 
+      - label: Sales Team Summary Dashboard
+        url: http://demonew.looker.com/dashboards/4?Business%20Segment={{ value | encode_uri }}
+        icon_url: http://www.looker.com/favicon.ico
     suggestions: ['Enterprise','Mid-Market','Small Business','Top of Funnel/Not Assigned']
       
   - filter: rep_select

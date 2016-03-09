@@ -7,10 +7,10 @@
   - dimension: id
     primary_key: true
     sql: ${TABLE}.id
-    html: |
-      {{ value }}
-      <a href="https://d16cvnquvjw7pr.cloudfront.net/www/img/p-brand/downloads/Logo/Zendesk_logo_on_green_RGB.png" target="_new">
-      <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
+    links: 
+      - label: Zendesk Ticket
+        url: https://d16cvnquvjw7pr.cloudfront.net/www/img/p-brand/downloads/Logo/Zendesk_logo_on_green_RGB.png
+        icon_url: http://www.google.com/s2/favicons?domain=www.zendesk.com
 
   - dimension_group: created
     type: time
@@ -49,14 +49,14 @@
   
   - dimension: time_to_solve
     label: Time to Solve (Min)
-    type: int
+    type: number
     sql: DATEDIFF(SECONDS, ${TABLE}.created_date, ${TABLE}.zendesk___date__time__solved___c )/60.0
     value_format: '#,##0.00'
   
   - dimension: time_to_solve_hours
     label: Time to Solve (Hours)
     sql: DATEDIFF(HOURS, ${TABLE}.created_date, ${TABLE}.zendesk___date__time__solved___c )
-    type: int
+    type: number
     value_format: '#,##0.00'
 
   - dimension: requester
@@ -108,7 +108,7 @@
   - measure: average_time_to_solve_hours
     type: average
     sql: ${time_to_solve_hours}
-    decimals: 2
+    value_format_name: decimal_2
     filters:
       status: Solved
     
@@ -295,7 +295,7 @@
     sql: ${TABLE}.zendesk___zendesk_domain___c
 
   - dimension: ticket_form_id
-    type: int
+    type: number
     hidden: true
     sql: ${TABLE}.zendesk___ticket__form__id___c
 

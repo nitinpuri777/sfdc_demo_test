@@ -37,7 +37,7 @@
   fields:
   - dimension: number
     primary_key: true
-    type: int
+    type: number
 
 - view: dates
   derived_table:
