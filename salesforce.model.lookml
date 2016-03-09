@@ -93,6 +93,7 @@
       relationship: one_to_one  
     
     - join: account_snapshot
+      view_label: 'Account'
       sql_on: ${the_switchboard.account_id} = ${account_snapshot.account_id}
       relationship: one_to_many
       fields: [export_set*]
