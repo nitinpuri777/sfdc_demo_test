@@ -1,4 +1,3 @@
-# - explore: usage
 - view: usage
   derived_table:
     sql: |
@@ -141,6 +140,15 @@
     type: number
     sql: ${TABLE}.approximate_usage_in_minutes_lifetime
     
+  - dimension: account_health_slack_code
+    sql: |
+      CASE
+        WHEN ${account_health} = 'At Risk' THEN ':cold_sweat:'
+        WHEN ${account_health} = 'Safe' THEN ':smile:'
+        WHEN ${account_health} = 'Solid' THEN ':sunglasses:'
+        ELSE ':no_mouth:'
+      END
+      
   - dimension: account_health
     sql: |
       case
@@ -233,4 +241,5 @@
       - events_yesterday
       - total_current_users
       - unique_months_with_events
+      - account_health
 

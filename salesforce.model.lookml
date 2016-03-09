@@ -56,7 +56,6 @@
       relationship: many_to_one
       sql_on: ${opportunity.id} = ${the_switchboard.opportunity_id}
       
-      
     - join: opportunity_zendesk_facts
       view_label: 'Opportunity'
       sql_on: ${opportunity.id} = ${opportunity_zendesk_facts.id}
@@ -91,7 +90,12 @@
     - join: usage
       sql_on: ${usage.salesforce_account_id} = ${account.id}
       type: inner   # to omit accounts for whom there is no usage due to no license mapping
-      relationship: one_to_one      
+      relationship: one_to_one  
+    
+    - join: account_snapshot
+      sql_on: ${the_switchboard.account_id} = ${account_snapshot.account_id}
+      relationship: one_to_many
+      fields: [export_set*]
       
 - explore: funnel
   label: '(2) Lead Funnel'
