@@ -232,8 +232,10 @@
 
   sets:
     export_set:
+      - account_id
       - weeks_ago
       - event_week
       - account_health_score
       - account_health
+      - count_of_accounts
       - average_account_health
