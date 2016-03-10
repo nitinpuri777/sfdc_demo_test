@@ -38,7 +38,7 @@
 
   - dimension_group: closed
     type: time
-    timeframes: [date, week, month, year, time]
+    timeframes: [raw, date, week, month, year, time]
     sql: ${TABLE}.closed_date
     
   - dimension: closed_quarter
@@ -60,6 +60,10 @@
   - dimension: days_open
     type: number
     sql: DATEDIFF(DAYS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date) )
+
+  - dimension: months_open
+    type: number
+    sql: DATEDIFF(MONTHS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date) )
     
       
       

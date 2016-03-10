@@ -106,7 +106,8 @@
         icon_url: http://www.google.com/s2/favicons?domain_url={{ value | encode_uri }}
              
   - dimension: vertical
-    sql: ${TABLE}.vertical_c
+    type: string
+    sql: COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c)
 
   - dimension: zendesk_organization
     hidden: true

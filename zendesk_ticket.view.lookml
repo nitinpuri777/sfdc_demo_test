@@ -43,6 +43,10 @@
     timeframes: [time, date, week, month]
     sql: ${TABLE}.zendesk___date__time__solved___c
   
+  - dimension: has_been_solved
+    type: yesno
+    sql: ${solved_time} IS NOT NULL
+  
   - dimension: time_to_solve
     label: Time to Solve (Min)
     type: number
@@ -68,6 +72,12 @@
   - measure: count
     type: count
     drill_fields: [id, name]
+
+  - measure: count_of_open_tickets
+    type: count
+    drill_fields: [id, name]
+    filters:
+      solved_time: 'NULL'
 
   - measure: total_requester_wait_time_business
     type: sum
