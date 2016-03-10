@@ -1,23 +1,22 @@
 - view: max_user_usage
   derived_table:
-    sql_trigger_value: SELECT CURRENT_DATE()
-    distkey: salesforce_account_id
-    sortkeys: [salesforce_account_id]
     sql: |
       SELECT
           salesforce_account_id
         , MAX(user_usage) AS max_user_usage
-        FROM (SELECT license.salesforce_account_id
-        , user_id
-        , instance_slug
-        , COUNT(DISTINCT user_id || instance_slug || (FLOOR((DATE_PART(EPOCH, event_at)::BIGINT)/(60*5))))*5 user_usage
-      FROM events
-      LEFT JOIN license
-      ON events.license_slug = license.license_slug
-      GROUP BY 1,2,3)
+        FROM (
+          SELECT license.salesforce_account_id
+            , user_id
+            , instance_slug
+            , COUNT(DISTINCT user_id || instance_slug || (FLOOR((DATE_PART(EPOCH, event_at)::BIGINT)/(60*5))))*5 user_usage
+          FROM events
+          INNER JOIN license
+          ON events.license_slug = license.license_slug
+          GROUP BY 1,2,3
+          )
       GROUP BY 1
 
-- view: account_snapshot
+- view: account_weekly_usage
   derived_table:
     sql_trigger_value: SELECT CURRENT_DATE()
     distkey: account_id
@@ -35,7 +34,7 @@
         , LAG((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / (7 * COUNT(DISTINCT user_id || instance_slug)), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_usage_minutes
         , 1.00 * AVG(max_user_usage.max_user_usage) / NULLIF((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / (7 * COUNT(DISTINCT user_id || instance_slug)), 0) AS concentration
       FROM events
-      LEFT JOIN license ON events.license_slug = license.license_slug
+      INNER JOIN license ON events.license_slug = license.license_slug
       LEFT JOIN ${max_user_usage.SQL_TABLE_NAME} AS max_user_usage ON max_user_usage.salesforce_account_id = license.salesforce_account_id
       GROUP BY 1, 2
       
@@ -62,12 +61,9 @@
       type: time
       timeframes: [raw, week, month]
       sql: ${TABLE}.event_week
-    
-    - dimension: weeks_ago
-      type: number
-      sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))-1
 
     - dimension: current_weekly_users
+      type: number
       sql: ${TABLE}.total_weekly_users
 
     - dimension: last_week_users
@@ -90,10 +86,22 @@
       sql: ${TABLE}.lifetime_usage_minutes
     
   ### DERIVED DIMENSIONS ###
+    - dimension: weeks_since_signup
+      type: number
+      sql: DATEDIFF('week',${opportunity.closed_raw}, ${event_raw})
+    
+    - dimension: weeks_ago
+      type: number
+      sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))-1
+      
     - dimension: usage_change_percent
       type: number
       sql: 1.0 * (${approximate_usage_minutes} - ${last_week_usage_minutes}) / NULLIF(${last_week_usage_minutes},0)
       value_format_name: percent_2
+
+    - dimension: user_count_change
+      type: number
+      sql: 1.0* (${current_weekly_users} - ${last_week_users}) / NULLIF(${last_week_users},0)
     
     - dimension: usage_change_percent_score
       type: number
@@ -213,9 +221,18 @@
       sql: ${usage_change_percent}
       value_format_name: percent_2
     
+    - measure: average_user_count_change_percent
+      type: average
+      sql: ${user_count_change}
+      value_format_name: percent_2
+    
     - measure: average_lifetime_usage_minutes
       type: average
       sql: ${lifetime_usage_minutes}
+    
+    - measure: total_usage
+      type: sum
+      sql: ${approximate_usage_minutes}
 
     - measure: average_account_health
       type: average
@@ -234,8 +251,15 @@
     export_set:
       - account_id
       - weeks_ago
+      - weeks_since_signup
       - event_week
+      - event_month
       - account_health_score
       - account_health
       - count_of_accounts
       - average_account_health
+      - total_usage
+      - usage_change_percent
+      - user_count_change
+      - average_user_count_change_percent
+      - average_usage_change_percent

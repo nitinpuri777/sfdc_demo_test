@@ -38,7 +38,7 @@
 
   - dimension_group: closed
     type: time
-    timeframes: [date, week, month, year, time]
+    timeframes: [raw, date, week, month, year, time]
     sql: ${TABLE}.closed_date
     
   - dimension: closed_quarter
