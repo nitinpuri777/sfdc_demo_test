@@ -18,7 +18,7 @@
 
 - view: account_weekly_usage
   derived_table:
-    sql_trigger_value: SELECT CURRENT_DATE()
+    sql_trigger_value: SELECT CURRENT_DATE
     distkey: account_id
     sortkeys: [account_id, event_week]
     sql: |
@@ -29,10 +29,10 @@
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_users
         , COUNT(DISTINCT events.id) AS weekly_event_count
         , LAG(COUNT(DISTINCT events.id), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_events
-        , FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5)) / (7 * COUNT(DISTINCT user_id || instance_slug))) AS approximate_usage_minutes
-        , SUM(FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5)) / (7 * COUNT(DISTINCT user_id || instance_slug)))) OVER (PARTITION BY account_id ORDER BY event_week ROWS UNBOUNDED PRECEDING) as lifetime_usage_minutes
-        , LAG((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / (7 * COUNT(DISTINCT user_id || instance_slug)), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_usage_minutes
-        , 1.00 * AVG(max_user_usage.max_user_usage) / NULLIF((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / (7 * COUNT(DISTINCT user_id || instance_slug)), 0) AS concentration
+        , FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0)) AS approximate_usage_minutes
+        , SUM(FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0))) OVER (PARTITION BY account_id ORDER BY event_week ROWS UNBOUNDED PRECEDING) as lifetime_usage_minutes
+        , LAG((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_usage_minutes
+        , 1.00 * AVG(max_user_usage.max_user_usage) / NULLIF((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0), 0) AS concentration
       FROM events
       INNER JOIN license ON events.license_slug = license.license_slug
       LEFT JOIN ${max_user_usage.SQL_TABLE_NAME} AS max_user_usage ON max_user_usage.salesforce_account_id = license.salesforce_account_id
