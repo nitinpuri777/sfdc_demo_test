@@ -92,7 +92,7 @@
     
     - dimension: weeks_ago
       type: number
-      sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))-1
+      sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))
       
     - dimension: usage_change_percent
       type: number
