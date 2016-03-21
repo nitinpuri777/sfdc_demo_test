@@ -39,6 +39,9 @@
       - label: Sales Rep Performance Dashboard
         url: http://demonew.looker.com/dashboards/5?Sales%20Rep={{ value | encode_uri }}&Sales%20Segment={{ salesrep.business_segment._value }}
         icon_url: http://www.looker.com/favicon.ico
+      - label: Customer Overview Dashboard
+        url: http://demonew.looker.com/dashboards/289?Account%20Executive%20Name={{ value | encode_uri }}
+        icon_url: http://www.looker.com/favicon.ico
   
   - dimension: business_segment
     sql: COALESCE(${TABLE}.business_segment, 'Top of Funnel/Not Assigned')
