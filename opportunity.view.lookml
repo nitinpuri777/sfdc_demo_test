@@ -38,11 +38,11 @@
 
   - dimension_group: closed
     type: time
-    timeframes: [raw, date, week, month, year, time]
+    timeframes: [raw, date, week, month, year, time, quarter]
     sql: ${TABLE}.closed_date
     
-  - dimension: closed_quarter
-    sql: EXTRACT(YEAR FROM ${TABLE}.closed_date) || ' - Q' || EXTRACT(QUARTER FROM ${TABLE}.closed_date)
+#  - dimension: closed_quarter
+#    sql: EXTRACT(YEAR FROM ${TABLE}.closed_date) || ' - Q' || EXTRACT(QUARTER FROM ${TABLE}.closed_date)
     
   - dimension: is_current_quarter
     type: yesno
@@ -54,7 +54,7 @@
   
   - dimension_group: created
     type: time
-    timeframes: [date, week, month, year]
+    timeframes: [date, week, month, year, quarter]
     sql: ${TABLE}.created_at
 
   - dimension: days_open
@@ -165,6 +165,7 @@
     hidden: true
     sql: ${TABLE}.created_at  
 
+ 
 # MEASURES #
 
   - measure: count
@@ -173,6 +174,13 @@
 #     filters:
 #       account.type: Customer
 #       opportunity.type: New Business
+  - measure: count_current_quarter
+    type: count
+    drill_fields: opportunity_set*
+
+  - measure: count_last_quarter
+    type: count
+    drill_fields: opportunity_set*
     
   - measure: avg_days_open
     type: avg
@@ -206,6 +214,20 @@
     type: count
     filters:
       is_won: Yes
+    drill_fields: [opportunity.id, account.name, salesrep.name, type, total_acv]
+  
+  - measure: count_won_current_quarter
+    type: count
+    filters:
+      is_won: Yes
+      closed_quarter: this quarter
+    drill_fields:  [opportunity.id, account.name, salesrep.name, type, total_acv]
+  
+  - measure: count_won_last_quarter
+    type: count
+    filters:
+      is_won: Yes
+      closed_quarter: last quarter
     drill_fields: [opportunity.id, account.name, salesrep.name, type, total_acv]
     
   - measure: total_mrr
@@ -257,6 +279,16 @@
     type: number
     sql: 100.00 * ${count_won} / NULLIF(${count}, 0)
     value_format: '#0.00\%'
+  
+  - measure: win_percentage_current_quarter
+    type: number
+    sql: 100.00 * ${count_won_current_quarter} / NULLIF(${count_current_quarter}, 0)
+    value_format: '#0.00\%'    
+  
+  - measure: win_percentage_last_quarter
+    type: number
+    sql: 100.0 * ${count_won_last_quarter} / NULLIF (${count_last_quarter}, 0)
+    value_format: '#0.00\%'
     
   - measure: open_percentage
     type: number
@@ -283,6 +315,24 @@
     value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00' 
     drill_fields: [account.name, type, closed_date, total_acv]
 
+  - measure: total_acv_won_current_quarter
+    type: sum
+    sql: ${acv}
+    filters:
+      is_won: Yes
+      closed_quarter: this quarter
+    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    drill_fields: [account.name, type, closed_date, total_acv]     
+  
+  - measure: total_acv_won_last_quarter
+    type: sum
+    sql: ${acv}
+    filters:
+      is_won: Yes
+      closed_quarter: last quarter
+    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    drill_fields: opportunity_set*   
+
   - measure: total_acv_lost
     type: sum
     sql: ${acv}   
@@ -296,7 +346,7 @@
     sql: ${acv}   
     filters:
       is_closed: No
-    value_format: '$#,##0' 
+    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
     drill_fields: opportunity_set*
   
   - measure: total_pipeline_acv_m
