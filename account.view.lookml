@@ -70,9 +70,9 @@
 
   - dimension: name
     sql: ${TABLE}.name
-    links: 
+    links:
       - label: Customer Lookup Dashboard
-        url: http://demonew.looker.com/dashboards/279?Account%20Name={{ value | encode_uri }}
+        url: http://demonew.looker.com/dashboards/279?Account%20Name={{ value  }}
         icon_url: http://www.looker.com/favicon.ico
 
   - dimension: number_of_employees
