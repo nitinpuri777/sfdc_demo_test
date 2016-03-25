@@ -25,10 +25,6 @@
     
   - dimension: account_status
     sql: COALESCE(${TABLE}.account_status_c, 'Unknown')
-
-#   - dimension: annual_revenue
-#     type: number
-#     sql: ${TABLE}.annual_revenue::NUMERIC
   
   - dimension: campaign
     hidden: true
@@ -39,6 +35,7 @@
 
   - dimension: country
     sql: ${TABLE}.country
+    drill_fields: [city, state]
 
   - dimension_group: created
     type: time
@@ -72,17 +69,12 @@
       'Engaged': ${current_customer} = 'No' AND ${TABLE}.engagement_stage_c IS NOT NULL
       else: 'Prospecting'
 
-# only 3 partners, deleting
-#   - dimension: is_partner
-#     type: yesno
-#     sql: ${TABLE}.is_partner
-
-#  nearly all are tech or "other", we should use Account Vertical or Salesrep Business Segment instead
-#   - dimension: market_segment
-#     sql: COALESCE(${TABLE}.market_segment_c, 'Other')
-
   - dimension: name
     sql: ${TABLE}.name
+    links: 
+      - label: Customer Lookup Dashboard
+        url: http://demonew.looker.com/dashboards/279?Account%20Name={{ value | encode_uri }}
+        icon_url: http://www.looker.com/favicon.ico
 
   - dimension: number_of_employees
     type: number
@@ -94,6 +86,7 @@
 
   - dimension: state
     sql: ${TABLE}.state
+    drill_fields: [city]
     
 # We should consider removing this, unless we really want to build something around partnerships    
   - dimension: type
@@ -113,11 +106,6 @@
   - dimension: zendesk_organization
     hidden: true
     sql: ${TABLE}.zendesk_organization
-
-#   - dimension: annual_revenue_tier
-#     type: tier
-#     tiers: [0,10000,100000,1000000,10000000,100000000]
-#     sql: ${TABLE}.annual_revenue  
     
   - dimension: number_of_employees_tier
     type: tier
@@ -133,11 +121,6 @@
   - measure: percent_of_accounts
     type: percent_of_total
     sql: ${count}
-#     
-#   - measure: average_annual_revenue
-#     type: average
-#     sql: ${annual_revenue}
-#     value_format: '$#,##0'
     
   - measure: total_number_of_employees
     type: sum
