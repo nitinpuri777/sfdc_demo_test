@@ -31,7 +31,7 @@
     - table_calculation: calculation_1
       label: Calculation 1
       expression: running_total(${opportunity.total_acv_won})
-      value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+      value_format_name: usd_large
     hidden_fields: [opportunity.total_acv_won]
     filters:
       opportunity.is_current_quarter: 'Yes'
