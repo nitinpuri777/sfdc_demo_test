@@ -143,13 +143,13 @@
   - dimension: account_health_slack_code
     sql: |
       CASE
-        WHEN ${account_health} = 'At Risk' THEN ':cold_sweat:'
-        WHEN ${account_health} = 'Safe' THEN ':smile:'
-        WHEN ${account_health} = 'Solid' THEN ':sunglasses:'
+        WHEN ${account_weekly_usage.account_health} = 'At Risk' THEN ':cold_sweat:'
+        WHEN ${account_weekly_usage.account_health} = 'Safe' THEN ':smile:'
+        WHEN ${account_weekly_usage.account_health} = 'Solid' THEN ':sunglasses:'
         ELSE ':no_mouth:'
       END
       
-  - dimension: account_health
+  - dimension: account_health_tier
     sql: |
       case
               when ${TABLE}.approximate_usage_in_minutes_lifetime <= 0
