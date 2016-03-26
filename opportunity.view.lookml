@@ -23,6 +23,7 @@
   - dimension: acv
     type: number
     sql: ${TABLE}.acv
+    value_format_name: usd_large
 
   - dimension: amount
     type: number
@@ -48,6 +49,22 @@
     type: yesno
     sql: EXTRACT(QUARTER FROM ${TABLE}.closed_date) || EXTRACT(YEAR FROM ${TABLE}.closed_date) = EXTRACT(QUARTER FROM CURRENT_DATE) || EXTRACT(YEAR FROM CURRENT_DATE)    
 
+  - dimension: closed_day_of_quarter
+    type: number
+    sql: |  
+      DATEDIFF(
+        'day',
+        CAST(CONCAT(${closed_quarter}, '-01') as date),
+        ${closed_raw})
+
+  - dimension: days_left_in_quarter
+    type: number
+    sql: |
+      91 - (DATEDIFF(
+        'day',
+        CAST(CONCAT((TO_CHAR(CAST(DATE_TRUNC('quarter', CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', CURRENT_DATE)) AS DATE), 'YYYY-MM')), '-01') as date),
+        CURRENT_DATE))
+        
   - dimension: contract_length
     type: number
     sql: ${TABLE}.contract_length_c
@@ -94,7 +111,7 @@
   - dimension: mrr
     type: number
     sql: ${TABLE}.mrr
-    value_format: '$#,##0.00'
+    value_format_name: usd_large
 
   - dimension: next_step
     sql: ${TABLE}.next_step
@@ -174,12 +191,17 @@
 #     filters:
 #       account.type: Customer
 #       opportunity.type: New Business
+
   - measure: count_current_quarter
     type: count
+    filters:
+      closed_quarter: this quarter
     drill_fields: opportunity_set*
 
   - measure: count_last_quarter
     type: count
+    filters:
+      closed_quarter: last quarter
     drill_fields: opportunity_set*
     
   - measure: avg_days_open
@@ -229,7 +251,14 @@
       is_won: Yes
       closed_quarter: last quarter
     drill_fields: [opportunity.id, account.name, salesrep.name, type, total_acv]
-    
+  
+  - measure: count_won_percent_change
+    label: 'Count Won (% change from last quarter)'
+    type: number
+    sql: 1 - 1.0 * ${count_won_current_quarter}/NULLIF(${count_won_last_quarter},0)
+    value_format_name: percent_2
+
+
   - measure: total_mrr
     label: 'Total MRR (Closed/Won)'
     type: sum
@@ -237,7 +266,7 @@
     filters:
       is_won: Yes    
     drill_fields: opportunity_set*
-    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    value_format_name: usd_large
     
   - measure: total_pipeline_mrr
     type: sum
@@ -245,7 +274,7 @@
     filters:
       is_closed: No
     drill_fields: opportunity_set*  
-    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    value_format_name: usd_large
       
     
   - measure: average_mrr
@@ -289,6 +318,12 @@
     type: number
     sql: 100.0 * ${count_won_last_quarter} / NULLIF (${count_last_quarter}, 0)
     value_format: '#0.00\%'
+  
+  - measure: win_percentage_change
+    label: 'Win Percentage (change from last quarter)'
+    type: number
+    sql: ${win_percentage_current_quarter} - ${win_percentage_last_quarter}
+    value_format_name: percent_2
     
   - measure: open_percentage
     type: number
@@ -298,7 +333,7 @@
   - measure: total_acv
     type: sum
     sql: ${acv}
-    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    value_format_name: usd_large
     drill_fields: opportunity_set*
     
   - filter: rep_name
@@ -312,7 +347,7 @@
     sql: ${acv}   
     filters:
       is_won: Yes
-    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00' 
+    value_format_name: usd_large 
     drill_fields: [account.name, type, closed_date, total_acv]
 
   - measure: total_acv_won_current_quarter
@@ -321,7 +356,7 @@
     filters:
       is_won: Yes
       closed_quarter: this quarter
-    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    value_format_name: usd_large
     drill_fields: [account.name, type, closed_date, total_acv]     
   
   - measure: total_acv_won_last_quarter
@@ -330,15 +365,21 @@
     filters:
       is_won: Yes
       closed_quarter: last quarter
-    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    value_format_name: usd_large
     drill_fields: opportunity_set*   
+
+  - measure: total_acv_won_percent_change
+    label: 'Total ACV Won (% change from last quarter)'
+    type: number
+    sql: 1 - 1.0 * ${total_acv_won_current_quarter}/ NULLIF(${total_acv_won_last_quarter},0) 
+    value_format_name: percent_2
 
   - measure: total_acv_lost
     type: sum
     sql: ${acv}   
     filters:
       is_won: No
-    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    value_format_name: usd_large
     drill_fields: opportunity_set*
     
   - measure: total_pipeline_acv
@@ -346,7 +387,7 @@
     sql: ${acv}   
     filters:
       is_closed: No
-    value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
+    value_format_name: usd_large
     drill_fields: opportunity_set*
   
   - measure: total_pipeline_acv_m
