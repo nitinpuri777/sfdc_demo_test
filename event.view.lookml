@@ -12,6 +12,10 @@
     type: time
     timeframes: [time, date, week, month]
     sql: ${TABLE}.event_at
+  
+  - dimension: event_type
+    type: string
+    sql: ${TABLE}.event_type
 
   - dimension: instance_slug
     sql: ${TABLE}.instance_slug
