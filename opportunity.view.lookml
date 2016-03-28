@@ -28,6 +28,27 @@
     type: number
     sql: ${TABLE}.amount
     value_format: '$#,##0.00'
+  
+  - dimension: account_tier
+    type: number
+    sql: |
+      CASE
+        WHEN ${amount} >= 100000 THEN 1
+        WHEN ${amount} < 100000 AND ${salesrep.business_segment} = 'Enterprise' THEN 1
+        WHEN ${amount} BETWEEN 40000 AND 100000 THEN 2
+        WHEN ${amount} < 40000 THEN 3
+        ELSE 3
+      END
+    html: |
+      {% if rendered_value == '3' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: #cd7f32; font-size:200%;">{{ rendered_value }}</div>
+      {% elsif rendered_value == '2' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: silver; font-size:200%;">{{ rendered_value }}</div>
+      {% elsif rendered_value == '1' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: gold; font-size:200%;">{{ rendered_value }}</div>
+      {% else %}
+        {{ rendered_value }}
+      {% endif %}
     
   - dimension: campaign_id
     hidden: true
@@ -498,6 +519,7 @@
     export_set:
       - id
       - account_id
+      - account_tier
       - acv
       - amount
       - campaign_id
