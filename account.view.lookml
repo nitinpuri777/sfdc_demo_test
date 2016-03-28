@@ -25,6 +25,27 @@
     
   - dimension: account_status
     sql: COALESCE(${TABLE}.account_status_c, 'Unknown')
+
+  - dimension: account_tier
+    type: number
+    sql: |
+      CASE
+        WHEN ${opportunity.amount} >= 100000 THEN 1
+        WHEN ${opportunity.amount} < 100000 AND ${salesrep.business_segment} = 'Enterprise' THEN 1
+        WHEN ${opportunity.amount} BETWEEN 40000 AND 100000 THEN 2
+        WHEN ${opportunity.amount} < 40000 THEN 3
+        ELSE 3
+      END
+    html: |
+      {% if rendered_value == '3' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: #cd7f32; font-size:200%;">{{ rendered_value }}</div>
+      {% elsif rendered_value == '2' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: silver; font-size:200%;">{{ rendered_value }}</div>
+      {% elsif rendered_value == '1' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: gold; font-size:200%;">{{ rendered_value }}</div>
+      {% else %}
+        {{ rendered_value }}
+      {% endif %}
   
   - dimension: campaign
     hidden: true
@@ -136,6 +157,7 @@
       - id
       - company_id
       - account_status
+      - account_tier
       - city
       - created_date
       - current_customer
