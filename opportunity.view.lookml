@@ -335,6 +335,22 @@
     sql: ${acv}
     value_format_name: usd_large
     drill_fields: opportunity_set*
+
+  - measure: total_churn_acv
+    type: sum
+    sql: ${acv}
+    value_format_name: usd_large
+    drill_fields: opportunity_set*
+    filters:
+      lost_reason: 'Non-renewal'
+    
+  - measure: total_expansion_acv
+    type: sum
+    sql: ${acv}
+    value_format_name: usd_large
+    drill_fields: opportunity_set*
+    filters:
+      type: 'Addon/Upsell'
     
   - filter: rep_name
     suggest_dimension: salesrep.name
