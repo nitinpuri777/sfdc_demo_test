@@ -34,8 +34,9 @@
     sql: ${TABLE}.city
 
   - dimension: country
-    sql: ${TABLE}.country
     drill_fields: [city, state]
+    map_layer: countries
+    sql: ${TABLE}.country
 
   - dimension_group: created
     type: time
@@ -84,8 +85,10 @@
     sql: ${TABLE}.owner_id
 
   - dimension: state
-    sql: ${TABLE}.state
     drill_fields: [city]
+    map_layer: us_states
+    sql: ${TABLE}.state
+    
     
 # We should consider removing this, unless we really want to build something around partnerships    
   - dimension: type
