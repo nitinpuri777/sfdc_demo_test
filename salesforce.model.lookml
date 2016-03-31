@@ -13,6 +13,17 @@
       from: campaign
       sql_on: ${first_campaign.id} = ${the_switchboard.attributable_campaign_id}
       relationship: many_to_one
+    
+    - join: license
+      fields: []
+      sql_on: ${the_switchboard.account_id} = ${license.salesforce_account_id}
+      relationship: one_to_many
+    
+    - join: event
+      view_label: "Account"
+      fields: [user_count]
+      sql_on: ${license.license_slug} = ${event.license_slug}
+      relationship: one_to_many
       
     - join: campaign
       sql_on: ${campaign.id} = ${the_switchboard.campaign_id}
@@ -98,6 +109,7 @@
       relationship: one_to_many
       fields: [export_set*]
       
+      
 - explore: funnel
   label: '(2) Lead Funnel'
   joins: 
@@ -158,6 +170,32 @@
     - join: salesrep
       sql_on: ${salesrep.id} = ${account.owner_id}
       relationship: many_to_one 
+
+- explore: feature_usage
+  from: events_in_past_30_days
+  label: '(4) Sessions and Feature Usage'
+  joins:
+    - join: event_mapping
+      view_label: 'Event'
+      relationship: one_to_one
+      type: inner
+      sql_on: ${feature_usage.id} = ${event_mapping.event_id}
+
+    - join: sessions
+      relationship: many_to_one
+      type: left_outer
+      sql_on: ${event_mapping.unique_session_id} = ${sessions.unique_session_id}
+    
+    - join: account
+      fields: [name]
+      sql_on: ${sessions.account_id} = ${account.id}
+      relationship: many_to_one
+
+    - join: session_facts
+      relationship: one_to_one
+      type: inner
+      view_label: 'Sessions'
+      sql_on: ${sessions.unique_session_id} = ${session_facts.unique_session_id}
       
       
             
