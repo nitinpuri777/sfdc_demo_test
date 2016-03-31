@@ -49,7 +49,7 @@
       - label: Sales Team Summary Dashboard
         url: http://demonew.looker.com/dashboards/4?Business%20Segment={{ value | encode_uri }}
         icon_url: http://www.looker.com/favicon.ico
-    suggestions: ['Enterprise','Mid-Market','Small Business','Top of Funnel/Not Assigned']
+    suggestions: ['Enterprise','Mid-Market','Small Business', 'Top of Funnel/Not Assigned']
       
   - filter: rep_select
     view_label: 'Salesrep comparisons'
