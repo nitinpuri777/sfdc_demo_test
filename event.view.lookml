@@ -33,3 +33,7 @@
   - measure: count
     type: count
     drill_fields: [id]
+  
+  - measure: user_count
+    type: count_distinct
+    sql: ${user_id}
