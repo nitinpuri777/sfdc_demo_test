@@ -44,14 +44,6 @@
     type: count_distinct
     sql: ${user_id}
 
-- explore: sessions
-  joins:
-    - join: session_facts
-      relationship: many_to_one
-      type: inner
-      view_label: 'Sessions'
-      sql_on: ${sessions.unique_session_id} = ${session_facts.unique_session_id}
-
 - view: find_idle_time
   derived_table:
     persist_for: 6 hours
