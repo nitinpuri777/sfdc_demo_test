@@ -177,7 +177,7 @@
       relationship: many_to_one 
 
 - explore: feature_usage
-  from: events_in_past_30_days
+  from: events_in_past_180_days
   label: '(4) Sessions and Feature Usage'
   joins:
     - join: event_mapping

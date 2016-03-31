@@ -1,9 +1,9 @@
-- view: events_in_past_30_days
+- view: events_in_past_180_days
   derived_table:
     sql: |
       select * from events
-        WHERE ((events.event_at) >= (DATEADD(day,-29, DATE_TRUNC('day',GETDATE()) )) 
-            AND (events.event_at) < (DATEADD(day,30, DATEADD(day,-29, DATE_TRUNC('day',GETDATE()) ) )))
+        WHERE ((events.event_at) >= (DATEADD(day,-179, DATE_TRUNC('day',GETDATE()) )) 
+            AND (events.event_at) < (DATEADD(day,180, DATEADD(day,-187, DATE_TRUNC('day',GETDATE()) ) )))
         AND event_type IN ('run_query', 'create_project', 'git_commit', 'field_select', 'filter_add', 'view_sql', 'api_call', 'download_query_results', ' view_results', 'login', 'create_user')
     sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     sortkeys: [event_at]
@@ -58,10 +58,10 @@
             minute, 
             LAG(events.event_at) OVER ( PARTITION BY license.license_slug, events.user_id ORDER BY events.event_at)
           , events.event_at) AS idle_time
-      FROM ${events_in_past_30_days.SQL_TABLE_NAME} AS events
+      FROM ${events_in_past_180_days.SQL_TABLE_NAME} AS events
       LEFT JOIN license ON events.license_slug = license.license_slug
-      WHERE ((events.event_at) >= (DATEADD(day,-29, DATE_TRUNC('day',GETDATE()) )) 
-            AND (events.event_at) < (DATEADD(day,30, DATEADD(day,-29, DATE_TRUNC('day',GETDATE()) ) ))) 
+      WHERE ((events.event_at) >= (DATEADD(day,-179, DATE_TRUNC('day',GETDATE()) )) 
+            AND (events.event_at) < (DATEADD(day,180, DATEADD(day,-179, DATE_TRUNC('day',GETDATE()) ) ))) 
 
 
 - view: sessions
@@ -146,14 +146,14 @@
           , events.event_at AS created_at
           , ROW_NUMBER() OVER (PARTITION BY unique_session_id ORDER BY events.event_at) AS event_sequence_within_session
           , ROW_NUMBER() OVER (PARTITION BY unique_session_id ORDER BY events.event_at desc) AS inverse_event_sequence_within_session
-      FROM ${events_in_past_30_days.SQL_TABLE_NAME} AS events
+      FROM ${events_in_past_180_days.SQL_TABLE_NAME} AS events
       INNER JOIN ${sessions.SQL_TABLE_NAME} AS sessions
         ON events.user_id = sessions.user_id
         AND events.event_at >= sessions.session_start
         AND events.event_at < sessions.next_session_start
         AND events.license_slug = sessions.license_id
       WHERE 
-        ((events.event_at) >= (DATEADD(day,-29, DATE_TRUNC('day',GETDATE()) ))  AND (events.event_at) < (DATEADD(day,30, DATEADD(day,-29, DATE_TRUNC('day',GETDATE()) ) )))
+        ((events.event_at) >= (DATEADD(day,-179, DATE_TRUNC('day',GETDATE()) ))  AND (events.event_at) < (DATEADD(day,180, DATEADD(day,-179, DATE_TRUNC('day',GETDATE()) ) )))
       
       
   fields:
