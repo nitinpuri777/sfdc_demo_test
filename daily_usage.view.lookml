@@ -172,13 +172,11 @@
 
   - dimension: event_id
     primary_key: true
-#     hidden: true
     type: number
     sql: ${TABLE}.event_id
     
   - dimension: unique_session_id
     type: number
-#     hidden: true
     sql: ${TABLE}.unique_session_id
     
   - dimension: event_sequence_within_session
