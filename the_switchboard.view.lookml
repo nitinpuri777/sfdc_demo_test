@@ -291,9 +291,11 @@
     sql: ${TABLE}.city
 
   - dimension: state
+    map_layer: us_states
     sql: UPPER(REGEXP_SUBSTR(${TABLE}.state, '([A-Z]{1}[a-z]{1}$|[A-Z]{2})'))
     
   - dimension: country
+    map_layer: countries
     sql: ${TABLE}.country
 
 # LEAD-LEVEL FIELDS #
