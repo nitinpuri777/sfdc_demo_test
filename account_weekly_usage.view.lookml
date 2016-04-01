@@ -217,6 +217,7 @@
       value_format_name: percent_2
     
     - measure: average_usage_change_percent
+      description: usage change by week
       type: average
       sql: ${usage_change_percent}
       value_format_name: percent_2
