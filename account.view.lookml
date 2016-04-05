@@ -30,18 +30,18 @@
     type: string
     sql: |
       CASE
-        WHEN ${opportunity.amount} >= 100000 THEN '1. Gold'
-        WHEN ${opportunity.amount} < 100000 AND ${salesrep.business_segment} = 'Enterprise' THEN '1. Gold'
-        WHEN ${opportunity.amount} BETWEEN 40000 AND 100000 THEN '2. Silver'
-        WHEN ${opportunity.amount} < 40000 THEN '3. Bronze'
-        ELSE '3. Bronze'
+        WHEN ${opportunity.amount} >= 100000 THEN 'Gold'
+        WHEN ${opportunity.amount} < 100000 AND ${salesrep.business_segment} = 'Enterprise' THEN 'Gold'
+        WHEN ${opportunity.amount} BETWEEN 40000 AND 100000 THEN 'Silver'
+        WHEN ${opportunity.amount} < 40000 THEN 'Bronze'
+        ELSE 'Bronze'
       END
     html: |
-      {% if rendered_value == '3. Bronze' %}
+      {% if rendered_value == 'Bronze' %}
         <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: #cd7f32; font-size:200%;">{{ rendered_value }}</div>
-      {% elsif rendered_value == '2. Silver' %}
+      {% elsif rendered_value == 'Silver' %}
         <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: silver; font-size:200%;">{{ rendered_value }}</div>
-      {% elsif rendered_value == '1. Gold' %}
+      {% elsif rendered_value == 'Gold' %}
         <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: gold; font-size:200%;">{{ rendered_value }}</div>
       {% else %}
         {{ rendered_value }}
