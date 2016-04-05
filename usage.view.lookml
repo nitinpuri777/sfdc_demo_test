@@ -115,6 +115,14 @@
     type: number
     value_format: '#.0%'
     sql: ROUND(${TABLE}.concentration, 2)
+    html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
     
   - dimension: percent_change_usage
     type: number
@@ -226,6 +234,14 @@
   - measure: total_current_users
     type: sum
     sql: ${TABLE}.total_current_users
+    html: |
+      {% if value <= 10 %}
+        <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% elsif value <= 30 %}
+        <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% else %}
+        <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% endif %}
     
 # SETS #
 
