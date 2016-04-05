@@ -55,12 +55,13 @@
     sql: ${TABLE}.city
 
   - dimension: country
-    sql: ${TABLE}.country
     drill_fields: [city, state]
+    map_layer: countries
+    sql: ${TABLE}.country
 
   - dimension_group: created
     type: time
-    timeframes: [date, week, month, year]
+    timeframes: [time, date, week, month, year]
     sql: ${TABLE}.created_at
 
   - dimension: current_customer
@@ -79,9 +80,10 @@
 
   - dimension_group: customer_start
     type: time
-    timeframes: [date, week, month, year]
+    timeframes: [time, date, week, month, year]
     convert_tz: false
     sql: ${TABLE}.customer_start_date_c
+    
 
   - dimension: engagement_stage
     sql_case:
@@ -105,8 +107,10 @@
     sql: ${TABLE}.owner_id
 
   - dimension: state
-    sql: ${TABLE}.state
     drill_fields: [city]
+    map_layer: us_states
+    sql: ${TABLE}.state
+    
     
 # We should consider removing this, unless we really want to build something around partnerships    
   - dimension: type
@@ -129,7 +133,7 @@
     
   - dimension: number_of_employees_tier
     type: tier
-    tiers: [0,50,100,500,1000,10000]
+    tiers: [0,10,50,100,500,1000,10000]
     sql: ${number_of_employees}
     
 # MEASURES #
@@ -159,9 +163,15 @@
       - account_status
       - account_tier
       - city
+      - created_time
       - created_date
+      - created_week
+      - created_month
       - current_customer
+      - customer_start_time
       - customer_start_date
+      - customer_start_week
+      - customer_start_month
       - engagement_stage
       - name
       - number_of_employees

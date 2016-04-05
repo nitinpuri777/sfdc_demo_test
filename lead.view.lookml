@@ -47,6 +47,7 @@
     sql: ${TABLE}.converted_opportunity_id
 
   - dimension: country
+    map_layer: countries
     sql: ${TABLE}.country
 
   - dimension_group: created
@@ -95,6 +96,7 @@
     sql: ${TABLE}.number_of_employees
 
   - dimension: state
+    map_layer: us_states
     sql: ${TABLE}.state
 
   - dimension: status
