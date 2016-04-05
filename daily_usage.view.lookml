@@ -40,6 +40,36 @@
     type: count
     drill_fields: [id]
   
+  - measure: count_of_query_runs
+    type: count
+    filters:
+      event_type: 'run_query'
+      
+  - measure: count_of_project_creation
+    type: count
+    filters:
+      event_type: 'create_project'
+      
+  - measure: count_of_git_commits
+    type: count
+    filters:
+      event_type: 'git_commit'
+      
+  - measure: count_of_api_calls
+    type: count
+    filters:
+      event_type: 'api_call'
+      
+  - measure: count_of_query_result_downloads
+    type: count
+    filters:
+      event_type: 'download_query_results'
+      
+  - measure: count_of_logins
+    type: count
+    filters:
+      event_type: 'login'
+  
   - measure: user_count
     type: count_distinct
     sql: ${user_id}
@@ -60,8 +90,6 @@
           , events.event_at) AS idle_time
       FROM ${events_in_past_180_days.SQL_TABLE_NAME} AS events
       LEFT JOIN license ON events.license_slug = license.license_slug
-      WHERE ((events.event_at) >= (DATEADD(day,-179, DATE_TRUNC('day',GETDATE()) )) 
-            AND (events.event_at) < (DATEADD(day,180, DATEADD(day,-179, DATE_TRUNC('day',GETDATE()) ) ))) 
 
 
 - view: sessions
@@ -145,7 +173,6 @@
           , sessions.unique_session_id
           , events.event_at AS created_at
           , ROW_NUMBER() OVER (PARTITION BY unique_session_id ORDER BY events.event_at) AS event_sequence_within_session
-          , ROW_NUMBER() OVER (PARTITION BY unique_session_id ORDER BY events.event_at desc) AS inverse_event_sequence_within_session
       FROM ${events_in_past_180_days.SQL_TABLE_NAME} AS events
       INNER JOIN ${sessions.SQL_TABLE_NAME} AS sessions
         ON events.user_id = sessions.user_id
@@ -182,10 +209,6 @@
   - dimension: event_sequence_within_session
     type: number
     sql: ${TABLE}.event_sequence_within_session
-
-  - dimension: inverse_event_sequence_within_session
-    type: number
-    sql: ${TABLE}.inverse_event_sequence_within_session
 
 - explore: session_facts
 - view: session_facts
@@ -236,6 +259,25 @@
   - measure: total_session_length_minutes
     type: sum
     sql: ${session_length_minutes}
+  
+  - measure: total_session_length_minutes_1_week_ago
+    type: sum
+    hidden: true
+    sql: ${session_length_minutes}
+    filters:
+      session_start_at_date: '3 weeks ago for 1 week'
+
+  - measure: total_session_length_minutes_2_weeks_ago
+    type: sum
+    hidden: true
+    sql: ${session_length_minutes}
+    filters:
+      session_start_at_date: '2 weeks ago for 1 week'
+  
+  - measure: percent_change_in_total_usage
+    type: number
+    sql: 1.0 * (${total_session_length_minutes_2_weeks_ago} - ${total_session_length_minutes_1_week_ago}) / NULLIF(${total_session_length_minutes_1_week_ago},0)
+    value_format_name: percent_2
     
   - measure: average_session_length_minutes
     type: avg

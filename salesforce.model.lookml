@@ -192,9 +192,21 @@
       sql_on: ${event_mapping.unique_session_id} = ${sessions.unique_session_id}
     
     - join: account
-      fields: [name]
+      fields: [export_set*]
       sql_on: ${sessions.account_id} = ${account.id}
       relationship: many_to_one
+
+    - join: salesrep
+      view_label: 'Account'
+      fields: [business_segment]
+      sql_on: ${salesrep.id} = ${account.owner_id}
+      relationship: many_to_one 
+
+    - join: opportunity
+      sql_on: ${account.id} = ${opportunity.account_id}
+      relationship: one_to_many
+      fields: [export_set*]
+      type: inner
 
     - join: session_facts
       relationship: one_to_one

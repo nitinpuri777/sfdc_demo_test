@@ -182,15 +182,15 @@
       type: string
       sql: |
         CASE
-          WHEN ${account_health_score} < 50 THEN 'At Risk'
-          WHEN ${account_health_score} < 70 THEN 'Standard'
-          WHEN ${account_health_score} >= 70 THEN 'Safe'
+          WHEN ${account_health_score} < 50 THEN '1. At Risk'
+          WHEN ${account_health_score} < 70 THEN '2. Standard'
+          WHEN ${account_health_score} >= 70 THEN '3. Safe'
           ELSE 'NA'
         END
       html: |
-        {% if value == 'At Risk' %}
+        {% if value == '1. At Risk' %}
           <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
-        {% elsif value == 'Standard' %}
+        {% elsif value == '2. Standard' %}
           <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
         {% else %}
           <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
