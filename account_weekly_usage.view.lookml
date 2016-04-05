@@ -137,21 +137,6 @@
       type: number
       sql: COALESCE(1.0 * (${approximate_usage_minutes} - ${last_week_usage_minutes}) / NULLIF(${last_week_usage_minutes},0),0)
       value_format_name: percent_2
-    
-    - measure: latest_usage_change_percent
-      type: average
-      sql: ${usage_change_percent}
-      value_format_name: percent_2
-      filters:
-        weeks_ago: 0
-      html: |
-        {% if value <= 0.2 and value >= -0.2 %}
-          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
-        {% elsif value < -0.2 %}
-          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
-        {% else %}
-          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
-        {% endif %}
 
     - dimension: user_count_change
       type: number
@@ -461,6 +446,21 @@
       type: number
       sql: COALESCE(1.0 * (${total_count_of_api_calls_2_weeks_ago} - ${total_count_of_api_calls_1_week_ago}) / NULLIF(${total_count_of_api_calls_1_week_ago},0),0)
       value_format_name: percent_2
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+
+    - measure: latest_usage_change_percent
+      type: average
+      sql: ${usage_change_percent}
+      value_format_name: percent_2
+      filters:
+        weeks_ago: 0
       html: |
         {% if value <= 0.2 and value >= -0.2 %}
           <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
