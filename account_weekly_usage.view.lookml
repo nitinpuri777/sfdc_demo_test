@@ -25,6 +25,7 @@
       SELECT
           license.salesforce_account_id AS account_id
         , DATE_TRUNC('week', event_at) AS event_week
+        , DATE_DIFF('week', events.event_at, CURRENT_DATE) AS event_weeks_ago
         , COUNT(DISTINCT user_id || instance_slug) AS total_weekly_users
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_users
         , COUNT(DISTINCT events.id) AS weekly_event_count
@@ -33,10 +34,16 @@
         , SUM(FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0))) OVER (PARTITION BY account_id ORDER BY event_week ROWS UNBOUNDED PRECEDING) as lifetime_usage_minutes
         , LAG((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_usage_minutes
         , 1.00 * AVG(max_user_usage.max_user_usage) / NULLIF((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0), 0) AS concentration
+        , SUM(CASE WHEN events.event_type = 'run_query' THEN 1 ELSE 0 END) AS count_of_query_runs
+        , SUM(CASE WHEN events.event_type = 'create_project' THEN 1 ELSE 0 END) AS count_of_project_creation
+        , SUM(CASE WHEN events.event_type = 'git_commit' THEN 1 ELSE 0 END) AS count_of_git_commits
+        , SUM(CASE WHEN events.event_type = 'api_call' THEN 1 ELSE 0 END) AS count_of_api_calls
+        , SUM(CASE WHEN events.event_type = 'download_query_results' THEN 1 ELSE 0 END) AS count_of_query_result_downloads
+        , SUM(CASE WHEN events.event_type = 'login' THEN 1 ELSE 0 END) AS count_of_logins
       FROM events
       INNER JOIN license ON events.license_slug = license.license_slug
       LEFT JOIN ${max_user_usage.SQL_TABLE_NAME} AS max_user_usage ON max_user_usage.salesforce_account_id = license.salesforce_account_id
-      GROUP BY 1, 2
+      GROUP BY 1, 2, 3
       
   fields:
   
@@ -44,7 +51,7 @@
     - dimension: unique_key
       hidden: true
       primary_key: true
-      sql: ${account_id} || '-' || ${event_week}
+      sql: ${account_id} || '-' || ${event_week} || '-' || ${event_weeks_ago}
     
     - dimension: account_id
       sql: ${TABLE}.account_id
@@ -84,8 +91,40 @@
     - dimension: lifetime_usage_minutes
       type: number
       sql: ${TABLE}.lifetime_usage_minutes
+
+    - dimension: event_weeks_ago
+      type: number
+      sql: ${TABLE}.event_weeks_ago
     
-  ### DERIVED DIMENSIONS ###
+    - dimension: count_of_events
+      type: number
+      sql: ${TABLE}.count_of_events
+    
+    - dimension: count_of_query_runs
+      type: number
+      sql: ${TABLE}.count_of_query_runs
+  
+    - dimension: count_of_project_creation
+      type: number
+      sql: ${TABLE}.count_of_project_creation
+  
+    - dimension: count_of_git_commits
+      type: number
+      sql: ${TABLE}.count_of_git_commits
+  
+    - dimension: count_of_api_calls
+      type: number
+      sql: ${TABLE}.count_of_api_calls
+  
+    - dimension: count_of_query_result_downloads
+      type: number
+      sql: ${TABLE}.count_of_query_result_downloads
+  
+    - dimension: count_of_logins
+      type: number
+      sql: ${TABLE}.count_of_logins
+      
+    ### DERIVED DIMENSIONS ###
     - dimension: weeks_since_signup
       type: number
       sql: DATEDIFF('week',${opportunity.closed_raw}, ${event_raw})
@@ -96,12 +135,35 @@
       
     - dimension: usage_change_percent
       type: number
-      sql: 1.0 * (${approximate_usage_minutes} - ${last_week_usage_minutes}) / NULLIF(${last_week_usage_minutes},0)
+      sql: COALESCE(1.0 * (${approximate_usage_minutes} - ${last_week_usage_minutes}) / NULLIF(${last_week_usage_minutes},0),0)
       value_format_name: percent_2
+    
+    - measure: latest_usage_change_percent
+      type: average
+      sql: ${usage_change_percent}
+      value_format_name: percent_2
+      filters:
+        weeks_ago: 0
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
 
     - dimension: user_count_change
       type: number
       sql: 1.0* (${current_weekly_users} - ${last_week_users}) / NULLIF(${last_week_users},0)
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
     
     - dimension: usage_change_percent_score
       type: number
@@ -215,6 +277,14 @@
       type: average
       sql: ${concentration}
       value_format_name: percent_2
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value > 0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
     
     - measure: average_usage_change_percent
       description: usage change by week
@@ -248,10 +318,163 @@
           <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
         {% endif %}
 
+### COUNT BY WEEK
+    - measure: total_count_of_query_runs_1_week_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_query_runs}
+      filters:
+        event_weeks_ago: 1
+  
+    - measure: total_count_of_query_runs_2_weeks_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_query_runs}
+      filters:
+        event_weeks_ago: 2
+  
+    - measure: total_count_of_project_creation_1_week_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_project_creation}
+      filters:
+        event_weeks_ago: 1
+  
+    - measure: total_count_of_project_creation_2_weeks_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_project_creation}
+      filters:
+        event_weeks_ago: 2
+  
+    - measure: total_count_of_git_commits_1_week_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_git_commits}
+      filters:
+        event_weeks_ago: 1
+  
+    - measure: total_count_of_git_commits_2_weeks_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_git_commits}
+      filters:
+        event_weeks_ago: 2
+  
+    - measure: total_count_of_api_calls_1_week_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_api_calls}
+      filters:
+        event_weeks_ago: 1
+  
+    - measure: total_count_of_api_calls_2_weeks_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_api_calls}
+      filters:
+        event_weeks_ago: 2
+  
+    - measure: total_count_of_query_result_downloads_1_week_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_query_result_downloads}
+      filters:
+        event_weeks_ago: 1
+  
+    - measure: total_count_of_query_result_downloads_2_weeks_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_query_result_downloads}
+      filters:
+        event_weeks_ago: 2
+  
+    - measure: total_count_of_logins_1_week_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_logins}
+      filters:
+        event_weeks_ago: 1
+  
+    - measure: total_count_of_logins_2_weeks_ago
+      type: sum
+      hidden: true
+      sql: ${count_of_logins}
+      filters:
+        event_weeks_ago: 2
+  
+  
+  ### PERCENT CHANGES ###
+    - measure: percent_change_in_count_of_query_result_downloads
+      type: number
+      sql: COALESCE(1.0 * (${total_count_of_query_result_downloads_2_weeks_ago} - ${total_count_of_query_result_downloads_1_week_ago}) / NULLIF(${total_count_of_query_result_downloads_1_week_ago},0),0)
+      value_format_name: percent_2
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+    
+    - measure: percent_change_in_count_of_logins
+      type: number
+      sql: COALESCE(1.0 * (${total_count_of_logins_2_weeks_ago} - ${total_count_of_logins_1_week_ago}) / NULLIF(${total_count_of_logins_1_week_ago},0),0)
+      value_format_name: percent_2
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+  
+    - measure: percent_change_in_count_of_query_runs
+      type: number
+      sql: COALESCE(1.0 * (${total_count_of_query_runs_2_weeks_ago} - ${total_count_of_query_runs_1_week_ago}) / NULLIF(${total_count_of_query_runs_1_week_ago},0),0)
+      value_format_name: percent_2
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+  
+    - measure: percent_change_in_count_of_git_commits
+      type: number
+      sql: COALESCE(1.0 * (${total_count_of_git_commits_2_weeks_ago} - ${total_count_of_git_commits_1_week_ago}) / NULLIF(${total_count_of_git_commits_1_week_ago},0),0)
+      value_format_name: percent_2
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+  
+    - measure: percent_change_in_count_of_api_calls
+      type: number
+      sql: COALESCE(1.0 * (${total_count_of_api_calls_2_weeks_ago} - ${total_count_of_api_calls_1_week_ago}) / NULLIF(${total_count_of_api_calls_1_week_ago},0),0)
+      value_format_name: percent_2
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+
   sets:
     export_set:
       - account_id
       - weeks_ago
+      - event_weeks_ago
       - weeks_since_signup
       - event_week
       - event_month
@@ -264,3 +487,13 @@
       - user_count_change
       - average_user_count_change_percent
       - average_usage_change_percent
+      - count_of_logins
+      - percent_change_in_count_of_query_result_downloads
+      - percent_change_in_count_of_logins
+      - percent_change_in_count_of_query_runs
+      - percent_change_in_count_of_git_commits
+      - percent_change_in_count_of_api_calls
+      - latest_usage_change_percent
+
+
+
