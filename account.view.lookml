@@ -30,10 +30,10 @@
     type: number
     sql: |
       CASE
-        WHEN ${opportunity.amount} >= 100000 THEN 1
-        WHEN ${opportunity.amount} < 100000 AND ${salesrep.business_segment} = 'Enterprise' THEN 1
-        WHEN ${opportunity.amount} BETWEEN 40000 AND 100000 THEN 2
-        WHEN ${opportunity.amount} < 40000 THEN 3
+        WHEN ${opportunity.amount} >= 100000 THEN "1. Gold"
+        WHEN ${opportunity.amount} < 100000 AND ${salesrep.business_segment} = 'Enterprise' THEN "1. Gold"
+        WHEN ${opportunity.amount} BETWEEN 40000 AND 100000 THEN "2. Silver"
+        WHEN ${opportunity.amount} < 40000 THEN "3. Bronze"
         ELSE 3
       END
     html: |
