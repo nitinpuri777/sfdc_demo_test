@@ -242,7 +242,19 @@
       {% else %}
         <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
       {% endif %}
-    
+  
+  - measure: average_concentration
+    type: average
+    sql: ${concentration}
+    html: |
+      {% if value <= 0.1 %}
+        <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% elsif value <= 0.3 %}
+        <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% else %}
+        <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% endif %}
+  
 # SETS #
 
   sets:
@@ -258,3 +270,4 @@
       - events_yesterday
       - total_current_users
       - unique_months_with_events
+      - average_concentration
