@@ -54,7 +54,7 @@
     - dimension: unique_key
       hidden: true
       primary_key: true
-      sql: ${account_id} || '-' || ${event_week}
+      sql: ${account_id} || '-' || ${event_week} || '-' || ${event_weeks_ago}
     
     - dimension: account_id
       sql: ${TABLE}.account_id
