@@ -180,7 +180,6 @@
     type: number
     sql: ${TABLE}.event_sequence_within_session
 
-- explore: session_facts
 - view: session_facts
   derived_table:
     sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
