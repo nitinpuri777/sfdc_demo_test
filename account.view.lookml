@@ -25,6 +25,26 @@
     
   - dimension: account_status
     sql: COALESCE(${TABLE}.account_status_c, 'Unknown')
+
+  - dimension: account_tier
+    type: string
+    sql: |
+      CASE
+        WHEN ${current_customer} = 'Yes' AND ${salesrep.business_segment} = 'Enterprise' THEN 'Gold'
+        WHEN ${salesrep.business_segment} = 'Enterprise' THEN 'Silver'
+        WHEN ${salesrep.business_segment} = 'Mid-Market' THEN 'Silver'
+        ELSE 'Bronze'
+      END
+    html: |
+      {% if rendered_value == 'Bronze' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: #cd7f32; font-size:200%;">{{ rendered_value }}</div>
+      {% elsif rendered_value == 'Silver' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: silver; font-size:200%;">{{ rendered_value }}</div>
+      {% elsif rendered_value == 'Gold' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: gold; font-size:200%;">{{ rendered_value }}</div>
+      {% else %}
+        {{ rendered_value }}
+      {% endif %}
   
   - dimension: campaign
     hidden: true
@@ -72,9 +92,9 @@
 
   - dimension: name
     sql: ${TABLE}.name
-    links: 
+    links:
       - label: Customer Lookup Dashboard
-        url: http://demonew.looker.com/dashboards/279?Account%20Name={{ value | encode_uri }}
+        url: http://demonew.looker.com/dashboards/279?Account%20Name={{ value  }}
         icon_url: http://www.looker.com/favicon.ico
 
   - dimension: number_of_employees
@@ -104,7 +124,29 @@
              
   - dimension: vertical
     type: string
-    sql: COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c)
+    sql: (COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c))
+    
+  - dimension: vertical_segment
+    type: string
+    sql: |
+         CASE 
+         WHEN ${vertical} = 'Retail, eCommerce & Marketplaces' THEN 'Retail'
+         WHEN ${vertical} = 'Technology' THEN 'Technology'
+         WHEN ${vertical} = 'Software & SaaS' THEN 'Software'
+         WHEN ${vertical} = 'Ad Tech & Online Media' THEN 'Digital Advertising'
+         ELSE ${vertical}
+         END
+    
+#         Retail: ${vertical} = 'Retail, eCommerce & Marketplaces'
+#         Technology: 'Technology'
+#         Software:  'Software & SaaS'
+#         Digital Advertising: 'Ad Tech & Online Media'
+#         Finance & Payments: 'Finance & Payments'
+#         Non-profit & Education: 'Non-profit & Education'
+#         Mobile & Gaming: 'Mobile & Gaming'
+#         Health: 'Health'
+#         Enterprise: 'Enterprise'
+#         Agency: 'Agency'
 
   - dimension: zendesk_organization
     hidden: true
@@ -140,6 +182,7 @@
       - id
       - company_id
       - account_status
+      - account_tier
       - city
       - created_time
       - created_date

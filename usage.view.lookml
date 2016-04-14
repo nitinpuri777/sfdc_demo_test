@@ -115,6 +115,14 @@
     type: number
     value_format: '#.0%'
     sql: ROUND(${TABLE}.concentration, 2)
+    html: |
+        {% if value <= 0.1 %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 0.3 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
     
   - dimension: percent_change_usage
     type: number
@@ -174,13 +182,14 @@
 
 
     html: |
-      {% if value == 'At Risk' %}
-        <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
-      {% elsif value == 'Safe' %}
-        <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
-      {% else %}
-        <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
-      {% endif %}
+    html: |
+        {% if value == 'At Risk' %}
+          <b><p style="color: white; background-color: #dc7350; font-size:100%; text-align:center; margin: 0; border-radius: 5px;">{{ rendered_value }}</p></b>
+        {% elsif value == 'Safe' %}
+          <b><p style="color: black; background-color: #e9b404; font-size:100%; text-align:center; margin: 0; border-radius: 5px;">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: #49cec1; font-size:100%; text-align:center; margin: 0; border-radius: 5px;">{{ rendered_value }}</p></b>
+        {% endif %}
                               
     
 # MEASURES #
@@ -225,7 +234,27 @@
   - measure: total_current_users
     type: sum
     sql: ${TABLE}.total_current_users
-    
+    html: |
+      {% if value <= 10 %}
+        <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% elsif value <= 30 %}
+        <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% else %}
+        <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% endif %}
+  
+  - measure: average_concentration
+    type: average
+    sql: ${concentration}
+    html: |
+      {% if value <= 0.1 %}
+        <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% elsif value <= 0.3 %}
+        <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% else %}
+        <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+      {% endif %}
+  
 # SETS #
 
   sets:
@@ -241,3 +270,4 @@
       - events_yesterday
       - total_current_users
       - unique_months_with_events
+      - average_concentration
