@@ -32,7 +32,7 @@
       CASE
         WHEN ${current_customer} = 'Yes' AND ${salesrep.business_segment} = 'Enterprise' THEN 'Gold'
         WHEN ${salesrep.business_segment} = 'Enterprise' THEN 'Silver'
-        WHEN ${opportunity.amount} BETWEEN 30000 AND 100000 THEN 'Silver'
+        WHEN ${salesrep.business_segment} = 'Mid-Market' THEN 'Silver'
         ELSE 'Bronze'
       END
     html: |

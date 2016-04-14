@@ -44,6 +44,51 @@
     type: count_distinct
     sql: ${user_id}
 
+  - measure: count_of_query_runs
+    type: count
+    filters:
+     event_type: 'run_query'
+  
+  - measure: count_of_project_creation
+    type: count
+    filters:
+      event_type: 'create_project'
+
+  - measure: count_of_git_commits
+    type: count
+    filters:
+      event_type: 'git_commit'
+
+  - measure: count_of_api_calls
+    type: count
+    filters:
+      event_type: 'api_call'
+
+  - measure: count_of_query_result_downloads
+    type: count
+    filters:
+      event_type: 'download_query_results'
+
+  - measure: count_of_logins
+    type: count
+    filters:
+      event_type: 'login'
+
+  - measure: count_of_dashboard_queries
+    type: count
+    filters:
+      event_type: 'run_dashboard'
+
+  - measure: count_of_dashboard_downloads
+    type: count
+    filters:
+      event_type: 'open_dashboard_pdf'
+    
+  - measure: count_of_support_chats
+    type: count
+    filters:
+      event_type: 'close_zopim_chat'
+
 - view: find_idle_time
   derived_table:
     persist_for: 6 hours

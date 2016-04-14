@@ -19,13 +19,17 @@
       sql_on: ${first_campaign.id} = ${the_switchboard.attributable_campaign_id}
       relationship: many_to_one
     
+    - join: task
+      sql_on: ${the_switchboard.account_id} = ${task.account_id}
+      relationship: one_to_many
+    
     - join: license
       fields: []
       sql_on: ${the_switchboard.account_id} = ${license.salesforce_account_id}
       relationship: one_to_many
     
     - join: event
-      view_label: "Account"
+      view_label: "Usage"
       fields: [user_count]
       sql_on: ${license.license_slug} = ${event.license_slug}
       relationship: one_to_many
@@ -195,6 +199,12 @@
       fields: [export_set*]
       sql_on: ${sessions.account_id} = ${account.id}
       relationship: many_to_one
+    
+    - join: account_weekly_usage
+      view_label: 'Account'
+      sql_on: ${account.id} = ${account_weekly_usage.account_id}
+      relationship: one_to_many
+      fields: [account_health_score, average_account_health]
 
     - join: salesrep
       view_label: 'Account'
