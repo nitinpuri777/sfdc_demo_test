@@ -323,6 +323,55 @@
           <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
         {% endif %}
 
+    - measure: average_account_health_this_week
+      type: average
+      sql: ${account_health_score}
+      value_format_name: decimal_2
+      filters:
+        weeks_ago: 1
+      html: |
+        {% if value < 50 %}
+          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% elsif value < 70 %}
+          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% else %}
+          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% endif %}
+
+    - measure: average_account_health_one_week_ago
+      type: average
+      sql: ${account_health_score}
+      value_format_name: decimal_2
+      filters:
+        weeks_ago: 2
+      html: |
+        {% if value < 50 %}
+          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% elsif value < 70 %}
+          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% else %}
+          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% endif %}
+
+    - measure: average_account_health_two_weeks_ago
+      type: average
+      sql: ${account_health_score}
+      value_format_name: decimal_2
+      filters:
+        weeks_ago: 3
+      html: |
+        {% if value < 50 %}
+          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% elsif value < 70 %}
+          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% else %}
+          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% endif %}
+  
+    - measure: average_account_health_change
+      type: number
+      sql: ${average_account_health_this_week} - ${average_account_health_one_week_ago}
+
 ### COUNT BY WEEK
     - measure: total_count_of_query_runs
       type: sum
@@ -447,13 +496,19 @@
       - event_month
       - account_health_score
       - account_health
-      - count_of_accounts
-      - average_account_health
       - total_usage
       - usage_change_percent
       - user_count_change
       - average_user_count_change_percent
       - average_usage_change_percent
+      - count_of_query_runs
+      - count_of_git_commits
+      - count_of_api_calls
+      - count_of_query_result_downloads
+      - count_of_logins
+      - count_of_dashboard_queries
+      - count_of_dashboard_downloads
+      - count_of_support_chats
       - total_count_of_query_runs
       - total_count_of_git_commits
       - total_count_of_api_calls
@@ -462,6 +517,12 @@
       - total_count_of_dashboard_queries
       - total_count_of_dashboard_downloads
       - total_count_of_support_chats
+      - count_of_accounts
+      - average_account_health
+      - average_account_health_this_week
+      - average_account_health_one_week_ago
+      - average_account_health_two_weeks_ago
+      - average_account_health_change
 
 
 
