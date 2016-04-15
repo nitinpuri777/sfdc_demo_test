@@ -25,6 +25,7 @@
       SELECT
           license.salesforce_account_id AS account_id
         , DATE_TRUNC('week', event_at) AS event_week
+        , DATE_DIFF('week', events.event_at, CURRENT_DATE) AS event_weeks_ago
         , COUNT(DISTINCT user_id || instance_slug) AS total_weekly_users
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_users
         , COUNT(DISTINCT events.id) AS weekly_event_count
@@ -33,10 +34,19 @@
         , SUM(FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0))) OVER (PARTITION BY account_id ORDER BY event_week ROWS UNBOUNDED PRECEDING) as lifetime_usage_minutes
         , LAG((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_usage_minutes
         , 1.00 * AVG(max_user_usage.max_user_usage) / NULLIF((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', event_at))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0), 0) AS concentration
+        , SUM(CASE WHEN events.event_type = 'run_query' THEN 1 ELSE 0 END) AS count_of_query_runs
+        , SUM(CASE WHEN events.event_type = 'create_project' THEN 1 ELSE 0 END) AS count_of_project_creation
+        , SUM(CASE WHEN events.event_type = 'git_commit' THEN 1 ELSE 0 END) AS count_of_git_commits
+        , SUM(CASE WHEN events.event_type = 'api_call' THEN 1 ELSE 0 END) AS count_of_api_calls
+        , SUM(CASE WHEN events.event_type = 'download_query_results' THEN 1 ELSE 0 END) AS count_of_query_result_downloads
+        , SUM(CASE WHEN events.event_type = 'login' THEN 1 ELSE 0 END) AS count_of_logins
+        , SUM(CASE WHEN events.event_type = 'run_dashboard' THEN 1 ELSE 0 END) AS count_of_dashboard_queries
+        , SUM(CASE WHEN events.event_type = 'open_dashboard_pdf' THEN 1 ELSE 0 END) AS count_of_dashboard_downloads
+        , SUM(CASE WHEN events.event_type = 'close_zopim_chat' THEN 1 ELSE 0 END) AS count_of_support_chats
       FROM events
       INNER JOIN license ON events.license_slug = license.license_slug
       LEFT JOIN ${max_user_usage.SQL_TABLE_NAME} AS max_user_usage ON max_user_usage.salesforce_account_id = license.salesforce_account_id
-      GROUP BY 1, 2
+      GROUP BY 1, 2, 3
       
   fields:
   
@@ -44,7 +54,7 @@
     - dimension: unique_key
       hidden: true
       primary_key: true
-      sql: ${account_id} || '-' || ${event_week}
+      sql: ${account_id} || '-' || ${event_week} || '-' || ${event_weeks_ago}
     
     - dimension: account_id
       sql: ${TABLE}.account_id
@@ -84,8 +94,49 @@
     - dimension: lifetime_usage_minutes
       type: number
       sql: ${TABLE}.lifetime_usage_minutes
+
+    - dimension: event_weeks_ago
+      type: number
+      sql: ${TABLE}.event_weeks_ago
     
-  ### DERIVED DIMENSIONS ###
+    - dimension: count_of_query_runs
+      type: number
+      sql: ${TABLE}.count_of_query_runs
+  
+    - dimension: count_of_project_creation
+      type: number
+      sql: ${TABLE}.count_of_project_creation
+  
+    - dimension: count_of_git_commits
+      type: number
+      sql: ${TABLE}.count_of_git_commits
+  
+    - dimension: count_of_api_calls
+      type: number
+      sql: ${TABLE}.count_of_api_calls
+  
+    - dimension: count_of_query_result_downloads
+      type: number
+      sql: ${TABLE}.count_of_query_result_downloads
+  
+    - dimension: count_of_logins
+      type: number
+      sql: ${TABLE}.count_of_logins
+
+    - dimension: count_of_dashboard_queries
+      type: number
+      sql: ${TABLE}.count_of_dashboard_queries
+
+    - dimension: count_of_dashboard_downloads
+      type: number
+      sql: ${TABLE}.count_of_dashboard_downloads
+      
+    - dimension: count_of_support_chats
+      type: number
+      sql: ${TABLE}.count_of_support_chats
+      
+      
+    ### DERIVED DIMENSIONS ###
     - dimension: weeks_since_signup
       type: number
       sql: DATEDIFF('week',${opportunity.closed_raw}, ${event_raw})
@@ -96,12 +147,20 @@
       
     - dimension: usage_change_percent
       type: number
-      sql: 1.0 * (${approximate_usage_minutes} - ${last_week_usage_minutes}) / NULLIF(${last_week_usage_minutes},0)
+      sql: COALESCE(1.0 * (${approximate_usage_minutes} - ${last_week_usage_minutes}) / NULLIF(${last_week_usage_minutes},0),0)
       value_format_name: percent_2
 
     - dimension: user_count_change
       type: number
       sql: 1.0* (${current_weekly_users} - ${last_week_users}) / NULLIF(${last_week_users},0)
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
     
     - dimension: usage_change_percent_score
       type: number
@@ -182,15 +241,15 @@
       type: string
       sql: |
         CASE
-          WHEN ${account_health_score} < 50 THEN 'At Risk'
-          WHEN ${account_health_score} < 70 THEN 'Safe'
-          WHEN ${account_health_score} >= 70 THEN 'Solid'
+          WHEN ${account_health_score} < 50 THEN '1. At Risk'
+          WHEN ${account_health_score} < 70 THEN '2. Standard'
+          WHEN ${account_health_score} >= 70 THEN '3. Safe'
           ELSE 'NA'
         END
       html: |
-        {% if value == 'At Risk' %}
+        {% if value == '1. At Risk' %}
           <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
-        {% elsif value == 'Safe' %}
+        {% elsif value == '2. Standard' %}
           <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
         {% else %}
           <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
@@ -215,8 +274,17 @@
       type: average
       sql: ${concentration}
       value_format_name: percent_2
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value > 0.2 %}
+          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
     
     - measure: average_usage_change_percent
+      description: usage change by week
       type: average
       sql: ${usage_change_percent}
       value_format_name: percent_2
@@ -233,6 +301,14 @@
     - measure: total_usage
       type: sum
       sql: ${approximate_usage_minutes}
+      html: |
+        {% if value <= 2000 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 6000 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
 
     - measure: average_account_health
       type: average
@@ -247,19 +323,206 @@
           <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
         {% endif %}
 
+    - measure: average_account_health_this_week
+      type: average
+      sql: ${account_health_score}
+      value_format_name: decimal_2
+      filters:
+        weeks_ago: 1
+      html: |
+        {% if value < 50 %}
+          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% elsif value < 70 %}
+          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% else %}
+          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% endif %}
+
+    - measure: average_account_health_one_week_ago
+      type: average
+      sql: ${account_health_score}
+      value_format_name: decimal_2
+      filters:
+        weeks_ago: 2
+      html: |
+        {% if value < 50 %}
+          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% elsif value < 70 %}
+          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% else %}
+          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% endif %}
+
+    - measure: average_account_health_two_weeks_ago
+      type: average
+      sql: ${account_health_score}
+      value_format_name: decimal_2
+      filters:
+        weeks_ago: 3
+      html: |
+        {% if value < 50 %}
+          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% elsif value < 70 %}
+          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% else %}
+          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% endif %}
+  
+    - measure: average_account_health_change
+      type: number
+      sql: ${average_account_health_this_week} - ${average_account_health_one_week_ago}
+
+### COUNT BY WEEK
+    - measure: total_count_of_query_runs
+      type: sum
+      sql: ${count_of_query_runs}
+      html: |
+        {% if value <= 10 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 20 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+
+    - measure: total_count_of_git_commits
+      type: sum
+      sql: ${count_of_git_commits}
+      html: |
+        {% if value <= 10 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 20 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+
+    - measure: total_count_of_api_calls
+      type: sum
+      sql: ${count_of_api_calls}
+      html: |
+        {% if value <= 10 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 20 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+  
+    - measure: total_count_of_query_result_downloads
+      type: sum
+      sql: ${count_of_query_result_downloads}
+      html: |
+        {% if value <= 10 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 20 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+
+    - measure: total_count_of_logins
+      type: sum
+      sql: ${count_of_logins}
+      html: |
+        {% if value <= 10 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 20 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+
+    - measure: total_count_of_dashboard_queries
+      type: sum
+      sql: ${count_of_dashboard_queries}
+      html: |
+        {% if value <= 10 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 20 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+
+    - measure: total_count_of_dashboard_downloads
+      type: sum
+      sql: ${count_of_dashboard_downloads}
+      html: |
+        {% if value <= 10 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 20 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+
+    - measure: total_count_of_support_chats
+      type: sum
+      sql: ${count_of_support_chats}
+      html: |
+        {% if value <= 10 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value <= 20 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+  
+  
+  ### PERCENT CHANGES ###
+    - measure: latest_usage_change_percent
+      type: average
+      sql: ${usage_change_percent}
+      value_format_name: percent_2
+      filters:
+        weeks_ago: 0
+      html: |
+        {% if value <= 0.2 and value >= -0.2 %}
+          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% elsif value < -0.2 %}
+          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% else %}
+          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        {% endif %}
+
   sets:
     export_set:
       - account_id
       - weeks_ago
+      - event_weeks_ago
       - weeks_since_signup
       - event_week
       - event_month
       - account_health_score
       - account_health
-      - count_of_accounts
-      - average_account_health
       - total_usage
       - usage_change_percent
       - user_count_change
       - average_user_count_change_percent
       - average_usage_change_percent
+      - count_of_query_runs
+      - count_of_git_commits
+      - count_of_api_calls
+      - count_of_query_result_downloads
+      - count_of_logins
+      - count_of_dashboard_queries
+      - count_of_dashboard_downloads
+      - count_of_support_chats
+      - total_count_of_query_runs
+      - total_count_of_git_commits
+      - total_count_of_api_calls
+      - total_count_of_query_result_downloads
+      - total_count_of_logins
+      - total_count_of_dashboard_queries
+      - total_count_of_dashboard_downloads
+      - total_count_of_support_chats
+      - count_of_accounts
+      - average_account_health
+      - average_account_health_this_week
+      - average_account_health_one_week_ago
+      - average_account_health_two_weeks_ago
+      - average_account_health_change
+
+
+

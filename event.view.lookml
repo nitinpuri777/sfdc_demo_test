@@ -12,6 +12,10 @@
     type: time
     timeframes: [time, date, week, month]
     sql: ${TABLE}.event_at
+  
+  - dimension: event_type
+    type: string
+    sql: ${TABLE}.event_type
 
   - dimension: instance_slug
     sql: ${TABLE}.instance_slug
@@ -29,3 +33,7 @@
   - measure: count
     type: count
     drill_fields: [id]
+  
+  - measure: user_count
+    type: count_distinct
+    sql: ${user_id}

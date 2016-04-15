@@ -25,6 +25,26 @@
     
   - dimension: account_status
     sql: COALESCE(${TABLE}.account_status_c, 'Unknown')
+
+  - dimension: account_tier
+    type: string
+    sql: |
+      CASE
+        WHEN ${current_customer} = 'Yes' AND ${salesrep.business_segment} = 'Enterprise' THEN 'Gold'
+        WHEN ${salesrep.business_segment} = 'Enterprise' THEN 'Silver'
+        WHEN ${salesrep.business_segment} = 'Mid-Market' THEN 'Silver'
+        ELSE 'Bronze'
+      END
+    html: |
+      {% if rendered_value == 'Bronze' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: #cd7f32; font-size:200%;">{{ rendered_value }}</div>
+      {% elsif rendered_value == 'Silver' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: silver; font-size:200%;">{{ rendered_value }}</div>
+      {% elsif rendered_value == 'Gold' %}
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: gold; font-size:200%;">{{ rendered_value }}</div>
+      {% else %}
+        {{ rendered_value }}
+      {% endif %}
   
   - dimension: campaign
     hidden: true
@@ -34,12 +54,13 @@
     sql: ${TABLE}.city
 
   - dimension: country
-    sql: ${TABLE}.country
     drill_fields: [city, state]
+    map_layer: countries
+    sql: ${TABLE}.country
 
   - dimension_group: created
     type: time
-    timeframes: [date, week, month, year]
+    timeframes: [time, date, week, month, year]
     sql: ${TABLE}.created_at
 
   - dimension: current_customer
@@ -58,9 +79,10 @@
 
   - dimension_group: customer_start
     type: time
-    timeframes: [date, week, month, year]
+    timeframes: [time, date, week, month, year]
     convert_tz: false
     sql: ${TABLE}.customer_start_date_c
+    
 
   - dimension: engagement_stage
     sql_case:
@@ -70,9 +92,9 @@
 
   - dimension: name
     sql: ${TABLE}.name
-    links: 
+    links:
       - label: Customer Lookup Dashboard
-        url: http://demonew.looker.com/dashboards/279?Account%20Name={{ value | encode_uri }}
+        url: http://demonew.looker.com/dashboards/279?Account%20Name={{ value  }}
         icon_url: http://www.looker.com/favicon.ico
       - label: Salesforce Account
         url: https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg
@@ -87,8 +109,10 @@
     sql: ${TABLE}.owner_id
 
   - dimension: state
-    sql: ${TABLE}.state
     drill_fields: [city]
+    map_layer: us_states
+    sql: ${TABLE}.state
+    
     
 # We should consider removing this, unless we really want to build something around partnerships    
   - dimension: type
@@ -103,7 +127,29 @@
              
   - dimension: vertical
     type: string
-    sql: COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c)
+    sql: (COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c))
+    
+  - dimension: vertical_segment
+    type: string
+    sql: |
+         CASE 
+         WHEN ${vertical} = 'Retail, eCommerce & Marketplaces' THEN 'Retail'
+         WHEN ${vertical} = 'Technology' THEN 'Technology'
+         WHEN ${vertical} = 'Software & SaaS' THEN 'Software'
+         WHEN ${vertical} = 'Ad Tech & Online Media' THEN 'Digital Advertising'
+         ELSE ${vertical}
+         END
+    
+#         Retail: ${vertical} = 'Retail, eCommerce & Marketplaces'
+#         Technology: 'Technology'
+#         Software:  'Software & SaaS'
+#         Digital Advertising: 'Ad Tech & Online Media'
+#         Finance & Payments: 'Finance & Payments'
+#         Non-profit & Education: 'Non-profit & Education'
+#         Mobile & Gaming: 'Mobile & Gaming'
+#         Health: 'Health'
+#         Enterprise: 'Enterprise'
+#         Agency: 'Agency'
 
   - dimension: zendesk_organization
     hidden: true
@@ -111,7 +157,7 @@
     
   - dimension: number_of_employees_tier
     type: tier
-    tiers: [0,50,100,500,1000,10000]
+    tiers: [0,10,50,100,500,1000,10000]
     sql: ${number_of_employees}
     
 # MEASURES #
@@ -139,10 +185,17 @@
       - id
       - company_id
       - account_status
+      - account_tier
       - city
+      - created_time
       - created_date
+      - created_week
+      - created_month
       - current_customer
+      - customer_start_time
       - customer_start_date
+      - customer_start_week
+      - customer_start_month
       - engagement_stage
       - name
       - number_of_employees
