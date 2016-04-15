@@ -42,8 +42,9 @@
     timeframes: [raw, date, week, month, year, time, quarter]
     sql: ${TABLE}.closed_date
     
-#  - dimension: closed_quarter
-#    sql: EXTRACT(YEAR FROM ${TABLE}.closed_date) || ' - Q' || EXTRACT(QUARTER FROM ${TABLE}.closed_date)
+  - dimension: closed_quarter_string
+    hidden: true
+    sql: EXTRACT(YEAR FROM ${TABLE}.closed_date) || ' - Q' || EXTRACT(QUARTER FROM ${TABLE}.closed_date)
     
   - dimension: is_current_quarter
     type: yesno
@@ -64,7 +65,26 @@
         'day',
         CAST(CONCAT((TO_CHAR(CAST(DATE_TRUNC('quarter', CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', CURRENT_DATE)) AS DATE), 'YYYY-MM')), '-01') as date),
         CURRENT_DATE))
-        
+  
+  - dimension: day_of_current_quarter
+    hidden: true
+    type: number
+    sql: |
+       (DATEDIFF(
+        'day',
+        CAST(CONCAT((TO_CHAR(CAST(DATE_TRUNC('quarter', CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', CURRENT_DATE)) AS DATE), 'YYYY-MM')), '-01') as date),
+        CURRENT_DATE))
+
+  - dimension: is_quarter_to_date
+    type: yesno
+    sql: ${closed_day_of_quarter} <= ${day_of_current_quarter}
+    
+#   - dimension: is_quarter_to_date
+#     type: yesno
+#     sql: ${closed_day_of_quarter} <= DATEDIFF('day', CAST(CONCAT(${closed_quarter}, '-01') as date), CURRENT_DATE)
+#     
+
+      
   - dimension: contract_length
     type: number
     sql: ${TABLE}.contract_length_c
@@ -129,8 +149,9 @@
   - dimension: probablity_tier
     type: tier
     tiers: [0,.01,.20,.40,.60,.80,1]
-#     style: integer
+    # style: integer
     sql: ${probability}
+    value_format: "#%"
     
   - dimension: probability_group
     sql_case:
@@ -255,8 +276,17 @@
   - measure: count_won_percent_change
     label: 'Count Won (% change from last quarter)'
     type: number
-    sql: 1 - 1.0 * ${count_won_current_quarter}/NULLIF(${count_won_last_quarter},0)
+    sql: 1.0 * ${count_won_current_quarter}/NULLIF(${count_won_last_quarter},0) - 1
     value_format_name: percent_2
+    html: |
+      {% if value > 0.2 %}
+       <p style="color: black; background-color: #41A317; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% elsif value >-0.2 %}
+       <p style="color: black; background-color: yellow; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% else %}
+       <p style="color: black; background-color: #E41B17; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% endif %}
+    
 
 
   - measure: total_mrr
@@ -286,14 +316,14 @@
     drill_fields: opportunity_set*
     value_format: '$#,##0'
 
-#   - measure: total_contract_value
-#     label: 'Total Contract Value (Won)'
-#     type: sum
-#     sql: ${contract_value}
-#     filters:
-#       is_won: Yes    
-#     drill_fields: opportunity_set*
-#     value_format: '$#,##0'
+  - measure: total_contract_value
+    label: 'Total Contract Value (Won)'
+    type: sum
+    sql: ${contract_value}
+    filters:
+     is_won: Yes    
+    drill_fields: opportunity_set*
+    value_format: '$#,##0'
     
   - measure: average_contract_value
     label: 'Average Contract Value (Won)'
@@ -322,8 +352,17 @@
   - measure: win_percentage_change
     label: 'Win Percentage (change from last quarter)'
     type: number
-    sql: ${win_percentage_current_quarter} - ${win_percentage_last_quarter}
+    sql: (${win_percentage_current_quarter} - ${win_percentage_last_quarter})/100
     value_format_name: percent_2
+    html: |
+      {% if value > 0.2 %}
+       <p style="color: black; background-color: #41A317; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% elsif value >-0.2 %}
+       <p style="color: black; background-color: yellow; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% else %}
+       <p style="color: black; background-color: #E41B17; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% endif %}
+    
     
   - measure: open_percentage
     type: number
@@ -354,7 +393,6 @@
     type: sum
     sql: ${acv}
     filters:
-      is_won: Yes
       closed_quarter: this quarter
     value_format_name: usd_large
     drill_fields: [account.name, type, closed_date, total_acv]     
@@ -371,8 +409,17 @@
   - measure: total_acv_won_percent_change
     label: 'Total ACV Won (% change from last quarter)'
     type: number
-    sql: 1 - 1.0 * ${total_acv_won_current_quarter}/ NULLIF(${total_acv_won_last_quarter},0) 
+    sql: 1.0 * ${total_acv_won_current_quarter}/ NULLIF(${total_acv_won_last_quarter},0) - 1
     value_format_name: percent_2
+    html: |
+      {% if value > 0.2 %}
+       <p style="color: black; background-color: #41A317; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% elsif value >-0.2 %}
+       <p style="color: black; background-color: yellow; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% else %}
+       <p style="color: black; background-color: #E41B17; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% endif %}
+    
 
   - measure: total_acv_lost
     type: sum
@@ -404,6 +451,10 @@
     type: running_total
     sql: ${total_acv}     
     drill_fields: opportunity_set*
+    
+  - measure: total_acv_won_running_sum
+    type: running_total
+    sql: ${total_acv_won}
     
   - measure: meetings_converted_to_close_within_60d
     type: count_distinct
@@ -546,6 +597,7 @@
       - created_date
       - created_week
       - created_month
+      - created_quarter
       - closed_date
       - closed_week
       - closed_month      
@@ -579,6 +631,9 @@
       - total_acv
       - total_acv_running_sum
       - count_lost
+      - total_acv_won
+      - total_acv_won_current_quarter
+      - total_acv_won_last_quarter
       
   derived_table:
     sql: |

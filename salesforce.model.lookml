@@ -102,7 +102,17 @@
       sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
       relationship: one_to_many
       fields: [export_set*]
-      
+    
+    - join: quota
+      view_label: 'Sales Representative'
+      sql_on: ${salesrep.id} = ${quota.person_id}
+      relationship: one_to_many
+    
+    - join: quota_aggregated
+      view_label: 'Sales Team Quota'
+      sql_on: ${opportunity.closed_quarter_string} = ${quota_aggregated.quota_quarter_string} 
+      relationship: many_to_one
+
 - explore: funnel
   label: '(2) Lead Funnel'
   joins: 
@@ -164,5 +174,11 @@
       sql_on: ${salesrep.id} = ${account.owner_id}
       relationship: many_to_one 
       
+    - join: quota
+      view_label: 'Sales Representative'
+      sql_on: ${salesrep.id} = ${quota.person_id}
+      relationship: one_to_many
+
       
+
             
