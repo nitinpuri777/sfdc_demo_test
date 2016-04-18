@@ -25,7 +25,8 @@
       SELECT
           license.salesforce_account_id AS account_id
         , DATE_TRUNC('week', event_at) AS event_week
-        , DATE_DIFF('week', events.event_at, CURRENT_DATE) AS event_weeks_ago
+        , DATE_DIFF('week', events.event_at, DATE_TRUNC('week', CURRENT_DATE)) AS event_weeks_ago
+        --, ROW_NUMBER() OVER (PARTITION BY license.salesforce_account_id ORDER BY event_week DESC) AS reverse_event_week_sequence
         , COUNT(DISTINCT user_id || instance_slug) AS total_weekly_users
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_users
         , COUNT(DISTINCT events.id) AS weekly_event_count
@@ -66,6 +67,8 @@
     - dimension: last_week_events
       type: number
       sql: ${TABLE}.last_week_events
+    
+    - dimension: reverse_event_week_sequence
 
     - dimension: event
       type: time
@@ -144,6 +147,10 @@
     - dimension: weeks_ago
       type: number
       sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))
+    
+    - dimension: months_ago
+      type: number
+      sql: DATEDIFF(month, ${event_raw}, DATE_TRUNC('month',CURRENT_DATE))
       
     - dimension: usage_change_percent
       type: number
@@ -259,21 +266,25 @@
     - measure: count_of_accounts
       type: count_distinct
       sql: ${account_id}
+      drill_fields: detail*
 
     - measure: average_event_count
       type: average
       sql: ${weekly_event_count}
       value_format_name: decimal_2
+      drill_fields: detail*
     
     - measure: average_current_weekly_users
       type: average
       sql: ${current_weekly_users}
       value_format_name: decimal_2
+      drill_fields: detail*
     
     - measure: average_concentration
       type: average
       sql: ${concentration}
       value_format_name: percent_2
+      drill_fields: detail*
       html: |
         {% if value <= 0.2 and value >= -0.2 %}
           <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -288,19 +299,23 @@
       type: average
       sql: ${usage_change_percent}
       value_format_name: percent_2
+      drill_fields: detail*
     
     - measure: average_user_count_change_percent
       type: average
       sql: ${user_count_change}
       value_format_name: percent_2
+      drill_fields: detail*
     
     - measure: average_lifetime_usage_minutes
       type: average
       sql: ${lifetime_usage_minutes}
+      drill_fields: detail*
     
     - measure: total_usage
       type: sum
       sql: ${approximate_usage_minutes}
+      drill_fields: detail*
       html: |
         {% if value <= 2000 %}
           <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -314,6 +329,7 @@
       type: average
       sql: ${account_health_score}
       value_format_name: decimal_2
+      drill_fields: detail*
       html: |
         {% if value < 50 %}
           <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
@@ -327,6 +343,7 @@
       type: average
       sql: ${account_health_score}
       value_format_name: decimal_2
+      drill_fields: detail*
       filters:
         weeks_ago: 1
       html: |
@@ -340,8 +357,9 @@
 
     - measure: average_account_health_one_week_ago
       type: average
-      sql: ${account_health_score}
+      sql: COALESCE(${account_health_score},0)
       value_format_name: decimal_2
+      drill_fields: detail*
       filters:
         weeks_ago: 2
       html: |
@@ -355,8 +373,9 @@
 
     - measure: average_account_health_two_weeks_ago
       type: average
-      sql: ${account_health_score}
+      sql: COALESCE(${account_health_score},0)
       value_format_name: decimal_2
+      drill_fields: detail*
       filters:
         weeks_ago: 3
       html: |
@@ -371,11 +390,27 @@
     - measure: average_account_health_change
       type: number
       sql: ${average_account_health_this_week} - ${average_account_health_one_week_ago}
+      drill_fields: detail*
+
+    - measure: count_of_red_accounts
+      type: count_distinct
+      sql: ${account_id}
+      sql_distinct_key: ${account_id}
+      drill_fields: detail*
+      filters:
+        account_health_score: '< 50'
+    
+    - measure: percent_red_accounts
+      type: number
+      sql: 1.0 * ${count_of_red_accounts} / NULLIF(${count_of_accounts},0)
+      value_format_name: percent_2
+      drill_fields: detail*
 
 ### COUNT BY WEEK
     - measure: total_count_of_query_runs
       type: sum
       sql: ${count_of_query_runs}
+      drill_fields: detail*
       html: |
         {% if value <= 10 %}
           <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -388,6 +423,7 @@
     - measure: total_count_of_git_commits
       type: sum
       sql: ${count_of_git_commits}
+      drill_fields: detail*
       html: |
         {% if value <= 10 %}
           <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -400,6 +436,7 @@
     - measure: total_count_of_api_calls
       type: sum
       sql: ${count_of_api_calls}
+      drill_fields: detail*
       html: |
         {% if value <= 10 %}
           <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -412,6 +449,7 @@
     - measure: total_count_of_query_result_downloads
       type: sum
       sql: ${count_of_query_result_downloads}
+      drill_fields: detail*
       html: |
         {% if value <= 10 %}
           <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -424,6 +462,7 @@
     - measure: total_count_of_logins
       type: sum
       sql: ${count_of_logins}
+      drill_fields: detail*
       html: |
         {% if value <= 10 %}
           <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -436,6 +475,7 @@
     - measure: total_count_of_dashboard_queries
       type: sum
       sql: ${count_of_dashboard_queries}
+      drill_fields: detail*
       html: |
         {% if value <= 10 %}
           <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -448,6 +488,7 @@
     - measure: total_count_of_dashboard_downloads
       type: sum
       sql: ${count_of_dashboard_downloads}
+      drill_fields: detail*
       html: |
         {% if value <= 10 %}
           <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -460,6 +501,7 @@
     - measure: total_count_of_support_chats
       type: sum
       sql: ${count_of_support_chats}
+      drill_fields: detail*
       html: |
         {% if value <= 10 %}
           <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -475,6 +517,7 @@
       type: average
       sql: ${usage_change_percent}
       value_format_name: percent_2
+      drill_fields: detail*
       filters:
         weeks_ago: 0
       html: |
@@ -487,11 +530,19 @@
         {% endif %}
 
   sets:
+    detail:
+      - account_id
+      - account.name
+      - average_account_health
+      - average_account_health_change
+      - total_usage
+    
     export_set:
       - account_id
       - weeks_ago
       - event_weeks_ago
       - weeks_since_signup
+      - months_ago
       - event_week
       - event_month
       - account_health_score
@@ -523,6 +574,9 @@
       - average_account_health_one_week_ago
       - average_account_health_two_weeks_ago
       - average_account_health_change
+      - count_of_red_accounts
+      - percent_red_accounts
+#       - reverse_event_week_sequence
 
 
 

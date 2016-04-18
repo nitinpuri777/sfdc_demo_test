@@ -113,7 +113,7 @@
       relationship: one_to_one  
     
     - join: account_weekly_usage
-      view_label: 'Account'
+      view_label: 'Usage'
       sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
       relationship: one_to_many
       fields: [export_set*]
