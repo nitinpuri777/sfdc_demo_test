@@ -26,7 +26,6 @@
           license.salesforce_account_id AS account_id
         , DATE_TRUNC('week', event_at) AS event_week
         , DATE_DIFF('week', events.event_at, DATE_TRUNC('week', CURRENT_DATE)) AS event_weeks_ago
-        --, ROW_NUMBER() OVER (PARTITION BY license.salesforce_account_id ORDER BY event_week DESC) AS reverse_event_week_sequence
         , COUNT(DISTINCT user_id || instance_slug) AS total_weekly_users
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_users
         , COUNT(DISTINCT events.id) AS weekly_event_count
@@ -576,7 +575,6 @@
       - average_account_health_change
       - count_of_red_accounts
       - percent_red_accounts
-#       - reverse_event_week_sequence
 
 
 
