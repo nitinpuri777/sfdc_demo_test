@@ -91,8 +91,9 @@
 
 - view: find_idle_time
   derived_table:
-    persist_for: 6 hours
-    sortkeys: [user_id, created_at]
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
+    sortkeys: [salesforce_account_id, user_id, created_at]
+    distkey: salesforce_account_id
     sql: |
       SELECT
           events.event_at AS created_at
@@ -105,13 +106,32 @@
           , events.event_at) AS idle_time
       FROM ${events_in_past_180_days.SQL_TABLE_NAME} AS events
       LEFT JOIN license ON events.license_slug = license.license_slug
+      
+  fields:
+    - dimension: salesforce_account_id
+      sql: ${TABLE}.salesforce_account_id
 
+    - dimension: created
+      type: time
+      timeframes: [time, date, week, month, year]
+      sql: ${TABLE}.created_at
+      
+    - dimension: license_id
+      sql: ${TABLE}.license_id
+      
+    - dimension: user_id
+      sql: ${TABLE}.user_id
+      
+    - dimension: idle_time
+      type: number
+      sql: ${TABLE}.idle_time
+      
 
 - view: sessions
   derived_table:
     sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     distkey: license_id
-    sortkeys: [session_start]
+    sortkeys: [unique_session_id, session_start, account_id, user_id, license_id]
     sql: |
         SELECT
           find_idle_time.created_at AS session_start
@@ -179,7 +199,7 @@
   derived_table:
     sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     distkey: event_id
-    sortkeys: [created_at]
+    sortkeys: [unique_session_id, event_id, created_at]
     sql: |
       SELECT
           events.id AS event_id
@@ -194,9 +214,6 @@
         AND events.event_at >= sessions.session_start
         AND events.event_at < sessions.next_session_start
         AND events.license_slug = sessions.license_id
-      WHERE 
-        ((events.event_at) >= (DATEADD(day,-179, DATE_TRUNC('day',GETDATE()) ))  AND (events.event_at) < (DATEADD(day,180, DATEADD(day,-179, DATE_TRUNC('day',GETDATE()) ) )))
-      
       
   fields:
   
@@ -229,7 +246,7 @@
   derived_table:
     sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     distkey: unique_session_id
-    sortkeys: [session_start]
+    sortkeys: [unique_session_id, session_start, user_id]
     sql: |
         SELECT
               unique_session_id
