@@ -1,5 +1,8 @@
 - view: max_user_usage
   derived_table:
+    sql_trigger_value: SELECT CURRENT_DATE
+    distkey: salesforce_account_id
+    sortkeys: [salesforce_account_id]
     sql: |
       SELECT
           salesforce_account_id
@@ -26,6 +29,7 @@
           license.salesforce_account_id AS account_id
         , DATE_TRUNC('week', event_at) AS event_week
         , DATE_DIFF('week', events.event_at, DATE_TRUNC('week', CURRENT_DATE)) AS event_weeks_ago
+        , DATE_DIFF('month', events.event_at, DATE_TRUNC('month',CURRENT_DATE)) AS event_months_ago
         , COUNT(DISTINCT user_id || instance_slug) AS total_weekly_users
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_users
         , COUNT(DISTINCT events.id) AS weekly_event_count
@@ -46,7 +50,7 @@
       FROM events
       INNER JOIN license ON events.license_slug = license.license_slug
       LEFT JOIN ${max_user_usage.SQL_TABLE_NAME} AS max_user_usage ON max_user_usage.salesforce_account_id = license.salesforce_account_id
-      GROUP BY 1, 2, 3
+      GROUP BY 1, 2, 3, 4
       
   fields:
   
@@ -54,7 +58,7 @@
     - dimension: unique_key
       hidden: true
       primary_key: true
-      sql: ${account_id} || '-' || ${event_week} || '-' || ${event_weeks_ago}
+      sql: ${account_id} || '-' || ${event_week} || '-' || ${event_weeks_ago} || '-' || ${event_months_ago}
     
     - dimension: account_id
       sql: ${TABLE}.account_id
@@ -100,6 +104,10 @@
     - dimension: event_weeks_ago
       type: number
       sql: ${TABLE}.event_weeks_ago
+
+    - dimension: event_months_ago
+      type: number
+      sql: ${TABLE}.event_months_ago
     
     - dimension: count_of_query_runs
       type: number
@@ -143,13 +151,13 @@
       type: number
       sql: DATEDIFF('week',${opportunity.closed_raw}, ${event_raw})
     
-    - dimension: weeks_ago
-      type: number
-      sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))
-    
-    - dimension: months_ago
-      type: number
-      sql: DATEDIFF(month, ${event_raw}, DATE_TRUNC('month',CURRENT_DATE))
+#     - dimension: weeks_ago
+#       type: number
+#       sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))
+#     
+#     - dimension: months_ago
+#       type: number
+#       sql: DATEDIFF(month, ${event_raw}, DATE_TRUNC('month',CURRENT_DATE))
       
     - dimension: usage_change_percent
       type: number
@@ -344,7 +352,7 @@
       value_format_name: decimal_2
       drill_fields: detail*
       filters:
-        weeks_ago: 1
+        event_weeks_ago: 1
       html: |
         {% if value < 50 %}
           <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
@@ -360,7 +368,7 @@
       value_format_name: decimal_2
       drill_fields: detail*
       filters:
-        weeks_ago: 2
+        event_weeks_ago: 2
       html: |
         {% if value < 50 %}
           <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
@@ -376,7 +384,7 @@
       value_format_name: decimal_2
       drill_fields: detail*
       filters:
-        weeks_ago: 3
+        event_weeks_ago: 3
       html: |
         {% if value < 50 %}
           <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
@@ -518,7 +526,7 @@
       value_format_name: percent_2
       drill_fields: detail*
       filters:
-        weeks_ago: 0
+        event_weeks_ago: 0
       html: |
         {% if value <= 0.2 and value >= -0.2 %}
           <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
@@ -538,10 +546,11 @@
     
     export_set:
       - account_id
-      - weeks_ago
+#       - weeks_ago
       - event_weeks_ago
+      - event_months_ago
       - weeks_since_signup
-      - months_ago
+#       - months_ago
       - event_week
       - event_month
       - account_health_score
