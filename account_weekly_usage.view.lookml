@@ -1,6 +1,6 @@
 - view: max_user_usage
   derived_table:
-    sql_trigger_value: SELECT CURRENT_DATE
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     distkey: salesforce_account_id
     sortkeys: [salesforce_account_id]
     sql: |
@@ -21,7 +21,7 @@
 
 - view: account_weekly_usage
   derived_table:
-    sql_trigger_value: SELECT CURRENT_DATE
+    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
     distkey: account_id
     sortkeys: [account_id, event_week]
     sql: |
