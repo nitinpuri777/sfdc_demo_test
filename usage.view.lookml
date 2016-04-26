@@ -117,11 +117,11 @@
     sql: ROUND(${TABLE}.concentration, 2)
     html: |
         {% if value <= 0.1 %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 0.3 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
     
   - dimension: percent_change_usage
@@ -236,11 +236,11 @@
     sql: ${TABLE}.total_current_users
     html: |
       {% if value <= 10 %}
-        <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% elsif value <= 30 %}
-        <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% else %}
-        <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
   
   - measure: average_concentration
@@ -248,11 +248,11 @@
     sql: ${concentration}
     html: |
       {% if value <= 0.1 %}
-        <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% elsif value <= 0.3 %}
-        <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% else %}
-        <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
   
 # SETS #
