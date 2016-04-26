@@ -1,6 +1,6 @@
 - view: max_user_usage
   derived_table:
-    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
+    sql_trigger_value: SELECT DATE(DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: salesforce_account_id
     sortkeys: [salesforce_account_id]
     sql: |
@@ -21,15 +21,13 @@
 
 - view: account_weekly_usage
   derived_table:
-    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
+    sql_trigger_value: SELECT DATE(DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: account_id
     sortkeys: [account_id, event_week]
     sql: |
       SELECT
           license.salesforce_account_id AS account_id
         , DATE_TRUNC('week', event_at) AS event_week
-        , DATE_DIFF('week', events.event_at, DATE_TRUNC('week', CURRENT_DATE)) AS event_weeks_ago
-        , DATE_DIFF('month', events.event_at, DATE_TRUNC('month',CURRENT_DATE)) AS event_months_ago
         , COUNT(DISTINCT user_id || instance_slug) AS total_weekly_users
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_users
         , COUNT(DISTINCT events.id) AS weekly_event_count
@@ -70,13 +68,19 @@
     - dimension: last_week_events
       type: number
       sql: ${TABLE}.last_week_events
-    
-    - dimension: reverse_event_week_sequence
 
-    - dimension: event
+    - dimension_group: event
       type: time
       timeframes: [raw, week, month]
       sql: ${TABLE}.event_week
+    
+    - dimension: event_weeks_ago
+      type: number
+      sql: DATE_DIFF('week', ${event_raw}, DATE_TRUNC('week', CURRENT_DATE))
+
+    - dimension: event_months_ago
+      type: number
+      sql: DATE_DIFF('month', ${event_raw}, DATE_TRUNC('month', CURRENT_DATE))
 
     - dimension: current_weekly_users
       type: number
@@ -100,14 +104,6 @@
     - dimension: lifetime_usage_minutes
       type: number
       sql: ${TABLE}.lifetime_usage_minutes
-
-    - dimension: event_weeks_ago
-      type: number
-      sql: ${TABLE}.event_weeks_ago
-
-    - dimension: event_months_ago
-      type: number
-      sql: ${TABLE}.event_months_ago
     
     - dimension: count_of_query_runs
       type: number
