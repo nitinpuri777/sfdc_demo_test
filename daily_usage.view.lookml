@@ -6,7 +6,7 @@
         , license_slug AS license_slug
         , instance_slug AS instance_slug
         , user_id AS user_id
-        , event_type AS event_typeo
+        , event_type AS event_type
         , COUNT(*) AS count_of_events
       FROM events
       WHERE event_type IN ('run_query', 'create_project', 'git_commit', 'open_dashboard_pdf', 'api_call', 'download_query_results', 'login', 'run_dashboard', 'open_dashboard_pdf', 'close_zopim_chat')
