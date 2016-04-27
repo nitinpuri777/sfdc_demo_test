@@ -1,6 +1,6 @@
 - view: max_user_usage
   derived_table:
-    sql_trigger_value: SELECT DATE(DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
+    persist_for: 6 hours
     distkey: salesforce_account_id
     sortkeys: [salesforce_account_id]
     sql: |
@@ -21,7 +21,8 @@
 
 - view: account_weekly_usage
   derived_table:
-    sql_trigger_value: SELECT DATE(DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
+    # Rebuilds at 11PM on Sundays
+    sql_trigger_value: SELECT DATE_TRUNC('week', DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: account_id
     sortkeys: [account_id, event_week]
     sql: |
