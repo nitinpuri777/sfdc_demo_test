@@ -8,10 +8,19 @@
         , user_id AS user_id
         , event_type AS event_type
         , COUNT(*) AS count_of_events
+        , SUM(CASE WHEN event_type = 'run_query' THEN 1 ELSE 0 END) AS count_of_query_runs
+        , SUM(CASE WHEN event_type = 'create_project' THEN 1 ELSE 0 END) AS count_of_project_creation
+        , SUM(CASE WHEN event_type = 'git_commit' THEN 1 ELSE 0 END) AS count_of_git_commits
+        , SUM(CASE WHEN event_type = 'open_dashboard_pdf' THEN 1 ELSE 0 END) AS count_of_dashboard_downloads
+        , SUM(CASE WHEN event_type = 'api_call' THEN 1 ELSE 0 END) AS count_of_api_calls
+        , SUM(CASE WHEN event_type = 'download_query_results' THEN 1 ELSE 0 END) AS count_of_query_result_downloads
+        , SUM(CASE WHEN event_type = 'login' THEN 1 ELSE 0 END) AS count_of_logins
+        , SUM(CASE WHEN event_type = 'run_dashboard' THEN 1 ELSE 0 END) AS count_of_dashboard_queries
+        , SUM(CASE WHEN event_type = 'close_zopim_chat' THEN 1 ELSE 0 END) AS count_of_support_chats
       FROM events
-      WHERE event_type IN ('run_query', 'create_project', 'git_commit', 'open_dashboard_pdf', 'api_call', 'download_query_results', 'login', 'run_dashboard', 'open_dashboard_pdf', 'close_zopim_chat')
+      WHERE event_type IN ('run_query', 'create_project', 'git_commit', 'open_dashboard_pdf', 'api_call', 'download_query_results', 'login', 'run_dashboard', 'close_zopim_chat')
       GROUP BY 1, 2, 3, 4, 5
-    sql_trigger_value: SELECT DATE(DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
+    sql_trigger_value: SELECT DATE(DATE_ADD('hour', 3, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: license_slug
     sortkeys: [license_slug, instance_slug, user_id, event_type]
     
@@ -20,7 +29,10 @@
   - dimension: id
     primary_key: true
     type: string
-    sql: ${event_date} || '-' || ${event_type} || '-' || ${license_slug} || '-' || ${instance_slug} || '-' || ${user_id}
+    sql: ${event_raw} || '-' || ${event_type} || '-' || ${license_slug} || '-' || ${instance_slug} || '-' || ${user_id}
+  
+  - dimension: license_user
+    sql: ${license_slug} || '-' || ${user_id}
 
   - dimension_group: event
     type: time
@@ -55,7 +67,51 @@
     type: number
     sql: ${TABLE}.count_of_events
 
-# MEASURES #
+  - dimension: count_of_query_runs
+    type: number
+    sql: ${TABLE}.count_of_query_runs
+  
+  - dimension: count_of_project_creation
+    type: number
+    hidden: true
+    sql: ${TABLE}.count_of_project_creation
+
+  - dimension: count_of_git_commits
+    type: number
+    hidden: true
+    sql: ${TABLE}.count_of_git_commits
+
+  - dimension: count_of_api_calls
+    type: number
+    hidden: true
+    sql: ${TABLE}.count_of_api_calls
+
+  - dimension: count_of_query_result_downloads
+    type: number
+    hidden: true
+    sql: ${TABLE}.count_of_query_result_downloads
+
+  - dimension: count_of_logins
+    type: number
+    hidden: true
+    sql: ${TABLE}.count_of_logins
+
+  - dimension: count_of_dashboard_queries
+    type: number
+    hidden: true
+    sql: ${TABLE}.count_of_dashboard_queries
+
+  - dimension: count_of_dashboard_downloads
+    type: number
+    hidden: true
+    sql: ${TABLE}.count_of_dashboard_downloads
+    
+  - dimension: count_of_support_chats
+    type: number
+    hidden: true
+    sql: ${TABLE}.count_of_support_chats
+
+### MEASURES ###
 
   - measure: count
     type: count
@@ -63,13 +119,11 @@
 
   - measure: user_count
     type: count_distinct
-    sql: ${user_id}
+    sql: ${license_user}
 
-  - measure: count_of_query_runs
+  - measure: total_query_runs
     type: sum
-    sql: ${count_of_events}
-    filters:
-     event_type: 'run_query'
+    sql: ${count_of_query_runs}
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -79,11 +133,9 @@
         <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}    
   
-  - measure: count_of_project_creation
+  - measure: total_project_creation
     type: sum
-    sql: ${count_of_events}
-    filters:
-      event_type: 'create_project'
+    sql: ${count_of_project_creation}
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -93,11 +145,9 @@
         <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
 
-  - measure: count_of_git_commits
+  - measure: total_git_commits
     type: sum
-    sql: ${count_of_events}
-    filters:
-      event_type: 'git_commit'
+    sql: ${count_of_git_commits}
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -107,11 +157,9 @@
         <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
 
-  - measure: count_of_api_calls
+  - measure: total_api_calls
     type: sum
-    sql: ${count_of_events}
-    filters:
-      event_type: 'api_call'
+    sql: ${count_of_api_calls}
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -121,11 +169,9 @@
         <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
 
-  - measure: count_of_query_result_downloads
+  - measure: total_query_result_downloads
     type: sum
-    sql: ${count_of_events}
-    filters:
-      event_type: 'download_query_results'
+    sql: ${count_of_query_result_downloads}
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -135,11 +181,9 @@
         <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
 
-  - measure: count_of_logins
+  - measure: total_logins
     type: sum
-    sql: ${count_of_events}
-    filters:
-      event_type: 'login'
+    sql: ${count_of_logins}
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -149,11 +193,9 @@
         <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
 
-  - measure: count_of_dashboard_queries
+  - measure: total_dashboard_queries
     type: sum
-    sql: ${count_of_events}
-    filters:
-      event_type: 'run_dashboard'
+    sql: ${count_of_dashboard_queries}
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -163,11 +205,9 @@
         <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
 
-  - measure: count_of_dashboard_downloads
+  - measure: total_dashboard_downloads
     type: sum
-    sql: ${count_of_events}
-    filters:
-      event_type: 'open_dashboard_pdf'
+    sql: ${count_of_dashboard_downloads}
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -177,11 +217,9 @@
         <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
     
-  - measure: count_of_support_chats
+  - measure: total_support_chats
     type: sum
-    sql: ${count_of_events}
-    filters:
-      event_type: 'close_zopim_chat'
+    sql: ${count_of_support_chats}
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -192,17 +230,11 @@
       {% endif %}
 
 ### DATE FILTERED MEASURES ###
-  - measure: user_count_last_week
-    type: count_distinct
-    sql: ${user_id}
-    filters:
-      event_weeks_ago: 1
 
   - measure: count_of_query_runs_last_week
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_query_runs}
     filters:
-     event_type: 'run_query'
      event_weeks_ago: 1
     html: |
       {% if value <= 10 %}
@@ -215,9 +247,8 @@
   
   - measure: count_of_project_creation_last_week
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_project_creation}
     filters:
-      event_type: 'create_project'
       event_weeks_ago: 1
     html: |
       {% if value <= 10 %}
@@ -230,9 +261,8 @@
 
   - measure: count_of_git_commits_last_week
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_git_commits}
     filters:
-      event_type: 'git_commit'
       event_weeks_ago: 1
     html: |
       {% if value <= 10 %}
@@ -245,9 +275,8 @@
 
   - measure: count_of_api_calls_last_week
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_api_calls}
     filters:
-      event_type: 'api_call'
       event_weeks_ago: 1
     html: |
       {% if value <= 10 %}
@@ -260,9 +289,8 @@
 
   - measure: count_of_query_result_downloads_last_week
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_query_result_downloads}
     filters:
-      event_type: 'download_query_results'
       event_weeks_ago: 1
     html: |
       {% if value <= 10 %}
@@ -275,9 +303,8 @@
 
   - measure: count_of_logins_last_week
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_logins}
     filters:
-      event_type: 'login'
       event_weeks_ago: 1
     html: |
       {% if value <= 10 %}
@@ -290,9 +317,8 @@
 
   - measure: count_of_dashboard_queries_last_week
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_dashboard_queries}
     filters:
-      event_type: 'run_dashboard'
       event_weeks_ago: 1
     html: |
       {% if value <= 10 %}
@@ -305,9 +331,8 @@
 
   - measure: count_of_dashboard_downloads_last_week
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_dashboard_downloads}
     filters:
-      event_type: 'open_dashboard_pdf'
       event_weeks_ago: 1
     html: |
       {% if value <= 10 %}
@@ -320,9 +345,8 @@
     
   - measure: count_of_support_chats_last_week
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_support_chats}
     filters:
-      event_type: 'close_zopim_chat'
       event_weeks_ago: 1
     html: |
       {% if value <= 10 %}
@@ -333,18 +357,24 @@
         <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
 
+  - measure: user_count_last_week
+    type: count_distinct
+    sql: ${user_id}
+    sql_distinct_key: ${license_slug}
+    filters:
+      event_weeks_ago: 1
 
   - measure: user_count_two_weeks_ago
     type: count_distinct
     sql: ${user_id}
+    sql_distinct_key: ${license_slug}
     filters:
       event_weeks_ago: 2
       
   - measure: count_of_query_runs_two_weeks_ago
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_query_runs}
     filters:
-     event_type: 'run_query'
      event_weeks_ago: 2
     html: |
       {% if value <= 10 %}
@@ -357,9 +387,8 @@
   
   - measure: count_of_project_creation_two_weeks_ago
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_project_creation}
     filters:
-      event_type: 'create_project'
       event_weeks_ago: 2
     html: |
       {% if value <= 10 %}
@@ -372,9 +401,8 @@
 
   - measure: count_of_git_commits_two_weeks_ago
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_git_commits}
     filters:
-      event_type: 'git_commit'
       event_weeks_ago: 2
     html: |
       {% if value <= 10 %}
@@ -387,9 +415,8 @@
 
   - measure: count_of_api_calls_two_weeks_ago
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_api_calls}
     filters:
-      event_type: 'api_call'
       event_weeks_ago: 2
     html: |
       {% if value <= 10 %}
@@ -402,9 +429,8 @@
 
   - measure: count_of_query_result_downloads_two_weeks_ago
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_query_result_downloads}
     filters:
-      event_type: 'download_query_results'
       event_weeks_ago: 2
     html: |
       {% if value <= 10 %}
@@ -417,9 +443,8 @@
 
   - measure: count_of_logins_two_weeks_ago
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_logins}
     filters:
-      event_type: 'login'
       event_weeks_ago: 2
     html: |
       {% if value <= 10 %}
@@ -432,9 +457,8 @@
 
   - measure: count_of_dashboard_queries_two_weeks_ago
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_dashboard_queries}
     filters:
-      event_type: 'run_dashboard'
       event_weeks_ago: 2
     html: |
       {% if value <= 10 %}
@@ -447,9 +471,8 @@
 
   - measure: count_of_dashboard_downloads_two_weeks_ago
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_dashboard_downloads}
     filters:
-      event_type: 'open_dashboard_pdf'
       event_weeks_ago: 2
     html: |
       {% if value <= 10 %}
@@ -462,9 +485,8 @@
     
   - measure: count_of_support_chats_two_weeks_ago
     type: sum
-    sql: ${count_of_events}
+    sql: ${count_of_support_chats}
     filters:
-      event_type: 'close_zopim_chat'
       event_weeks_ago: 2
     html: |
       {% if value <= 10 %}
@@ -481,15 +503,15 @@
     type: number
     value_format_name: decimal_2
     sql: |
-      1.0 * (${count_of_dashboard_queries} * 10
-      + ${count_of_dashboard_downloads} * 5
-      + ${count_of_support_chats} * 10
-      + ${count_of_query_runs} * 3
-      + ${count_of_project_creation} * 5
-      + ${count_of_git_commits} * 5
-      + ${count_of_api_calls} * 3
-      + ${count_of_query_result_downloads} * 5
-      + ${count_of_logins} * 3) / 60
+      1.0 * (${total_dashboard_queries} * 10
+      + ${total_dashboard_downloads} * 5
+      + ${total_support_chats} * 10
+      + ${total_query_runs} * 3
+      + ${total_project_creation} * 5
+      + ${total_git_commits} * 5
+      + ${total_api_calls} * 3
+      + ${total_query_result_downloads} * 5
+      + ${total_logins} * 3) / 60
 
   - measure: usage_minutes_last_week
     type: number
@@ -529,16 +551,15 @@
         license.salesforce_account_id AS account_id
         , DATE_TRUNC('week', daily_event_rollup.event_date) AS event_week
         , daily_event_rollup.license_slug AS license_slug
-        , SUM(CASE WHEN (daily_event_rollup.event_type = 'open_dashboard_pdf') THEN daily_event_rollup.count_of_events ELSE 0 END) AS count_of_dashboard_downloads
-        , SUM(CASE WHEN (daily_event_rollup.event_type = 'run_dashboard') THEN daily_event_rollup.count_of_events ELSE 0 END) AS count_of_dashboard_queries
-        , SUM(CASE WHEN (daily_event_rollup.event_type = 'git_commit') THEN daily_event_rollup.count_of_events ELSE 0 END) AS count_of_git_commits
-        , SUM(CASE WHEN (daily_event_rollup.event_type = 'login') THEN daily_event_rollup.count_of_events ELSE 0 END) AS count_of_logins
-        , SUM(CASE WHEN (daily_event_rollup.event_type = 'create_project') THEN daily_event_rollup.count_of_events ELSE 0 END) AS count_of_project_creation
-        , SUM(CASE WHEN (daily_event_rollup.event_type = 'download_query_results') THEN daily_event_rollup.count_of_events ELSE 0 END) AS count_of_query_result_downloads
-        , SUM(CASE WHEN (daily_event_rollup.event_type = 'run_query') THEN daily_event_rollup.count_of_events ELSE 0 END) AS count_of_query_runs
-        , SUM(CASE WHEN (daily_event_rollup.event_type = 'close_zopim_chat') THEN daily_event_rollup.count_of_events ELSE 0 END) AS count_of_support_chats
-        , SUM(CASE WHEN (daily_event_rollup.event_type = 'api_call') THEN daily_event_rollup.count_of_events ELSE 0 END) AS count_of_api_calls
-        , COUNT(DISTINCT daily_event_rollup.user_id) AS user_count
+        , SUM(count_of_dashboard_downloads) AS total_dashboard_downloads
+        , SUM(count_of_dashboard_queries) AS total_dashboard_queries
+        , SUM(count_of_git_commits) AS total_git_commits
+        , SUM(count_of_logins) AS total_logins
+        , SUM(count_of_project_creation) AS total_project_creation
+        , SUM(count_of_query_result_downloads) AS total_query_result_downloads
+        , SUM(count_of_query_runs) AS total_query_runs
+        , SUM(count_of_support_chats) AS total_support_chats
+        , SUM(count_of_api_calls) AS total_api_calls
         , COUNT(DISTINCT user_id || instance_slug) AS total_weekly_users
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('week', daily_event_rollup.event_date)) AS last_week_users
         , FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0)) AS approximate_usage_minutes
@@ -547,7 +568,6 @@
         , SUM(FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0))) OVER (PARTITION BY account_id ORDER BY event_week ROWS UNBOUNDED PRECEDING) as lifetime_usage_minutes
       FROM ${daily_event_rollup.SQL_TABLE_NAME} AS daily_event_rollup
       INNER JOIN license ON daily_event_rollup.license_slug = license.license_slug
-      LEFT JOIN ${max_user_usage.SQL_TABLE_NAME} AS max_user_usage ON max_user_usage.salesforce_account_id = license.salesforce_account_id
       GROUP BY 1,2,3
       ORDER BY 1 DESC
 
@@ -556,7 +576,7 @@
     - dimension: unique_key
       hidden: true
       primary_key: true
-      sql: ${license_slug} || '-' || ${event_week}
+      sql: ${license_slug} || '-' || ${event_raw}
     
     - dimension: license_slug
       type: string
@@ -610,41 +630,41 @@
       type: number
       sql: ${TABLE}.last_week_usage_minutes
     
-    - dimension: count_of_query_runs
+    - dimension: weekly_query_runs
       type: number
-      sql: ${TABLE}.count_of_query_runs
+      sql: ${TABLE}.total_query_runs
   
-    - dimension: count_of_project_creation
+    - dimension: weekly_project_creation
       type: number
-      sql: ${TABLE}.count_of_project_creation
+      sql: ${TABLE}.total_project_creation
   
-    - dimension: count_of_git_commits
+    - dimension: weekly_git_commits
       type: number
-      sql: ${TABLE}.count_of_git_commits
+      sql: ${TABLE}.total_git_commits
   
-    - dimension: count_of_api_calls
+    - dimension: weekly_api_calls
       type: number
-      sql: ${TABLE}.count_of_api_calls
+      sql: ${TABLE}.total_api_calls
   
-    - dimension: count_of_query_result_downloads
+    - dimension: weekly_query_result_downloads
       type: number
-      sql: ${TABLE}.count_of_query_result_downloads
+      sql: ${TABLE}.total_query_result_downloads
   
-    - dimension: count_of_logins
+    - dimension: weekly_logins
       type: number
-      sql: ${TABLE}.count_of_logins
+      sql: ${TABLE}.total_logins
 
-    - dimension: count_of_dashboard_queries
+    - dimension: weekly_dashboard_queries
       type: number
-      sql: ${TABLE}.count_of_dashboard_queries
+      sql: ${TABLE}.total_dashboard_queries
 
-    - dimension: count_of_dashboard_downloads
+    - dimension: weekly_dashboard_downloads
       type: number
-      sql: ${TABLE}.count_of_dashboard_downloads
+      sql: ${TABLE}.total_dashboard_downloads
       
-    - dimension: count_of_support_chats
+    - dimension: weekly_support_chats
       type: number
-      sql: ${TABLE}.count_of_support_chats
+      sql: ${TABLE}.total_support_chats
       
       
     ### DERIVED DIMENSIONS ###
@@ -729,7 +749,7 @@
       type: string
       sql: |
         CASE
-          WHEN ${account_health_score} < 40 THEN '1. At Risk'
+          WHEN ${account_health_score} < 50 THEN '1. At Risk'
           WHEN ${account_health_score} < 70 THEN '2. Standard'
           WHEN ${account_health_score} >= 70 THEN '3. Safe'
           ELSE 'NA'
@@ -798,7 +818,7 @@
       value_format_name: decimal_2
       drill_fields: detail*
       html: |
-        {% if value < 40 %}
+        {% if value < 50 %}
           <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
           <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
@@ -814,7 +834,7 @@
       filters:
         event_weeks_ago: 1
       html: |
-        {% if value < 40 %}
+        {% if value < 50 %}
           <div style="color: black; background-color: #dc7350; font-size: 100%; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
           <div style="color: black; background-color: #e9b404; font-size: 100%; text-align:center">{{ value }}</div>
@@ -830,7 +850,7 @@
       filters:
         event_weeks_ago: 2
       html: |
-        {% if value < 40 %}
+        {% if value < 50 %}
           <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
           <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
@@ -846,7 +866,7 @@
       filters:
         event_weeks_ago: 3
       html: |
-        {% if value < 40 %}
+        {% if value < 50 %}
           <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
           <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
@@ -867,7 +887,7 @@
       filters:
         event_months_ago: 1
       html: |
-        {% if value < 40 %}
+        {% if value < 50 %}
           <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
           <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
@@ -883,7 +903,7 @@
       filters:
         event_months_ago: 2
       html: |
-        {% if value < 40 %}
+        {% if value < 50 %}
           <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
           <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
@@ -899,7 +919,7 @@
       filters:
         event_months_ago: 3
       html: |
-        {% if value < 40 %}
+        {% if value < 50 %}
           <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
           <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
@@ -918,7 +938,7 @@
       sql_distinct_key: ${account_id}
       drill_fields: detail*
       filters:
-        account_health_score: '< 40'
+        account_health_score: '< 50'
     
     - measure: percent_red_accounts
       type: number
@@ -929,7 +949,7 @@
 ### COUNT BY WEEK
     - measure: total_count_of_query_runs
       type: sum
-      sql: ${count_of_query_runs}
+      sql: ${weekly_query_runs}
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
@@ -942,7 +962,7 @@
 
     - measure: total_count_of_git_commits
       type: sum
-      sql: ${count_of_git_commits}
+      sql: ${weekly_git_commits}
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
@@ -955,7 +975,7 @@
 
     - measure: total_count_of_api_calls
       type: sum
-      sql: ${count_of_api_calls}
+      sql: ${weekly_api_calls}
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
@@ -968,7 +988,7 @@
   
     - measure: total_count_of_query_result_downloads
       type: sum
-      sql: ${count_of_query_result_downloads}
+      sql: ${weekly_query_result_downloads}
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
@@ -981,7 +1001,7 @@
 
     - measure: total_count_of_logins
       type: sum
-      sql: ${count_of_logins}
+      sql: ${weekly_logins}
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
@@ -994,7 +1014,7 @@
 
     - measure: total_count_of_dashboard_queries
       type: sum
-      sql: ${count_of_dashboard_queries}
+      sql: ${weekly_dashboard_queries}
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
@@ -1007,7 +1027,7 @@
 
     - measure: total_count_of_dashboard_downloads
       type: sum
-      sql: ${count_of_dashboard_downloads}
+      sql: ${weekly_dashboard_downloads}
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
@@ -1020,7 +1040,7 @@
 
     - measure: total_count_of_support_chats
       type: sum
-      sql: ${count_of_support_chats}
+      sql: ${weekly_support_chats}
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
