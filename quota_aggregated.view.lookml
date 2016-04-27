@@ -1,10 +1,18 @@
 
 - view: quota_aggregated
   derived_table:
+    persist_for: 24 hours
+    sortkeys: quota_quarter
     sql: |
             SELECT 
               quota_quarter 
-              , SUM(quota) as sales_team_quota
+              ,     sum(
+                    case
+                    when datediff(day, quota_quarter, current_date) < 90
+                    then 90 / datediff(day, quota_quarter, current_date) * quota
+                    else quota
+                    end)
+                      as sales_team_quota
             FROM public.quota q
             GROUP BY quota_quarter
             ORDER BY quota_quarter asc
@@ -32,6 +40,11 @@
   - measure: quota_sum
     type: sum
     sql: ${sales_team_quota}
+  
+  - measure: tracking_to_quota
+    type: number
+    sql: 1.0* ${opportunity.total_acv_won} / NULLIF(${quota_sum},0)
+    value_format_name: percent_2
     
   sets:
     detail:

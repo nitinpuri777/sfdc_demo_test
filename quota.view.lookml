@@ -1,6 +1,20 @@
 
 - view: quota
-  sql_table_name: public.quota
+  derived_table:
+    persist_for: 24 hours
+    sortkeys: quota_quarter
+    sql: |
+            SELECT 
+               person_id
+              , quota_quarter
+              ,     (
+                    case
+                    when datediff(day, quota_quarter, current_date) < 90
+                    then 90 / datediff(day, quota_quarter, current_date) * quota
+                    else quota
+                    end)
+                      as quota
+            FROM public.quota quota
   fields:
 
   - dimension: person_id
@@ -17,7 +31,6 @@
     timeframes: [time, date, week, month, quarter,raw]
     sql: ${TABLE}.quota_quarter
     convert_tz: false
-
 
   - dimension: quota_quarter_person_id
     type: string

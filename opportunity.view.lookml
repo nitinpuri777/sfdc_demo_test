@@ -64,16 +64,15 @@
       91 - (DATEDIFF(
         'day',
         CAST(CONCAT((TO_CHAR(CAST(DATE_TRUNC('quarter', CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', CURRENT_DATE)) AS DATE), 'YYYY-MM')), '-01') as date),
-        CURRENT_DATE))
+        CURRENT_DATE)) - 1
   
   - dimension: day_of_current_quarter
-    hidden: true
     type: number
     sql: |
        (DATEDIFF(
         'day',
         CAST(CONCAT((TO_CHAR(CAST(DATE_TRUNC('quarter', CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', CURRENT_DATE)) AS DATE), 'YYYY-MM')), '-01') as date),
-        CURRENT_DATE))
+        CURRENT_DATE)) + 1
 
   - dimension: is_quarter_to_date
     type: yesno
