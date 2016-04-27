@@ -147,14 +147,6 @@
     - dimension: weeks_since_signup
       type: number
       sql: DATEDIFF('week',${opportunity.closed_raw}, ${event_raw})
-    
-#     - dimension: weeks_ago
-#       type: number
-#       sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))
-#     
-#     - dimension: months_ago
-#       type: number
-#       sql: DATEDIFF(month, ${event_raw}, DATE_TRUNC('month',CURRENT_DATE))
       
     - dimension: usage_change_percent
       type: number
@@ -596,11 +588,9 @@
     
     export_set:
       - account_id
-#       - weeks_ago
       - event_weeks_ago
       - event_months_ago
       - weeks_since_signup
-#       - months_ago
       - event_week
       - event_month
       - account_health_score
