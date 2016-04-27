@@ -18,7 +18,9 @@
 
 - view: account_weekly_usage
   derived_table:
-    sql_trigger_value: SELECT CURRENT_DATE
+  
+    # Rebuilds at 11PM on Sundays
+    sql_trigger_value: SELECT DATE_TRUNC('week', DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: account_id
     sortkeys: [account_id, event_week]
     sql: |
