@@ -519,7 +519,6 @@
       + ${count_of_query_result_downloads_two_weeks_ago} * 5
       + ${count_of_logins_two_weeks_ago} * 3) / 60
 
-- explore: weekly_event_rollup
 - view: weekly_event_rollup
   derived_table:
     sql_trigger_value: SELECT DATE(DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
@@ -587,6 +586,10 @@
     - dimension: event_months_ago
       type: number
       sql: DATE_DIFF('month', ${event_raw}, DATE_TRUNC('month', CURRENT_DATE))
+
+    - dimension: weeks_since_signup
+      type: number
+      sql: DATEDIFF('week',${opportunity.closed_raw}, ${event_raw})
 
     - dimension: current_weekly_users
       type: number
