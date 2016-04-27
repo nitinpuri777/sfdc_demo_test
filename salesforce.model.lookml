@@ -120,11 +120,11 @@
       type: inner   # to omit accounts for whom there is no usage due to no license mapping
       relationship: one_to_one  
     
-    - join: account_weekly_usage
-      view_label: 'Usage'
-      sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
-      relationship: one_to_many
-      fields: [export_set*]
+#     - join: account_weekly_usage
+#       view_label: 'Usage'
+#       sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
+#       relationship: one_to_many
+#       fields: [export_set*]
       
       
 - explore: funnel
@@ -188,25 +188,24 @@
       sql_on: ${salesrep.id} = ${account.owner_id}
       relationship: many_to_one 
 
-- explore: feature_usage
-  from: daily_event_rollup
-  label: '(4) Sessions and Feature Usage'
+- explore: weekly_event_rollup
+  from: weekly_event_rollup
+  label: '(4) Feature Usage'
   joins:
-    - join: license
-      fields: []
-      sql_on: ${feature_usage.license_slug} = ${license.license_slug}
-      relationship: many_to_one
-    
+      
     - join: account
       fields: [export_set*]
-      sql_on: ${license.salesforce_account_id} = ${account.id}
+      sql_on: ${weekly_event_rollup.account_id} = ${account.id}
       relationship: many_to_one
-    
-    - join: account_weekly_usage
-      view_label: 'Account'
-      sql_on: ${account.id} = ${account_weekly_usage.account_id}
+
+    - join: license
+      fields: []
+      sql_on: ${account.id} = ${license.salesforce_account_id}
       relationship: one_to_many
-      fields: [account_health_score, average_account_health]
+
+    - join: daily_event_rollup
+      sql_on: ${license.license_slug} = ${daily_event_rollup.license_slug}
+      relationship: one_to_many
 
     - join: salesrep
       view_label: 'Account'
@@ -219,12 +218,6 @@
       relationship: one_to_many
       fields: [export_set*]
       type: inner
-# 
-#     - join: session_facts
-#       relationship: one_to_one
-#       type: inner
-#       view_label: 'Sessions'
-#       sql_on: ${sessions.unique_session_id} = ${session_facts.unique_session_id}
   
       
             
