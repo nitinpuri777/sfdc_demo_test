@@ -14,7 +14,7 @@
     sql_trigger_value: SELECT DATE(DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: license_slug
     sortkeys: [license_slug, instance_slug, user_id, event_type]
-
+    
   fields:
       
   - dimension: id
@@ -648,18 +648,6 @@
       
       
     ### DERIVED DIMENSIONS ###
-#     - dimension: weeks_since_signup
-#       type: number
-#       sql: DATEDIFF('week',${opportunity.closed_raw}, ${event_raw})
-    
-#     - dimension: weeks_ago
-#       type: number
-#       sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))
-#     
-#     - dimension: months_ago
-#       type: number
-#       sql: DATEDIFF(month, ${event_raw}, DATE_TRUNC('month',CURRENT_DATE))
-      
     - dimension: usage_change_percent
       type: number
       sql: COALESCE(1.0 * (${approximate_usage_minutes} - ${last_week_usage_minutes}) / NULLIF(${last_week_usage_minutes},0),0)
