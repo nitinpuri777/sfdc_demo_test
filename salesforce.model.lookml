@@ -28,6 +28,14 @@
       sql_on: ${the_switchboard.account_id} = ${license.salesforce_account_id}
       relationship: one_to_many
     
+    - join: daily_event_rollup
+      sql_on: ${license.license_slug} = ${daily_event_rollup.license_slug}
+      relationship: one_to_many
+
+    - join: weekly_event_rollup
+      sql_on: ${the_switchboard.account_id} = ${weekly_event_rollup.account_id}
+      relationship: one_to_many
+    
     - join: event
       view_label: "Usage"
       fields: [user_count]
@@ -181,23 +189,17 @@
       relationship: many_to_one 
 
 - explore: feature_usage
-  from: events_in_past_180_days
+  from: daily_event_rollup
   label: '(4) Sessions and Feature Usage'
   joins:
-    - join: event_mapping
-      view_label: 'Event'
-      relationship: one_to_one
-      type: inner
-      sql_on: ${feature_usage.id} = ${event_mapping.event_id}
-
-    - join: sessions
+    - join: license
+      fields: []
+      sql_on: ${feature_usage.license_slug} = ${license.license_slug}
       relationship: many_to_one
-      type: left_outer
-      sql_on: ${event_mapping.unique_session_id} = ${sessions.unique_session_id}
     
     - join: account
       fields: [export_set*]
-      sql_on: ${sessions.account_id} = ${account.id}
+      sql_on: ${license.salesforce_account_id} = ${account.id}
       relationship: many_to_one
     
     - join: account_weekly_usage
@@ -217,12 +219,12 @@
       relationship: one_to_many
       fields: [export_set*]
       type: inner
-
-    - join: session_facts
-      relationship: one_to_one
-      type: inner
-      view_label: 'Sessions'
-      sql_on: ${sessions.unique_session_id} = ${session_facts.unique_session_id}
+# 
+#     - join: session_facts
+#       relationship: one_to_one
+#       type: inner
+#       view_label: 'Sessions'
+#       sql_on: ${sessions.unique_session_id} = ${session_facts.unique_session_id}
   
       
             
