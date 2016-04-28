@@ -23,7 +23,7 @@
           AND wd.date < daily_use.event_date + interval '30 day'
           AND (((wd.date) >= (CONVERT_TIMEZONE('America/Los_Angeles', 'UTC', DATEADD(day,-364, DATE_TRUNC('day',CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())) ))) AND (wd.date) < (CONVERT_TIMEZONE('America/Los_Angeles', 'UTC', DATEADD(day,365, DATEADD(day,-364, DATE_TRUNC('day',CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())) ) )))))
       GROUP BY 1,2,3,4 
-    sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/New_York', GETDATE()))
+    sql_trigger_value: SELECT DATE(DATE_ADD('hour', 3, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: user_id
     sortkeys: [date]
     
