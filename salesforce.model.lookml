@@ -222,7 +222,9 @@
       type: inner
 
 - explore: rolling_30_day_activity_facts
+  view_label: "Active Users"
   label: '(5) Daily, Weekly, and Monthly Active Users'
+  fields: [ALL_FIELDS*, -account.account_tier]
   joins:
     - join: license
       fields: []
@@ -230,7 +232,7 @@
       relationship: many_to_one
     
     - join: account
-      fields: [ALL_FIELDS*, -account_tier]
+      fields: [name, city, state, vertical, vertical_segment]
       sql_on: ${license.salesforce_account_id} =${account.id}
       relationship: many_to_one
   
