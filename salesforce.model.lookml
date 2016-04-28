@@ -122,7 +122,7 @@
       view_label: 'Sales Representative'
       sql_on: |
         ${salesrep.id} = ${quota.person_id} AND 
-        DATE_TRUNC('quarter',  ${opportunity.closed_raw}) = DATE_TRUNC('quarter',  ${quota.quota_quarter_raw})
+        DATE_TRUNC('quarter',  ${opportunity.closed_raw}) = DATE_TRUNC('quarter',  ${quota.quota_raw})
       type: full_outer
       relationship: one_to_many
 
@@ -242,7 +242,7 @@
       view_label: 'Sales Representative'
       sql_on: |
         ${salesrep.id} = ${quota.person_id} AND 
-        TO_CHAR(CAST(DATE_TRUNC('quarter',  ${opportunity.closed_raw}) AS DATE), 'YYYY-MM') = TO_CHAR(CAST(DATE_TRUNC('quarter',  ${quota.quota_quarter_raw}) AS DATE), 'YYYY-MM')
+        TO_CHAR(CAST(DATE_TRUNC('quarter',  ${opportunity.closed_raw}) AS DATE), 'YYYY-MM') = TO_CHAR(CAST(DATE_TRUNC('quarter',  ${quota.quota_raw}) AS DATE), 'YYYY-MM')
       type: full_outer
       relationship: one_to_many
 

@@ -26,7 +26,7 @@
     type: number
     sql: ${TABLE}.quota
 
-  - dimension_group: quota_quarter
+  - dimension_group: quota
     type: time
     timeframes: [time, date, week, month, quarter,raw]
     sql: ${TABLE}.quota_quarter
@@ -36,7 +36,7 @@
     type: string
     primary_key: true
     hidden: true
-    sql: ${person_id} || '_' || ${quota_quarter_time}
+    sql: ${person_id} || '_' || ${quota_time}
     
   - measure: count
     type: count
@@ -50,43 +50,42 @@
     type: sum
     sql: ${quota}
     filters: 
-      quota_quarter_quarter: this quarter
+      quota_quarter: this quarter
   
   - measure: sum_quota_last_quarter
     type: sum
     sql: ${quota}
     filters:
-      quota_quarter_quarter: last quarter
+      quota_quarter: last quarter
   
-  - measure: tracking_to_quota
+  - measure: pace
     type: number
     sql: 1.0* ${opportunity.total_acv_won} / NULLIF(${quota.sum_quota},0)
     value_format_name: percent_2
     
-  - measure: tracking_to_quota_current_quarter
+  - measure: pace_current_quarter
     type: number
     sql: 1.0* ${opportunity.total_acv_won_current_quarter} / NULLIF(${quota.sum_quota_current_quarter},0)
     value_format_name: percent_2
      
-  - measure: tracking_to_quota_last_quarter
+  - measure: pace_last_quarter
     type: number
     sql: 1.0* ${opportunity.total_acv_won_last_quarter} / NULLIF(${quota.sum_quota_last_quarter},0)
     value_format_name: percent_2
     
-  - measure: tracking_to_quota_change
-    label: 'Tracking to Quota (change from last quarter)'
+  - measure: pace_change
+    label: 'Pace Change from Last Quarter'
     type: number
-    sql: ${tracking_to_quota} - ${tracking_to_quota_last_quarter}
-    value_format_name: percent_2
+    sql: (${pace_current_quarter} - ${pace_last_quarter})/NULLIF(${pace_last_quarter},0)
+    value_format_name: percent_0
     html: |
-      {% if value > 0.2 %}
-       <p style="color: black; background-color: #41A317; font-size:100%; text-align:center">{{ rendered_value }}</p>
-      {% elsif value >-0.2 %}
-       <p style="color: black; background-color: yellow; font-size:100%; text-align:center">{{ rendered_value }}</p>
-      {% else %}
-       <p style="color: black; background-color: #E41B17; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% if value < -0.05 %}
+       <p style="color: #353b49; background-color: #ed6168; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% elsif value < 0.05 %}
+       <p style="color: #353b49; background-color: #e9b404; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+       {% else %}
+       <p style="color: #353b49; background-color: #49cec1; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
       {% endif %}
   
-
 
     

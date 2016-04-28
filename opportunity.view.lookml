@@ -1,3 +1,6 @@
+- explore: opportunity
+  hidden: true
+  
 - view: opportunity
   fields:
 
@@ -40,15 +43,20 @@
   - dimension_group: closed
     type: time
     timeframes: [raw, date, week, month, year, time, quarter]
+    convert_tz: false
     sql: ${TABLE}.closed_date
     
   - dimension: closed_quarter_string
     hidden: true
     sql: EXTRACT(YEAR FROM ${TABLE}.closed_date) || ' - Q' || EXTRACT(QUARTER FROM ${TABLE}.closed_date)
-    
+
+  - dimension: current_quarter
+    hidden: true
+    sql: EXTRACT(YEAR FROM CURRENT_DATE) || ' - Q' || EXTRACT(QUARTER FROM CURRENT_DATE)
+
   - dimension: is_current_quarter
     type: yesno
-    sql: EXTRACT(QUARTER FROM ${TABLE}.closed_date) || EXTRACT(YEAR FROM ${TABLE}.closed_date) = EXTRACT(QUARTER FROM CURRENT_DATE) || EXTRACT(YEAR FROM CURRENT_DATE)    
+    sql: ${closed_quarter_string} = ${current_quarter}
 
   - dimension: closed_day_of_quarter
     type: number
@@ -275,16 +283,17 @@
   - measure: count_won_percent_change
     label: 'Count Won (% change from last quarter)'
     type: number
-    sql: 1.0 * ${count_won_current_quarter}/NULLIF(${count_won_last_quarter},0) - 1
-    value_format_name: percent_2
+    sql: (${count_won_current_quarter} - ${count_won_last_quarter})/NULLIF(${count_won_last_quarter},0)
+    value_format_name: percent_0
     html: |
-      {% if value > 0.2 %}
-       <p style="color: black; background-color: #41A317; font-size:100%; text-align:center">{{ rendered_value }}</p>
-      {% elsif value >-0.2 %}
-       <p style="color: black; background-color: yellow; font-size:100%; text-align:center">{{ rendered_value }}</p>
-      {% else %}
-       <p style="color: black; background-color: #E41B17; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% if value < -0.05 %}
+       <p style="color: #353b49; background-color: #ed6168; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% elsif value < 0.05 %}
+       <p style="color: #353b49; background-color: #e9b404; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+       {% else %}
+       <p style="color: #353b49; background-color: #49cec1; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
       {% endif %}
+    
     
 
 
@@ -349,19 +358,18 @@
     value_format: '#0.00\%'
   
   - measure: win_percentage_change
-    label: 'Win Percentage (change from last quarter)'
+    label: 'Win Percentage Change from Last Quarter'
     type: number
-    sql: (${win_percentage_current_quarter} - ${win_percentage_last_quarter})/100
-    value_format_name: percent_2
+    sql: (${win_percentage_current_quarter} - ${win_percentage_last_quarter})/${win_percentage_last_quarter}
+    value_format_name: percent_0
     html: |
-      {% if value > 0.2 %}
-       <p style="color: black; background-color: #41A317; font-size:100%; text-align:center">{{ rendered_value }}</p>
-      {% elsif value >-0.2 %}
-       <p style="color: black; background-color: yellow; font-size:100%; text-align:center">{{ rendered_value }}</p>
-      {% else %}
-       <p style="color: black; background-color: #E41B17; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% if value < -0.05 %}
+       <p style="color: #353b49; background-color: #ed6168; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% elsif value < 0.05 %}
+       <p style="color: #353b49; background-color: #e9b404; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+       {% else %}
+       <p style="color: #353b49; background-color: #49cec1; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
       {% endif %}
-    
     
   - measure: open_percentage
     type: number
@@ -407,7 +415,8 @@
   - measure: total_acv_won_current_quarter
     type: sum
     sql: ${acv}
-    filters:
+    filter:
+      is_won: Yes
       closed_quarter: this quarter
     value_format_name: usd_large
     drill_fields: [account.name, type, closed_date, total_acv]     
@@ -422,19 +431,19 @@
     drill_fields: opportunity_set*   
 
   - measure: total_acv_won_percent_change
-    label: 'Total ACV Won (% change from last quarter)'
+    label: 'Total ACV Won Change from Last Quarter'
     type: number
-    sql: 1.0 * ${total_acv_won_current_quarter}/ NULLIF(${total_acv_won_last_quarter},0) - 1
-    value_format_name: percent_2
+    sql: (${total_acv_won_current_quarter} - ${total_acv_won_last_quarter})/ NULLIF(${total_acv_won_last_quarter},0)
+    value_format_name: percent_0
     html: |
-      {% if value > 0.2 %}
-       <p style="color: black; background-color: #41A317; font-size:100%; text-align:center">{{ rendered_value }}</p>
-      {% elsif value >-0.2 %}
-       <p style="color: black; background-color: yellow; font-size:100%; text-align:center">{{ rendered_value }}</p>
-      {% else %}
-       <p style="color: black; background-color: #E41B17; font-size:100%; text-align:center">{{ rendered_value }}</p>
+      {% if value < -0.05 %}
+       <p style="color: #353b49; background-color: #ed6168; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% elsif value < 0.05 %}
+       <p style="color: #353b49; background-color: #e9b404; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+       {% else %}
+       <p style="color: #353b49; background-color: #49cec1; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
       {% endif %}
-    
+  
 
   - measure: total_acv_lost
     type: sum
@@ -471,24 +480,24 @@
     type: running_total
     sql: ${total_acv_won}
     
-  - measure: meetings_converted_to_close_within_60d
-    type: count_distinct
-    sql: ${meeting.id}
-    hidden: true
-    filters:
-      meeting.status: 'Completed'
-      opp_to_closed_60d: 'Yes' 
-      is_won: 'Yes'
+#   - measure: meetings_converted_to_close_within_60d
+#     type: count_distinct
+#     sql: ${meeting.id}
+#     hidden: true
+#     filters:
+#       meeting.status: 'Completed'
+#       opp_to_closed_60d: 'Yes' 
+#       is_won: 'Yes'
       
       
-  - measure: meeting_to_close_conversion_rate_60d
-    label: 'Meeting to Close/Won Conversion within 60 days'
-    view_label: 'Meeting'
-    description: 'What percent of meetings converted to closed within 60 days of the meeting?'
-    type: number
-    value_format: '#.#\%'
-    sql: 100.0 * ${meetings_converted_to_close_within_60d} / nullif(${meeting.meetings_completed},0)
-    drill_fields: [name, meeting.meeting_date, account_representative_meeting.name, opportunity.created_date, opportunity.name, opportunity.stage_name]      
+#   - measure: meeting_to_close_conversion_rate_60d
+#     label: 'Meeting to Close/Won Conversion within 60 days'
+#     view_label: 'Meeting'
+#     description: 'What percent of meetings converted to closed within 60 days of the meeting?'
+#     type: number
+#     value_format: '#.#\%'
+#     sql: 100.0 * ${meetings_converted_to_close_within_60d} / nullif(${meeting.meetings_completed},0)
+#     drill_fields: [name, meeting.meeting_date, account_representative_meeting.name, opportunity.created_date, opportunity.name, opportunity.stage_name]      
 
 #REP VS TEAM METRICS. Could use extends functionality for this.
     
