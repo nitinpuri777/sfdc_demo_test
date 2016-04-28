@@ -205,7 +205,7 @@
 
     - join: daily_event_rollup
       view_label: "Weekly Event Rollup"
-      fields: [user_id, user_count, usage_minutes]
+      fields: [user_id, user_count, usage_minutes, count_of_instances, count_of_licenses, users_per_instance]
       sql_on: ${license.license_slug} = ${daily_event_rollup.license_slug}
       relationship: one_to_many
 
@@ -220,6 +220,19 @@
       relationship: one_to_many
       fields: [export_set*]
       type: inner
+
+- explore: rolling_30_day_activity_facts
+  label: '(5) Daily, Weekly, and Monthly Active Users'
+  joins:
+    - join: license
+      fields: []
+      sql_on: ${rolling_30_day_activity_facts.license_slug} = ${license.license_slug}
+      relationship: many_to_one
+    
+    - join: account
+      fields: [ALL_FIELDS*, -account_tier]
+      sql_on: ${license.salesforce_account_id} =${account.id}
+      relationship: many_to_one
   
       
             
