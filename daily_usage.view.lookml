@@ -38,14 +38,14 @@
     type: time
     timeframes: [raw, date, week, month]
     sql: ${TABLE}.event_date
-
+  
   - dimension: event_weeks_ago
     type: number
-    sql: DATE_DIFF('week', ${event_raw}, CURRENT_DATE)
+    sql: DATE_DIFF('week', ${event_raw}, DATE_TRUNC('week', CURRENT_DATE))
 
   - dimension: event_months_ago
     type: number
-    sql: DATE_DIFF('month', ${event_raw}, CURRENT_DATE)
+    sql: DATE_DIFF('month', ${event_raw}, DATE_TRUNC('month', CURRENT_DATE))
   
   - dimension: event_type
     type: string
@@ -935,7 +935,6 @@
     - measure: count_of_red_accounts
       type: count_distinct
       sql: ${account_id}
-      sql_distinct_key: ${account_id}
       drill_fields: detail*
       filters:
         account_health_score: '< 50'

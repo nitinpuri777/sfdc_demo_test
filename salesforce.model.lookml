@@ -204,14 +204,16 @@
       relationship: one_to_many
 
     - join: daily_event_rollup
+      view_label: "Weekly Event Rollup"
+      fields: [user_id, user_count, usage_minutes]
       sql_on: ${license.license_slug} = ${daily_event_rollup.license_slug}
       relationship: one_to_many
 
     - join: salesrep
-      view_label: 'Account'
-      fields: [business_segment]
-      sql_on: ${salesrep.id} = ${account.owner_id}
-      relationship: many_to_one 
+      view_label: 'Account Owner'
+      fields: [business_segment,id,name]
+      sql_on: ${account.owner_id} = ${salesrep.id}
+      relationship: many_to_one
 
     - join: opportunity
       sql_on: ${account.id} = ${opportunity.account_id}
