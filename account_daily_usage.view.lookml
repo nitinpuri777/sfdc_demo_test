@@ -564,8 +564,6 @@
         license.salesforce_account_id AS account_id
         , DATE_TRUNC('week', daily_event_rollup.event_date) AS event_week
         , daily_event_rollup.license_slug AS license_slug
-        , daily_event_rollup.instance_slug AS instance_slug
-        , daily_event_rollup.instance_user_id AS instance_user_id
         , SUM(count_of_dashboard_downloads) AS total_dashboard_downloads
         , SUM(count_of_dashboard_queries) AS total_dashboard_queries
         , SUM(count_of_git_commits) AS total_git_commits
@@ -576,14 +574,14 @@
         , SUM(count_of_support_chats) AS total_support_chats
         , SUM(count_of_api_calls) AS total_api_calls
         , COUNT(DISTINCT instance_user_id) AS total_weekly_users
-        , LAG(COUNT(DISTINCT instance_user_id), 1) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('week', daily_event_rollup.event_date)) AS last_week_users
-        , FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT instance_user_id)),0)) AS approximate_usage_minutes
-        , LAG((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT instance_user_id)),0), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_usage_minutes
-        , LAG(COUNT(DISTINCT instance_user_id), 1) OVER (PARTITION BY daily_event_rollup.license_slug ORDER BY DATE_TRUNC('week', daily_event_rollup.event_date)) AS last_week_events
-        , SUM(FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT instance_user_id)),0))) OVER (PARTITION BY account_id ORDER BY event_week ROWS UNBOUNDED PRECEDING) as lifetime_usage_minutes
+        , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('week', daily_event_rollup.event_date)) AS last_week_users
+        , FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0)) AS approximate_usage_minutes
+        , LAG((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_usage_minutes
+        , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY daily_event_rollup.license_slug ORDER BY DATE_TRUNC('week', daily_event_rollup.event_date)) AS last_week_events
+        , SUM(FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0))) OVER (PARTITION BY account_id ORDER BY event_week ROWS UNBOUNDED PRECEDING) as lifetime_usage_minutes
       FROM ${daily_event_rollup.SQL_TABLE_NAME} AS daily_event_rollup
       INNER JOIN license ON daily_event_rollup.license_slug = license.license_slug
-      GROUP BY 1,2,3,4,5
+      GROUP BY 1,2,3
       ORDER BY 1 DESC
 
   fields:
@@ -597,17 +595,9 @@
       type: string
       sql: ${TABLE}.license_slug
     
-    - dimension: instance_slug
-      type: string
-      sql: ${TABLE}.instance_slug
-    
     - dimension: account_id
       type: string
       sql: ${TABLE}.account_id
-    
-    - dimension: instance_user_id
-      type: string
-      sql: ${TABLE}.isntance_user_id
 
     - dimension: last_week_events
       type: number
