@@ -117,28 +117,34 @@
 
   - measure: count
     type: count
-    drill_fields: [id]
+    drill_fields: detail*
 
   - measure: user_count
     type: count_distinct
     sql: ${instance_user_id}
+    description: "A count of unique users per instance calculated based on instance_user_id."
+    drill_fields: detail*
 
   - measure: count_of_licenses
     type: count_distinct
     sql: ${license_slug}
+    drill_fields: detail*
 
   - measure: count_of_instances
     type: count_distinct
     sql: ${instance_slug}
+    drill_fields: detail*
 
   - measure: users_per_instance
     type: number
     sql: ${user_count} / ${count_of_instances}
     value_format_name: decimal_2
+    drill_fields: detail*
 
   - measure: total_query_runs
     type: sum
     sql: ${count_of_query_runs}
+    drill_fields: detail*
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -151,6 +157,7 @@
   - measure: total_project_creation
     type: sum
     sql: ${count_of_project_creation}
+    drill_fields: detail*
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -163,6 +170,7 @@
   - measure: total_git_commits
     type: sum
     sql: ${count_of_git_commits}
+    drill_fields: detail*
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -175,6 +183,7 @@
   - measure: total_api_calls
     type: sum
     sql: ${count_of_api_calls}
+    drill_fields: detail*
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -187,6 +196,7 @@
   - measure: total_query_result_downloads
     type: sum
     sql: ${count_of_query_result_downloads}
+    drill_fields: detail*
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -199,6 +209,7 @@
   - measure: total_logins
     type: sum
     sql: ${count_of_logins}
+    drill_fields: detail*
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -211,6 +222,7 @@
   - measure: total_dashboard_queries
     type: sum
     sql: ${count_of_dashboard_queries}
+    drill_fields: detail*
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -223,6 +235,7 @@
   - measure: total_dashboard_downloads
     type: sum
     sql: ${count_of_dashboard_downloads}
+    drill_fields: detail*
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -235,6 +248,7 @@
   - measure: total_support_chats
     type: sum
     sql: ${count_of_support_chats}
+    drill_fields: detail*
     html: |
       {% if value <= 10 %}
         <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -249,6 +263,7 @@
   - measure: count_of_query_runs_last_week
     type: sum
     sql: ${count_of_query_runs}
+    drill_fields: detail*
     filters:
      event_weeks_ago: 1
     html: |
@@ -263,6 +278,7 @@
   - measure: count_of_project_creation_last_week
     type: sum
     sql: ${count_of_project_creation}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 1
     html: |
@@ -277,6 +293,7 @@
   - measure: count_of_git_commits_last_week
     type: sum
     sql: ${count_of_git_commits}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 1
     html: |
@@ -291,6 +308,7 @@
   - measure: count_of_api_calls_last_week
     type: sum
     sql: ${count_of_api_calls}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 1
     html: |
@@ -305,6 +323,7 @@
   - measure: count_of_query_result_downloads_last_week
     type: sum
     sql: ${count_of_query_result_downloads}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 1
     html: |
@@ -319,6 +338,7 @@
   - measure: count_of_logins_last_week
     type: sum
     sql: ${count_of_logins}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 1
     html: |
@@ -333,6 +353,7 @@
   - measure: count_of_dashboard_queries_last_week
     type: sum
     sql: ${count_of_dashboard_queries}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 1
     html: |
@@ -347,6 +368,7 @@
   - measure: count_of_dashboard_downloads_last_week
     type: sum
     sql: ${count_of_dashboard_downloads}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 1
     html: |
@@ -361,6 +383,7 @@
   - measure: count_of_support_chats_last_week
     type: sum
     sql: ${count_of_support_chats}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 1
     html: |
@@ -375,18 +398,21 @@
   - measure: user_count_last_week
     type: count_distinct
     sql: ${instance_user_id}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 1
 
   - measure: user_count_two_weeks_ago
     type: count_distinct
     sql: ${instance_user_id}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 2
       
   - measure: count_of_query_runs_two_weeks_ago
     type: sum
     sql: ${count_of_query_runs}
+    drill_fields: detail*
     filters:
      event_weeks_ago: 2
     html: |
@@ -401,6 +427,7 @@
   - measure: count_of_project_creation_two_weeks_ago
     type: sum
     sql: ${count_of_project_creation}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 2
     html: |
@@ -415,6 +442,7 @@
   - measure: count_of_git_commits_two_weeks_ago
     type: sum
     sql: ${count_of_git_commits}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 2
     html: |
@@ -429,6 +457,7 @@
   - measure: count_of_api_calls_two_weeks_ago
     type: sum
     sql: ${count_of_api_calls}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 2
     html: |
@@ -443,6 +472,7 @@
   - measure: count_of_query_result_downloads_two_weeks_ago
     type: sum
     sql: ${count_of_query_result_downloads}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 2
     html: |
@@ -457,6 +487,7 @@
   - measure: count_of_logins_two_weeks_ago
     type: sum
     sql: ${count_of_logins}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 2
     html: |
@@ -471,6 +502,7 @@
   - measure: count_of_dashboard_queries_two_weeks_ago
     type: sum
     sql: ${count_of_dashboard_queries}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 2
     html: |
@@ -485,6 +517,7 @@
   - measure: count_of_dashboard_downloads_two_weeks_ago
     type: sum
     sql: ${count_of_dashboard_downloads}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 2
     html: |
@@ -499,6 +532,7 @@
   - measure: count_of_support_chats_two_weeks_ago
     type: sum
     sql: ${count_of_support_chats}
+    drill_fields: detail*
     filters:
       event_weeks_ago: 2
     html: |
@@ -515,6 +549,7 @@
   - measure: usage_minutes
     type: number
     value_format_name: decimal_2
+    drill_fields: detail*
     sql: |
       1.0 * (${total_dashboard_queries} * 10
       + ${total_dashboard_downloads} * 5
@@ -529,6 +564,7 @@
   - measure: usage_minutes_last_week
     type: number
     value_format_name: decimal_2
+    drill_fields: detail*
     sql: |
       1.0 * (${count_of_dashboard_queries_last_week} * 10
       + ${count_of_dashboard_downloads_last_week} * 5
@@ -543,6 +579,7 @@
   - measure: usage_minutes_two_weeks_ago
     type: number
     value_format_name: decimal_2
+    drill_fields: detail*
     sql: |
       1.0 * (${count_of_dashboard_queries_two_weeks_ago} * 10
       + ${count_of_dashboard_downloads_two_weeks_ago} * 5
@@ -553,7 +590,26 @@
       + ${count_of_api_calls_two_weeks_ago} * 3
       + ${count_of_query_result_downloads_two_weeks_ago} * 5
       + ${count_of_logins_two_weeks_ago} * 3) / 60
-
+      
+  sets:
+    detail:
+      - instance_user_id
+      - event_weeks_ago
+      - event_type
+      - instance_slug
+      - license_slug
+      - user_id
+      - count_of_event
+      - count_of_query_run
+      - count_of_project_creation
+      - count_of_git_commits
+      - count_of_api_calls
+      - count_of_query_result_downloads
+      - count_of_logins
+      - count_of_dashboard_queries
+      - count_of_dashboard_downloads
+      - count_of_support_chats
+      
 - view: weekly_event_rollup
   derived_table:
     sql_trigger_value: SELECT DATE(DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
@@ -1066,6 +1122,7 @@
     - measure: cumulative_weekly_users
       type: sum
       sql: ${current_weekly_users}
+      drill_fields: detail*
       html: |
         {% if value <= 10 %}
           <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -1092,4 +1149,27 @@
         {% else %}
           <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
-    
+  
+  sets:
+    detail:
+      - account.name
+      - account_id
+      - license_slug
+      - account_id
+      - last_week_events
+      - lifetime_usage_minutes
+      - event_weeks_ago
+      - weeks_since_signup
+      - current_weekly_users
+      - last_week_users
+      - approximate_usage_minutes
+      - last_week_usage_minutes
+      - weekly_query_runs
+      - weekly_project_creation
+      - weekly_git_commits
+      - weekly_api_calls
+      - weekly_query_result_downloads
+      - weekly_logins
+      - weekly_dashboard_queries
+      - weekly_dashboard_downloads
+      - weekly_support_chats
