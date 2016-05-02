@@ -37,6 +37,7 @@
       
     - dimension: license_user_id
       type: string
+      hidden: true
       sql: ${TABLE}.license_user_id
   
     - dimension: user_id
@@ -45,6 +46,7 @@
 
     - dimension: license_slug
       type: string
+      hidden: true
       sql: ${TABLE}.license_slug
     
     - dimension: count_of_instances

@@ -2,7 +2,8 @@
   derived_table:
     sql: |
       SELECT
-          DATE(event_at) AS event_date
+        ROW_NUMBER() OVER (ORDER BY event_at) AS unique_key
+        , DATE(event_at) AS event_date
         , license_slug AS license_slug
         , instance_slug AS instance_slug
         , user_id AS user_id
@@ -20,7 +21,7 @@
         , SUM(CASE WHEN event_type = 'close_zopim_chat' THEN 1 ELSE 0 END) AS count_of_support_chats
       FROM events
       WHERE event_type IN ('run_query', 'create_project', 'git_commit', 'open_dashboard_pdf', 'api_call', 'download_query_results', 'login', 'run_dashboard', 'close_zopim_chat')
-      GROUP BY 1, 2, 3, 4, 5, 6
+      GROUP BY 1, 2, 3, 4, 5, 6, 7
     sql_trigger_value: SELECT DATE(DATE_ADD('hour', 3, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: license_slug
     sortkeys: [license_slug, instance_slug, user_id, event_type]
@@ -29,8 +30,9 @@
       
   - dimension: id
     primary_key: true
+    hidden: true
     type: string
-    sql: ${event_raw} || '-' || ${event_type} || '-' || ${license_slug} || '-' || ${instance_slug} || '-' || ${user_id}
+    sql: ${TABLE}.unique_key
   
   - dimension: instance_user_id
     type: string
@@ -55,60 +57,62 @@
 
   - dimension: instance_slug
     type: string
+    hidden: true
     sql: ${TABLE}.instance_slug
 
   - dimension: license_slug
     type: string
+    hidden: true
     sql: ${TABLE}.license_slug
 
   - dimension: user_id
     type: string
     sql: ${TABLE}.user_id
   
-  - dimension: count_of_events
+  - dimension: number_of_events
     type: number
     sql: ${TABLE}.count_of_events
 
-  - dimension: count_of_query_runs
+  - dimension: number_of_query_runs
     type: number
     sql: ${TABLE}.count_of_query_runs
   
-  - dimension: count_of_project_creation
+  - dimension: number_of_project_creation
     type: number
     hidden: true
     sql: ${TABLE}.count_of_project_creation
 
-  - dimension: count_of_git_commits
+  - dimension: number_of_git_commits
     type: number
     hidden: true
     sql: ${TABLE}.count_of_git_commits
 
-  - dimension: count_of_api_calls
+  - dimension: number_of_api_calls
     type: number
     hidden: true
     sql: ${TABLE}.count_of_api_calls
 
-  - dimension: count_of_query_result_downloads
+  - dimension: number_of_query_result_downloads
     type: number
     hidden: true
     sql: ${TABLE}.count_of_query_result_downloads
 
-  - dimension: count_of_logins
+  - dimension: number_of_logins
     type: number
     hidden: true
     sql: ${TABLE}.count_of_logins
 
-  - dimension: count_of_dashboard_queries
+  - dimension: number_of_dashboard_queries
     type: number
     hidden: true
     sql: ${TABLE}.count_of_dashboard_queries
 
-  - dimension: count_of_dashboard_downloads
+  - dimension: number_of_dashboard_downloads
     type: number
     hidden: true
     sql: ${TABLE}.count_of_dashboard_downloads
     
-  - dimension: count_of_support_chats
+  - dimension: number_of_support_chats
     type: number
     hidden: true
     sql: ${TABLE}.count_of_support_chats
@@ -143,7 +147,7 @@
 
   - measure: total_query_runs
     type: sum
-    sql: ${count_of_query_runs}
+    sql: ${number_of_query_runs}
     drill_fields: detail*
     html: |
       {% if value <= 10 %}
@@ -156,7 +160,7 @@
   
   - measure: total_project_creation
     type: sum
-    sql: ${count_of_project_creation}
+    sql: ${number_of_project_creation}
     drill_fields: detail*
     html: |
       {% if value <= 10 %}
@@ -169,7 +173,7 @@
 
   - measure: total_git_commits
     type: sum
-    sql: ${count_of_git_commits}
+    sql: ${number_of_git_commits}
     drill_fields: detail*
     html: |
       {% if value <= 10 %}
@@ -182,7 +186,7 @@
 
   - measure: total_api_calls
     type: sum
-    sql: ${count_of_api_calls}
+    sql: ${number_of_api_calls}
     drill_fields: detail*
     html: |
       {% if value <= 10 %}
@@ -195,7 +199,7 @@
 
   - measure: total_query_result_downloads
     type: sum
-    sql: ${count_of_query_result_downloads}
+    sql: ${number_of_query_result_downloads}
     drill_fields: detail*
     html: |
       {% if value <= 10 %}
@@ -208,7 +212,7 @@
 
   - measure: total_logins
     type: sum
-    sql: ${count_of_logins}
+    sql: ${number_of_logins}
     drill_fields: detail*
     html: |
       {% if value <= 10 %}
@@ -221,7 +225,7 @@
 
   - measure: total_dashboard_queries
     type: sum
-    sql: ${count_of_dashboard_queries}
+    sql: ${number_of_dashboard_queries}
     drill_fields: detail*
     html: |
       {% if value <= 10 %}
@@ -234,7 +238,7 @@
 
   - measure: total_dashboard_downloads
     type: sum
-    sql: ${count_of_dashboard_downloads}
+    sql: ${number_of_dashboard_downloads}
     drill_fields: detail*
     html: |
       {% if value <= 10 %}
@@ -247,7 +251,7 @@
     
   - measure: total_support_chats
     type: sum
-    sql: ${count_of_support_chats}
+    sql: ${number_of_support_chats}
     drill_fields: detail*
     html: |
       {% if value <= 10 %}
@@ -262,7 +266,7 @@
 
   - measure: count_of_query_runs_last_week
     type: sum
-    sql: ${count_of_query_runs}
+    sql: ${number_of_query_runs}
     drill_fields: detail*
     filters:
      event_weeks_ago: 1
@@ -277,7 +281,7 @@
   
   - measure: count_of_project_creation_last_week
     type: sum
-    sql: ${count_of_project_creation}
+    sql: ${number_of_project_creation}
     drill_fields: detail*
     filters:
       event_weeks_ago: 1
@@ -292,7 +296,7 @@
 
   - measure: count_of_git_commits_last_week
     type: sum
-    sql: ${count_of_git_commits}
+    sql: ${number_of_git_commits}
     drill_fields: detail*
     filters:
       event_weeks_ago: 1
@@ -307,7 +311,7 @@
 
   - measure: count_of_api_calls_last_week
     type: sum
-    sql: ${count_of_api_calls}
+    sql: ${number_of_api_calls}
     drill_fields: detail*
     filters:
       event_weeks_ago: 1
@@ -322,7 +326,7 @@
 
   - measure: count_of_query_result_downloads_last_week
     type: sum
-    sql: ${count_of_query_result_downloads}
+    sql: ${number_of_query_result_downloads}
     drill_fields: detail*
     filters:
       event_weeks_ago: 1
@@ -337,7 +341,7 @@
 
   - measure: count_of_logins_last_week
     type: sum
-    sql: ${count_of_logins}
+    sql: ${number_of_logins}
     drill_fields: detail*
     filters:
       event_weeks_ago: 1
@@ -352,7 +356,7 @@
 
   - measure: count_of_dashboard_queries_last_week
     type: sum
-    sql: ${count_of_dashboard_queries}
+    sql: ${number_of_dashboard_queries}
     drill_fields: detail*
     filters:
       event_weeks_ago: 1
@@ -367,7 +371,7 @@
 
   - measure: count_of_dashboard_downloads_last_week
     type: sum
-    sql: ${count_of_dashboard_downloads}
+    sql: ${number_of_dashboard_downloads}
     drill_fields: detail*
     filters:
       event_weeks_ago: 1
@@ -382,7 +386,7 @@
     
   - measure: count_of_support_chats_last_week
     type: sum
-    sql: ${count_of_support_chats}
+    sql: ${number_of_support_chats}
     drill_fields: detail*
     filters:
       event_weeks_ago: 1
@@ -411,7 +415,7 @@
       
   - measure: count_of_query_runs_two_weeks_ago
     type: sum
-    sql: ${count_of_query_runs}
+    sql: ${number_of_query_runs}
     drill_fields: detail*
     filters:
      event_weeks_ago: 2
@@ -426,7 +430,7 @@
   
   - measure: count_of_project_creation_two_weeks_ago
     type: sum
-    sql: ${count_of_project_creation}
+    sql: ${number_of_project_creation}
     drill_fields: detail*
     filters:
       event_weeks_ago: 2
@@ -441,7 +445,7 @@
 
   - measure: count_of_git_commits_two_weeks_ago
     type: sum
-    sql: ${count_of_git_commits}
+    sql: ${number_of_git_commits}
     drill_fields: detail*
     filters:
       event_weeks_ago: 2
@@ -456,7 +460,7 @@
 
   - measure: count_of_api_calls_two_weeks_ago
     type: sum
-    sql: ${count_of_api_calls}
+    sql: ${number_of_api_calls}
     drill_fields: detail*
     filters:
       event_weeks_ago: 2
@@ -471,7 +475,7 @@
 
   - measure: count_of_query_result_downloads_two_weeks_ago
     type: sum
-    sql: ${count_of_query_result_downloads}
+    sql: ${number_of_query_result_downloads}
     drill_fields: detail*
     filters:
       event_weeks_ago: 2
@@ -486,7 +490,7 @@
 
   - measure: count_of_logins_two_weeks_ago
     type: sum
-    sql: ${count_of_logins}
+    sql: ${number_of_logins}
     drill_fields: detail*
     filters:
       event_weeks_ago: 2
@@ -501,7 +505,7 @@
 
   - measure: count_of_dashboard_queries_two_weeks_ago
     type: sum
-    sql: ${count_of_dashboard_queries}
+    sql: ${number_of_dashboard_queries}
     drill_fields: detail*
     filters:
       event_weeks_ago: 2
@@ -516,7 +520,7 @@
 
   - measure: count_of_dashboard_downloads_two_weeks_ago
     type: sum
-    sql: ${count_of_dashboard_downloads}
+    sql: ${number_of_dashboard_downloads}
     drill_fields: detail*
     filters:
       event_weeks_ago: 2
@@ -531,7 +535,7 @@
     
   - measure: count_of_support_chats_two_weeks_ago
     type: sum
-    sql: ${count_of_support_chats}
+    sql: ${number_of_support_chats}
     drill_fields: detail*
     filters:
       event_weeks_ago: 2
@@ -614,7 +618,7 @@
   derived_table:
     sql_trigger_value: SELECT DATE(DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: license_slug
-    sortkeys: [event_week, license_slug]
+    sortkeys: [event_week, account_id, license_slug]
     sql: |
       SELECT 
         license.salesforce_account_id AS account_id
@@ -638,7 +642,6 @@
       FROM ${daily_event_rollup.SQL_TABLE_NAME} AS daily_event_rollup
       INNER JOIN license ON daily_event_rollup.license_slug = license.license_slug
       GROUP BY 1,2,3
-      ORDER BY 1 DESC
 
   fields:
     ### DIMENSIONS ###
@@ -649,10 +652,12 @@
     
     - dimension: license_slug
       type: string
+      hidden: true
       sql: ${TABLE}.license_slug
     
     - dimension: account_id
       type: string
+      hidden: true
       sql: ${TABLE}.account_id
 
     - dimension: last_week_events
