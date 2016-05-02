@@ -67,6 +67,7 @@
 
   - dimension: user_id
     type: string
+    hidden: true
     sql: ${TABLE}.user_id
   
   - dimension: number_of_events
