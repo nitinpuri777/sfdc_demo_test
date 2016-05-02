@@ -2,7 +2,6 @@
   derived_table:
     sql: | 
       WITH daily_use AS (
-        -- ## 2 ) Create a table of days and activity by user_id
         SELECT 
           user_id
           , license_slug
@@ -10,10 +9,9 @@
           , event_date as event_date
         FROM ${daily_event_rollup.SQL_TABLE_NAME}
       )
-      --  ## 3) Cross join activity and dates to build a row for each user/date combo with
-      -- days since last activity
       SELECT
-            daily_use.user_id || '-' || daily_use.license_slug AS license_user_id
+          ROW_NUMBER() OVER () AS unique_key
+          , daily_use.user_id || '-' || daily_use.license_slug AS license_user_id
           , daily_use.user_id AS user_id
           , daily_use.license_slug as license_slug
           , wd.date as date
@@ -30,6 +28,12 @@
     sortkeys: [date]
     
   fields:
+    - dimension: id
+      type: string
+      primary_key: true
+      hidden: true
+      sql: ${TABLE}.unique_key
+      
     - dimension_group: date
       type: time
       timeframes: [raw, date, week, day_of_week]
