@@ -120,7 +120,7 @@
       relationship: one_to_one  
     
     - join: account_weekly_usage
-      view_label: 'Account'
+      view_label: 'Usage'
       sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
       relationship: one_to_many
       fields: [export_set*]
@@ -244,7 +244,7 @@
       type: inner
       view_label: 'Sessions'
       sql_on: ${sessions.unique_session_id} = ${session_facts.unique_session_id}
-      
+
     - join: quota
       view_label: 'Sales Representative'
       sql_on: |

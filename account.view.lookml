@@ -164,23 +164,35 @@
 
   - measure: count
     type: count
-    drill_fields: [id, name]
+    drill_fields: detail*
     
   - measure: percent_of_accounts
     type: percent_of_total
     sql: ${count}
+    drill_fields: detail*
     
   - measure: total_number_of_employees
     type: sum
     sql: ${number_of_employees}
+    drill_fields: detail*
     
   - measure: average_number_of_employees
     type: avg
     sql: ${number_of_employees}
+    drill_fields: detail*
     
 # SETS #
 
   sets:
+    detail:
+      - id
+      - name
+      - account_status
+      - accoutn_tier
+      - city
+      - state
+      - number_of_employees_tier
+      
     export_set:
       - id
       - company_id
