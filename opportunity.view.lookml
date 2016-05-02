@@ -1,6 +1,4 @@
-- explore: opportunity
-  hidden: true
-  
+
 - view: opportunity
   fields:
 
@@ -14,7 +12,6 @@
         url: https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg
         icon_url: http://www.salesforce.com/favicon.ico
 
-
   - dimension: account_id
     hidden: true
     sql: ${TABLE}.account_id
@@ -23,6 +20,10 @@
     hidden: true
     sql: company_id
 
+  - dimension: owner_id
+    hidden: true
+    sql: ${TABLE}.owner_id
+    
   - dimension: acv
     type: number
     sql: ${TABLE}.acv

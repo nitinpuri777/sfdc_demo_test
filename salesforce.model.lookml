@@ -11,6 +11,13 @@
 
 # VIEWS TO EXPLORE——i.e., "BASE VIEWS" #
 
+- explore: opportunity
+  hidden: true
+  joins:
+    - join: person
+      sql_on: ${person.id} = ${opportunity.owner_id}
+      relationship: one_to_many
+  
 - explore: the_switchboard
   label: '(1) The Switchboard'
   joins:
