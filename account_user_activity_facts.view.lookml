@@ -10,11 +10,11 @@
         FROM ${daily_event_rollup.SQL_TABLE_NAME}
       )
       SELECT
-          ROW_NUMBER() OVER () AS unique_key
-          , daily_use.user_id || '-' || daily_use.license_slug AS license_user_id
+          daily_use.user_id || '-' || daily_use.license_slug AS license_user_id
           , daily_use.user_id AS user_id
           , daily_use.license_slug as license_slug
           , wd.date as date
+          , ROW_NUMBER() OVER () AS unique_key
           , COUNT(DISTINCT instance_slug) AS count_of_instances
           , MIN(wd.date::date - daily_use.event_date::date) as days_since_last_action
       FROM daily_use, ${dates.SQL_TABLE_NAME} AS wd 
