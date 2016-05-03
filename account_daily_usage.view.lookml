@@ -2,13 +2,13 @@
   derived_table:
     sql: |
       SELECT
-        ROW_NUMBER() OVER (ORDER BY event_at) AS unique_key
-        , DATE(event_at) AS event_date
+        DATE(event_at) AS event_date
         , license_slug AS license_slug
         , instance_slug AS instance_slug
         , user_id AS user_id
         , license_slug || '-' || instance_slug || '-' || user_id AS instance_user_id
         , event_type AS event_type
+        , ROW_NUMBER() OVER () AS unique_key
         , COUNT(*) AS count_of_events
         , SUM(CASE WHEN event_type = 'run_query' THEN 1 ELSE 0 END) AS count_of_query_runs
         , SUM(CASE WHEN event_type = 'create_project' THEN 1 ELSE 0 END) AS count_of_project_creation
@@ -21,7 +21,7 @@
         , SUM(CASE WHEN event_type = 'close_zopim_chat' THEN 1 ELSE 0 END) AS count_of_support_chats
       FROM events
       WHERE event_type IN ('run_query', 'create_project', 'git_commit', 'open_dashboard_pdf', 'api_call', 'download_query_results', 'login', 'run_dashboard', 'close_zopim_chat')
-      GROUP BY 1, 2, 3, 4, 5, 6, 7
+      GROUP BY 1, 2, 3, 4, 5, 6
     sql_trigger_value: SELECT DATE(DATE_ADD('hour', 3, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: license_slug
     sortkeys: [license_slug, instance_slug, user_id, event_type]

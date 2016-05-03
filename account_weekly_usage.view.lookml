@@ -49,7 +49,7 @@
       FROM events
       INNER JOIN license ON events.license_slug = license.license_slug
       LEFT JOIN ${max_user_usage.SQL_TABLE_NAME} AS max_user_usage ON max_user_usage.salesforce_account_id = license.salesforce_account_id
-      GROUP BY 1, 2, 3, 4
+      GROUP BY 1, 2
       
   fields:
   
