@@ -117,11 +117,11 @@
     sql: ROUND(${TABLE}.concentration, 2)
     html: |
         {% if value <= 0.1 %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 0.3 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
     
   - dimension: percent_change_usage
@@ -147,15 +147,6 @@
   - dimension: approximate_usage_in_minutes_lifetime
     type: number
     sql: ${TABLE}.approximate_usage_in_minutes_lifetime
-    
-  - dimension: account_health_slack_code
-    sql: |
-      CASE
-        WHEN ${account_weekly_usage.account_health} = 'At Risk' THEN ':cold_sweat:'
-        WHEN ${account_weekly_usage.account_health} = 'Safe' THEN ':smile:'
-        WHEN ${account_weekly_usage.account_health} = 'Solid' THEN ':sunglasses:'
-        ELSE ':no_mouth:'
-      END
       
   - dimension: account_health_tier
     sql: |
@@ -236,11 +227,11 @@
     sql: ${TABLE}.total_current_users
     html: |
       {% if value <= 10 %}
-        <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% elsif value <= 30 %}
-        <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% else %}
-        <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
   
   - measure: average_concentration
@@ -248,11 +239,11 @@
     sql: ${concentration}
     html: |
       {% if value <= 0.1 %}
-        <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% elsif value <= 0.3 %}
-        <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% else %}
-        <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+        <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% endif %}
   
 # SETS #

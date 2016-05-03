@@ -37,11 +37,11 @@
       END
     html: |
       {% if rendered_value == 'Bronze' %}
-        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: #cd7f32; font-size:200%;">{{ rendered_value }}</div>
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: #cd7f32; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% elsif rendered_value == 'Silver' %}
-        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: silver; font-size:200%;">{{ rendered_value }}</div>
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: silver; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% elsif rendered_value == 'Gold' %}
-        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: gold; font-size:200%;">{{ rendered_value }}</div>
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: gold; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% else %}
         {{ rendered_value }}
       {% endif %}
@@ -79,9 +79,17 @@
 
   - dimension_group: customer_start
     type: time
-    timeframes: [time, date, week, month, year]
+    timeframes: [raw, time, date, week, month, year]
     convert_tz: false
     sql: ${TABLE}.customer_start_date_c
+  
+  - dimension: days_to_contract_renewal
+    type: number
+    sql: |
+      CASE
+        WHEN DATEDIFF(day, ${customer_start_raw}, CURRENT_DATE) < 0 THEN DATEDIFF(day, ${customer_start_raw}, CURRENT_DATE)
+        ELSE 365 - (DATEDIFF(day, ${customer_start_raw}, CURRENT_DATE) % 365)
+      END
     
 
   - dimension: engagement_stage
@@ -219,3 +227,4 @@
       - total_number_of_employees
       - average_number_of_employees  
       - owner_id
+      - days_to_contract_renewal
