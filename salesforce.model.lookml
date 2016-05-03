@@ -14,6 +14,12 @@
 - explore: the_switchboard
   label: '(1) The Switchboard'
   joins:
+#     - join: account_weekly_usage
+# #       view_label: 'Usage'
+#       sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
+#       relationship: one_to_many
+#       fields: [export_set*]
+
     - join: first_campaign
       from: campaign
       sql_on: ${first_campaign.id} = ${the_switchboard.attributable_campaign_id}
@@ -205,7 +211,7 @@
 
     - join: daily_event_rollup
       view_label: "Weekly Event Rollup"
-      fields: [user_id, user_count, usage_minutes, count_of_instances, count_of_licenses, users_per_instance]
+      fields: [instance_user_id, user_count, usage_minutes, count_of_instances, count_of_licenses, users_per_instance]
       sql_on: ${license.license_slug} = ${daily_event_rollup.license_slug}
       relationship: one_to_many
 
