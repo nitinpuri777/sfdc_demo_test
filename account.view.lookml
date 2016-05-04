@@ -132,30 +132,25 @@
              
   - dimension: vertical
     type: string
-    sql: (COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c))
+    sql: COALESCE(COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c), 'Unkown')
     
   - dimension: vertical_segment
     type: string
     sql: |
-         CASE 
-         WHEN ${vertical} = 'Retail, eCommerce & Marketplaces' THEN 'Retail'
-         WHEN ${vertical} = 'Technology' THEN 'Technology'
-         WHEN ${vertical} = 'Software & SaaS' THEN 'Software'
-         WHEN ${vertical} = 'Ad Tech & Online Media' THEN 'Digital Advertising'
-         ELSE ${vertical}
-         END
-    
-#         Retail: ${vertical} = 'Retail, eCommerce & Marketplaces'
-#         Technology: 'Technology'
-#         Software:  'Software & SaaS'
-#         Digital Advertising: 'Ad Tech & Online Media'
-#         Finance & Payments: 'Finance & Payments'
-#         Non-profit & Education: 'Non-profit & Education'
-#         Mobile & Gaming: 'Mobile & Gaming'
-#         Health: 'Health'
-#         Enterprise: 'Enterprise'
-#         Agency: 'Agency'
-
+        CASE 
+          WHEN ${vertical} = 'Retail, eCommerce & Marketplaces' THEN 'Retail'
+          WHEN ${vertical} = 'Technology' THEN 'Technology'
+          WHEN ${vertical} = 'Software & SaaS' THEN 'Software'
+          WHEN ${vertical} = 'Ad Tech & Online Media' THEN 'Digital'
+          WHEN ${vertical} = 'Finance & Payments' THEN 'Finance'
+          WHEN ${vertical} = 'Non-profit & Education' THEN 'Non-Profit'
+          WHEN ${vertical} = 'Mobile & Gaming' THEN 'Mobile'
+          WHEN ${vertical} = 'Health' THEN 'Health'
+          WHEN ${vertical} = 'Enterprise' THEN 'Enterprise'
+          WHEN ${vertical} = 'Agency' THEN 'Agency'         
+          ELSE ${vertical}
+        END
+         
   - dimension: zendesk_organization
     hidden: true
     sql: ${TABLE}.zendesk_organization

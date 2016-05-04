@@ -1,3 +1,24 @@
+- view: max_user_usage
+  derived_table:
+    persist_for: 6 hours
+    distkey: salesforce_account_id
+    sortkeys: [salesforce_account_id]
+    sql: |
+      SELECT
+          salesforce_account_id
+        , MAX(user_usage) AS max_user_usage
+        FROM (
+          SELECT license.salesforce_account_id
+            , user_id
+            , instance_slug
+            , COUNT(DISTINCT user_id || instance_slug || (FLOOR((DATE_PART(EPOCH, event_at)::BIGINT)/(60*5))))*5 user_usage
+          FROM events
+          INNER JOIN license
+          ON events.license_slug = license.license_slug
+          GROUP BY 1,2,3
+          )
+      GROUP BY 1
+
 - view: daily_event_rollup
   derived_table:
     sql: |
@@ -36,7 +57,7 @@
   
   - dimension: instance_user_id
     type: string
-    sql: ${TABLE}.instance_user_id
+    sql: RIGHT(${TABLE}.instance_user_id, 8)
 
   - dimension_group: event
     type: time
@@ -564,7 +585,7 @@
       + ${total_git_commits} * 5
       + ${total_api_calls} * 3
       + ${total_query_result_downloads} * 5
-      + ${total_logins} * 3) / 60
+      + ${total_logins} * 3) / 3600
 
   - measure: usage_minutes_last_week
     type: number
@@ -579,7 +600,7 @@
       + ${count_of_git_commits_last_week} * 5
       + ${count_of_api_calls_last_week} * 3
       + ${count_of_query_result_downloads_last_week} * 5
-      + ${count_of_logins_last_week} * 3) / 60
+      + ${count_of_logins_last_week} * 3) / 3600
 
   - measure: usage_minutes_two_weeks_ago
     type: number
@@ -594,7 +615,7 @@
       + ${count_of_git_commits_two_weeks_ago} * 5
       + ${count_of_api_calls_two_weeks_ago} * 3
       + ${count_of_query_result_downloads_two_weeks_ago} * 5
-      + ${count_of_logins_two_weeks_ago} * 3) / 60
+      + ${count_of_logins_two_weeks_ago} * 3) / 3600
       
   sets:
     detail:
@@ -603,7 +624,6 @@
       - event_type
       - instance_slug
       - license_slug
-      - user_id
       - count_of_event
       - count_of_query_run
       - count_of_project_creation
@@ -640,8 +660,10 @@
         , LAG((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_usage_minutes
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY daily_event_rollup.license_slug ORDER BY DATE_TRUNC('week', daily_event_rollup.event_date)) AS last_week_events
         , SUM(FLOOR(((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5)) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0))) OVER (PARTITION BY account_id ORDER BY event_week ROWS UNBOUNDED PRECEDING) as lifetime_usage_minutes
+        , 1.00 * AVG(max_user_usage.max_user_usage) / NULLIF((FLOOR((DATE_PART(EPOCH, DATE_TRUNC('week', daily_event_rollup.event_date))::BIGINT)/(60*5))) / NULLIF((7 * COUNT(DISTINCT user_id || instance_slug)),0), 0) AS concentration
       FROM ${daily_event_rollup.SQL_TABLE_NAME} AS daily_event_rollup
       INNER JOIN license ON daily_event_rollup.license_slug = license.license_slug
+      LEFT JOIN ${max_user_usage.SQL_TABLE_NAME} AS max_user_usage ON max_user_usage.salesforce_account_id = license.salesforce_account_id
       GROUP BY 1,2,3
 
   fields:
@@ -668,6 +690,10 @@
     - dimension: lifetime_usage_minutes
       type: number
       sql: ${TABLE}.lifetime_usage_minutes
+
+    - dimension: concentration
+      type: number
+      sql: ${TABLE}.concentration
 
     - dimension_group: event
       type: time
@@ -803,6 +829,21 @@
           WHEN ${lifetime_usage_minutes} > 2500000  THEN 10
           ELSE 3
         END
+
+    - dimension: concentration_score
+      type: number
+      sql: |
+        CASE
+          WHEN ${concentration} IN (0, NULL) THEN 0.0
+          WHEN ${concentration} <= 0.1 THEN 10.0
+          WHEN ${concentration} <= 0.3 THEN 8.5
+          WHEN ${concentration} <= 0.5  THEN 7.0
+          WHEN ${concentration} <= 0.7  THEN 5.5
+          WHEN ${concentration} <= 0.9  THEN 4.0
+          WHEN ${concentration} <= 1.1 THEN 2.5
+          WHEN ${concentration} > 1.1 THEN 1.0
+          ELSE 4
+        END
   
     - dimension: current_weekly_users_score
       type: number
@@ -817,7 +858,7 @@
     
     - dimension: account_health_score
       type: number
-      sql: 100.0 * (${usage_change_percent_score} + ${lifetime_usage_minutes_score} + ${current_weekly_users_score}) / 25
+      sql: 100.0 * (${usage_change_percent_score} + ${lifetime_usage_minutes_score} + ${concentration_score} + ${current_weekly_users_score}) / 35
       value_format_name: decimal_2
     
     - dimension: account_health
@@ -841,7 +882,7 @@
   ### MEASURES ###
     - measure: count_of_accounts
       type: count_distinct
-      sql: ${license_slug}
+      sql: ${account_id}
       drill_fields: detail*
 
     - measure: average_event_count
@@ -1012,7 +1053,7 @@
       sql: ${account_id}
       drill_fields: detail*
       filters:
-        account_health_score: '< 50'
+        account_health: '1. At Risk'
     
     - measure: percent_red_accounts
       type: number
@@ -1039,9 +1080,9 @@
       sql: ${weekly_git_commits}
       drill_fields: detail*
       html: |
-        {% if value <= 10 %}
+        {% if value <= 5 %}
           <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
-        {% elsif value <= 20 %}
+        {% elsif value <= 10 %}
           <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
           <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -1106,7 +1147,7 @@
       html: |
         {% if value <= 10 %}
           <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
-        {% elsif value <= 20 %}
+        {% elsif value <= 15 %}
           <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
           <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -1117,9 +1158,9 @@
       sql: ${weekly_support_chats}
       drill_fields: detail*
       html: |
-        {% if value <= 10 %}
+        {% if value >= 20 %}
           <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
-        {% elsif value <= 20 %}
+        {% elsif value >= 10 %}
           <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
           <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>

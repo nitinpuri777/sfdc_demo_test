@@ -1,28 +1,7 @@
-- view: max_user_usage
-  derived_table:
-    persist_for: 6 hours
-    distkey: salesforce_account_id
-    sortkeys: [salesforce_account_id]
-    sql: |
-      SELECT
-          salesforce_account_id
-        , MAX(user_usage) AS max_user_usage
-        FROM (
-          SELECT license.salesforce_account_id
-            , user_id
-            , instance_slug
-            , COUNT(DISTINCT user_id || instance_slug || (FLOOR((DATE_PART(EPOCH, event_at)::BIGINT)/(60*5))))*5 user_usage
-          FROM events
-          INNER JOIN license
-          ON events.license_slug = license.license_slug
-          GROUP BY 1,2,3
-          )
-      GROUP BY 1
-
 - view: account_weekly_usage
   derived_table:
-    # Rebuilds at 11PM on Sundays
-    sql_trigger_value: SELECT DATE_TRUNC('week', DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
+    # Rebuilds at 9PM on Sundays
+    sql_trigger_value: SELECT DATE_TRUNC('week', DATE_ADD('hour', 3, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: account_id
     sortkeys: [account_id, event_week]
     sql: |
