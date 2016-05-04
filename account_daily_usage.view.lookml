@@ -882,7 +882,7 @@
   ### MEASURES ###
     - measure: count_of_accounts
       type: count_distinct
-      sql: ${license_slug}
+      sql: ${account_id}
       drill_fields: detail*
 
     - measure: average_event_count
