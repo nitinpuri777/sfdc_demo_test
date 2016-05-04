@@ -865,7 +865,7 @@
       type: string
       sql: |
         CASE
-          WHEN ${account_health_score} < 40 THEN '1. At Risk'
+          WHEN ${account_health_score} < 50 THEN '1. At Risk'
           WHEN ${account_health_score} < 70 THEN '2. Standard'
           WHEN ${account_health_score} >= 70 THEN '3. Safe'
           ELSE 'NA'
@@ -1053,7 +1053,7 @@
       sql: ${account_id}
       drill_fields: detail*
       filters:
-        account_health_score: '< 50'
+        account_health: '1. At Risk'
     
     - measure: percent_red_accounts
       type: number
@@ -1080,9 +1080,9 @@
       sql: ${weekly_git_commits}
       drill_fields: detail*
       html: |
-        {% if value <= 10 %}
+        {% if value <= 5 %}
           <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
-        {% elsif value <= 20 %}
+        {% elsif value <= 10 %}
           <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
           <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -1147,7 +1147,7 @@
       html: |
         {% if value <= 10 %}
           <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
-        {% elsif value <= 20 %}
+        {% elsif value <= 15 %}
           <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
           <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
@@ -1158,9 +1158,9 @@
       sql: ${weekly_support_chats}
       drill_fields: detail*
       html: |
-        {% if value <= 10 %}
+        {% if value >= 20 %}
           <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
-        {% elsif value <= 20 %}
+        {% elsif value >= 10 %}
           <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
           <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
