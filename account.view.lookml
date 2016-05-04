@@ -138,16 +138,16 @@
     type: string
     sql: |
         CASE 
-          WHEN ${vertical} = 'Retail, eCommerce & Marketplaces' THEN Retail
-          WHEN ${vertical} = 'Technology' THEN Technology
-          WHEN ${vertical} = 'Software & SaaS' THEN Software
-          WHEN ${vertical} = 'Ad Tech & Online Media' THEN Digital
-          WHEN ${vertical} = 'Finance & Payments' THEN Finance
-          WHEN ${vertical} = 'Non-profit & Education' THEN Non
-          WHEN ${vertical} = 'Mobile & Gaming' THEN Mobile
-          WHEN ${vertical} = 'Health' THEN Health
-          WHEN ${vertical} = 'Enterprise' THEN Enterprise
-          WHEN ${vertical} = 'Agency' THEN Agency         
+          WHEN ${vertical} = 'Retail, eCommerce & Marketplaces' THEN 'Retail'
+          WHEN ${vertical} = 'Technology' THEN 'Technology'
+          WHEN ${vertical} = 'Software & SaaS' THEN 'Software'
+          WHEN ${vertical} = 'Ad Tech & Online Media' THEN 'Digital'
+          WHEN ${vertical} = 'Finance & Payments' THEN 'Finance'
+          WHEN ${vertical} = 'Non-profit & Education' THEN 'Non-Profit'
+          WHEN ${vertical} = 'Mobile & Gaming' THEN 'Mobile'
+          WHEN ${vertical} = 'Health' THEN 'Health'
+          WHEN ${vertical} = 'Enterprise' THEN 'Enterprise'
+          WHEN ${vertical} = 'Agency' THEN 'Agency'         
           ELSE ${vertical}
         END
          
