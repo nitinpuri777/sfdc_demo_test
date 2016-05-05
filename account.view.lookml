@@ -132,7 +132,7 @@
              
   - dimension: vertical
     type: string
-    sql: COALESCE(COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c), 'Unkown')
+    sql: COALESCE(COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c), 'Unknown')
     
   - dimension: vertical_segment
     type: string
