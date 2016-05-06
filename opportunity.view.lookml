@@ -86,12 +86,6 @@
   - dimension: is_quarter_to_date
     type: yesno
     sql: ${closed_day_of_quarter} <= ${day_of_current_quarter}
-    
-#   - dimension: is_quarter_to_date
-#     type: yesno
-#     sql: ${closed_day_of_quarter} <= DATEDIFF('day', CAST(CONCAT(${closed_quarter}, '-01') as date), CURRENT_DATE)
-#     
-
       
   - dimension: contract_length
     type: number
@@ -110,17 +104,10 @@
     type: number
     sql: DATEDIFF(MONTHS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date) )
     
-      
-      
   - dimension:  opp_to_closed_60d 
     hidden: true
     type: yesno
     sql: ${days_open} <=60 AND ${is_closed} = 'yes' AND ${is_won} = 'yes'
-
-#  Always No
-#   - dimension: is_cancelled
-#     type: yesno
-#     sql: ${TABLE}.is_cancelled_c
 
   - dimension: is_closed
     type: yesno
@@ -157,7 +144,6 @@
   - dimension: probablity_tier
     type: tier
     tiers: [0,.01,.20,.40,.60,.80,1]
-    # style: integer
     sql: ${probability}
     value_format: "#%"
     
@@ -170,12 +156,6 @@
       '20 - 40%': ${probability} > .2
       'Under 20%': ${probability} > 0
       'Lost': ${probability} = 0
-
-
-# Always null
-#   - dimension: renewal_number
-#     type: number
-#     sql: ${TABLE}.renewal_number_c
 
   - dimension: renewal_opportunity_id
     sql: ${TABLE}.renewal_opportunity_id
@@ -294,10 +274,7 @@
        {% else %}
        <p style="color: #353b49; background-color: #49cec1; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
       {% endif %}
-    
-    
-
-
+  
   - measure: total_mrr
     label: 'Total MRR (Closed/Won)'
     type: sum
@@ -315,7 +292,6 @@
     drill_fields: opportunity_set*  
     value_format_name: usd_large
       
-    
   - measure: average_mrr
     label: 'Average MRR (Closed/Won)'
     type: average
@@ -445,7 +421,6 @@
        <p style="color: #353b49; background-color: #49cec1; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
       {% endif %}
   
-
   - measure: total_acv_lost
     type: sum
     sql: ${acv}   
@@ -605,7 +580,6 @@
     
 # SETS #
 
-
   sets:
     opportunity_set:
       - account.name
@@ -645,7 +619,6 @@
       - count
       - total_mrr
       - average_mrr
-#       - total_contract_value
       - average_contract_value
       - count_closed
       - count_won
