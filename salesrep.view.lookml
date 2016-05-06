@@ -36,23 +36,22 @@
   - dimension: name
     sql: ${first_name} || ' ' || ${last_name}
     links: 
-      - label: Sales Rep Comparitor
+      - label: Sales Representative Performance Dashboard
         url: http://demonew.looker.com/dashboards/5?Sales%20Rep={{ value | encode_uri }}&Sales%20Segment={{ salesrep.business_segment._value }}
         icon_url: http://www.looker.com/favicon.ico
-      - label: Rep Success
-        url: http://demonew.looker.com/dashboards/331?Sales%20Rep%20Name={{ value | encode_uri }}&Business%20Segment={{ salesrep.business_segment._value }}
-#         //demonew.looker.com/dashboards/289?Account%20Executive%20Name={{ value | encode_uri }} OLD URL
-        icon_url: http://www.looker.com/favicon.ico
-  
+#       - label: Rep Success --will want to activate this link with new demo
+#         url: http://demonew.looker.com/dashboards/331?Sales%20Rep%20Name={{ value | encode_uri }}&Business%20Segment={{ salesrep.business_segment._value }}
+#         icon_url: http://www.looker.com/favicon.ico
+#   
   - dimension: business_segment
     sql: COALESCE(${TABLE}.business_segment, 'Top of Funnel/Not Assigned')
     links: 
-#       - label: Sales Team Summary Dashboard
-#         url: http://demonew.looker.com/dashboards/4?Business%20Segment={{ value | encode_uri }}
-#         icon_url: http://www.looker.com/favicon.ico
-      - label: Sales Comparison Dashboard
-        url: http://demonew.looker.com/dashboards/323?Business%20Segment={{ value | encode_uri }}
+      - label: Sales Team Summary Dashboard
+        url: http://demonew.looker.com/dashboards/4?Business%20Segment={{ value | encode_uri }}
         icon_url: http://www.looker.com/favicon.ico
+#       - label: Sales Rep Comparison Dashboard --will want to activate this link with new demo
+#         url: http://demonew.looker.com/dashboards/323?Business%20Segment={{ value | encode_uri }}
+#         icon_url: http://www.looker.com/favicon.ico
     suggestions: ['Enterprise','Mid-Market','Small Business', 'Top of Funnel/Not Assigned']
       
   - filter: rep_select
