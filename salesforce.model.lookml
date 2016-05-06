@@ -242,11 +242,11 @@
       fields: [export_set*]
       type: inner
 
-    - join: session_facts
-      relationship: one_to_one
-      type: inner
-      view_label: 'Sessions'
-      sql_on: ${sessions.unique_session_id} = ${session_facts.unique_session_id}
+#     - join: session_facts
+#       relationship: one_to_one
+#       type: inner
+#       view_label: 'Sessions'
+#       sql_on: ${sessions.unique_session_id} = ${session_facts.unique_session_id}
 
     - join: quota
       view_label: 'Sales Representative'
