@@ -8,8 +8,8 @@
               quota_quarter 
               ,     sum(
                     case
-                    when datediff(day, quota_quarter, current_date) < 90
-                    then 90 / datediff(day, quota_quarter, current_date) * quota
+                    when datediff(day, quota_quarter, current_date) < 93
+                    then 93 / datediff(day, quota_quarter, current_date) * quota
                     else quota
                     end)
                       as sales_team_quota
