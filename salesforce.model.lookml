@@ -8,16 +8,8 @@
     value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
     
   
-
 # VIEWS TO EXPLORE——i.e., "BASE VIEWS" #
 
-- explore: opportunity
-  hidden: true
-  joins:
-    - join: person
-      sql_on: ${person.id} = ${opportunity.owner_id}
-      relationship: one_to_many
-  
 - explore: the_switchboard
   label: '(1) The Switchboard'
   joins:
@@ -270,5 +262,13 @@
       fields: [name, city, state, vertical, vertical_segment]
       sql_on: ${license.salesforce_account_id} =${account.id}
       relationship: many_to_one
+      
+      
+- explore: opportunity
+  hidden: true
+  joins:
+    - join: person
+      sql_on: ${person.id} = ${opportunity.owner_id}
+      relationship: one_to_many
   
       
