@@ -37,11 +37,11 @@
       END
     html: |
       {% if rendered_value == 'Bronze' %}
-        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: #cd7f32; font-size:200%;">{{ rendered_value }}</div>
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: #cd7f32; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% elsif rendered_value == 'Silver' %}
-        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: silver; font-size:200%;">{{ rendered_value }}</div>
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: silver; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% elsif rendered_value == 'Gold' %}
-        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: gold; font-size:200%;">{{ rendered_value }}</div>
+        <div style="color: #f6f8fa; text-align:center; border:1px solid #e6e6e6; background-color: gold; font-size: 100%; text-align:center">{{ rendered_value }}</div>
       {% else %}
         {{ rendered_value }}
       {% endif %}
@@ -79,9 +79,17 @@
 
   - dimension_group: customer_start
     type: time
-    timeframes: [time, date, week, month, year]
+    timeframes: [raw, time, date, week, month, year]
     convert_tz: false
     sql: ${TABLE}.customer_start_date_c
+  
+  - dimension: days_to_contract_renewal
+    type: number
+    sql: |
+      CASE
+        WHEN DATEDIFF(day, ${customer_start_raw}, CURRENT_DATE) < 0 THEN DATEDIFF(day, ${customer_start_raw}, CURRENT_DATE)
+        ELSE 365 - (DATEDIFF(day, ${customer_start_raw}, CURRENT_DATE) % 365)
+      END
     
 
   - dimension: engagement_stage
@@ -127,30 +135,25 @@
              
   - dimension: vertical
     type: string
-    sql: (COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c))
+    sql: COALESCE(COALESCE(${TABLE}.vertical_c, ${TABLE}.market_segment_c), 'Unknown')
     
   - dimension: vertical_segment
     type: string
     sql: |
-         CASE 
-         WHEN ${vertical} = 'Retail, eCommerce & Marketplaces' THEN 'Retail'
-         WHEN ${vertical} = 'Technology' THEN 'Technology'
-         WHEN ${vertical} = 'Software & SaaS' THEN 'Software'
-         WHEN ${vertical} = 'Ad Tech & Online Media' THEN 'Digital Advertising'
-         ELSE ${vertical}
-         END
-    
-#         Retail: ${vertical} = 'Retail, eCommerce & Marketplaces'
-#         Technology: 'Technology'
-#         Software:  'Software & SaaS'
-#         Digital Advertising: 'Ad Tech & Online Media'
-#         Finance & Payments: 'Finance & Payments'
-#         Non-profit & Education: 'Non-profit & Education'
-#         Mobile & Gaming: 'Mobile & Gaming'
-#         Health: 'Health'
-#         Enterprise: 'Enterprise'
-#         Agency: 'Agency'
-
+        CASE 
+          WHEN ${vertical} = 'Retail, eCommerce & Marketplaces' THEN 'Retail'
+          WHEN ${vertical} = 'Technology' THEN 'Technology'
+          WHEN ${vertical} = 'Software & SaaS' THEN 'Software'
+          WHEN ${vertical} = 'Ad Tech & Online Media' THEN 'Digital'
+          WHEN ${vertical} = 'Finance & Payments' THEN 'Finance'
+          WHEN ${vertical} = 'Non-profit & Education' THEN 'Non-Profit'
+          WHEN ${vertical} = 'Mobile & Gaming' THEN 'Mobile'
+          WHEN ${vertical} = 'Health' THEN 'Health'
+          WHEN ${vertical} = 'Enterprise' THEN 'Enterprise'
+          WHEN ${vertical} = 'Agency' THEN 'Agency'         
+          ELSE ${vertical}
+        END
+         
   - dimension: zendesk_organization
     hidden: true
     sql: ${TABLE}.zendesk_organization
@@ -222,3 +225,4 @@
       - total_number_of_employees
       - average_number_of_employees  
       - owner_id
+      - days_to_contract_renewal

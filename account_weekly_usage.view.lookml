@@ -1,33 +1,13 @@
-- view: max_user_usage
-  derived_table:
-    sql: |
-      SELECT
-          salesforce_account_id
-        , MAX(user_usage) AS max_user_usage
-        FROM (
-          SELECT license.salesforce_account_id
-            , user_id
-            , instance_slug
-            , COUNT(DISTINCT user_id || instance_slug || (FLOOR((DATE_PART(EPOCH, event_at)::BIGINT)/(60*5))))*5 user_usage
-          FROM events
-          INNER JOIN license
-          ON events.license_slug = license.license_slug
-          GROUP BY 1,2,3
-          )
-      GROUP BY 1
-
 - view: account_weekly_usage
   derived_table:
-  
-    # Rebuilds at 11PM on Sundays
-    sql_trigger_value: SELECT DATE_TRUNC('week', DATE_ADD('hour', 1, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
+    # Rebuilds at 9PM on Sundays
+    sql_trigger_value: SELECT DATE_TRUNC('week', DATE_ADD('hour', 3, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE())))
     distkey: account_id
     sortkeys: [account_id, event_week]
     sql: |
       SELECT
           license.salesforce_account_id AS account_id
         , DATE_TRUNC('week', event_at) AS event_week
-        , DATE_DIFF('week', events.event_at, DATE_TRUNC('week', CURRENT_DATE)) AS event_weeks_ago
         , COUNT(DISTINCT user_id || instance_slug) AS total_weekly_users
         , LAG(COUNT(DISTINCT user_id || instance_slug), 1) OVER (PARTITION BY account_id ORDER BY event_week) AS last_week_users
         , COUNT(DISTINCT events.id) AS weekly_event_count
@@ -48,7 +28,7 @@
       FROM events
       INNER JOIN license ON events.license_slug = license.license_slug
       LEFT JOIN ${max_user_usage.SQL_TABLE_NAME} AS max_user_usage ON max_user_usage.salesforce_account_id = license.salesforce_account_id
-      GROUP BY 1, 2, 3
+      GROUP BY 1, 2
       
   fields:
   
@@ -56,7 +36,7 @@
     - dimension: unique_key
       hidden: true
       primary_key: true
-      sql: ${account_id} || '-' || ${event_week} || '-' || ${event_weeks_ago}
+      sql: ${account_id} || '-' || ${event_week} || '-' || ${event_weeks_ago} || '-' || ${event_months_ago}
     
     - dimension: account_id
       sql: ${TABLE}.account_id
@@ -68,13 +48,19 @@
     - dimension: last_week_events
       type: number
       sql: ${TABLE}.last_week_events
-    
-    - dimension: reverse_event_week_sequence
 
-    - dimension: event
+    - dimension_group: event
       type: time
       timeframes: [raw, week, month]
       sql: ${TABLE}.event_week
+    
+    - dimension: event_weeks_ago
+      type: number
+      sql: DATE_DIFF('week', ${event_raw}, DATE_TRUNC('week', CURRENT_DATE))
+
+    - dimension: event_months_ago
+      type: number
+      sql: DATE_DIFF('month', ${event_raw}, DATE_TRUNC('month', CURRENT_DATE))
 
     - dimension: current_weekly_users
       type: number
@@ -98,10 +84,6 @@
     - dimension: lifetime_usage_minutes
       type: number
       sql: ${TABLE}.lifetime_usage_minutes
-
-    - dimension: event_weeks_ago
-      type: number
-      sql: ${TABLE}.event_weeks_ago
     
     - dimension: count_of_query_runs
       type: number
@@ -144,14 +126,6 @@
     - dimension: weeks_since_signup
       type: number
       sql: DATEDIFF('week',${opportunity.closed_raw}, ${event_raw})
-    
-    - dimension: weeks_ago
-      type: number
-      sql: DATEDIFF(week, ${event_raw}, DATE_TRUNC('week',CURRENT_DATE))
-    
-    - dimension: months_ago
-      type: number
-      sql: DATEDIFF(month, ${event_raw}, DATE_TRUNC('month',CURRENT_DATE))
       
     - dimension: usage_change_percent
       type: number
@@ -163,11 +137,11 @@
       sql: 1.0* (${current_weekly_users} - ${last_week_users}) / NULLIF(${last_week_users},0)
       html: |
         {% if value <= 0.2 and value >= -0.2 %}
-          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value < -0.2 %}
-          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
     
     - dimension: usage_change_percent_score
@@ -249,18 +223,18 @@
       type: string
       sql: |
         CASE
-          WHEN ${account_health_score} < 50 THEN '1. At Risk'
+          WHEN ${account_health_score} < 40 THEN '1. At Risk'
           WHEN ${account_health_score} < 70 THEN '2. Standard'
           WHEN ${account_health_score} >= 70 THEN '3. Safe'
           ELSE 'NA'
         END
       html: |
         {% if value == '1. At Risk' %}
-          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value == '2. Standard' %}
-          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% else %}
-          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% endif %}
   
   ### MEASURES ###
@@ -288,11 +262,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 0.2 and value >= -0.2 %}
-          <b><p style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value > 0.2 %}
-          <b><p style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
     
     - measure: average_usage_change_percent
@@ -319,11 +293,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 2000 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 6000 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
 
     - measure: average_account_health
@@ -332,12 +306,12 @@
       value_format_name: decimal_2
       drill_fields: detail*
       html: |
-        {% if value < 50 %}
-          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% if value < 40 %}
+          <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
-          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% else %}
-          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% endif %}
 
     - measure: average_account_health_this_week
@@ -346,14 +320,14 @@
       value_format_name: decimal_2
       drill_fields: detail*
       filters:
-        weeks_ago: 1
+        event_weeks_ago: 1
       html: |
-        {% if value < 50 %}
-          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% if value < 40 %}
+          <div style="color: black; background-color: #dc7350; font-size: 100%; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
-          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #e9b404; font-size: 100%; text-align:center">{{ value }}</div>
         {% else %}
-          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #49cec1; font-size: 100%; text-align:center">{{ value }}</div>
         {% endif %}
 
     - measure: average_account_health_one_week_ago
@@ -362,14 +336,14 @@
       value_format_name: decimal_2
       drill_fields: detail*
       filters:
-        weeks_ago: 2
+        event_weeks_ago: 2
       html: |
-        {% if value < 50 %}
-          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% if value < 40 %}
+          <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
-          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% else %}
-          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% endif %}
 
     - measure: average_account_health_two_weeks_ago
@@ -378,19 +352,72 @@
       value_format_name: decimal_2
       drill_fields: detail*
       filters:
-        weeks_ago: 3
+        event_weeks_ago: 3
       html: |
-        {% if value < 50 %}
-          <b><p style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+        {% if value < 40 %}
+          <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% elsif value < 70 %}
-          <b><p style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% else %}
-          <b><p style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</p></b>
+          <div style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% endif %}
   
     - measure: average_account_health_change
       type: number
-      sql: ${average_account_health_this_week} - ${average_account_health_one_week_ago}
+      sql: ${average_account_health_this_week} - COALESCE(${average_account_health_one_week_ago},${average_account_health_two_weeks_ago})
+      drill_fields: detail*
+
+    - measure: average_account_health_this_month
+      type: average
+      sql: ${account_health_score}
+      value_format_name: decimal_2
+      drill_fields: detail*
+      filters:
+        event_months_ago: 1
+      html: |
+        {% if value < 40 %}
+          <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+        {% elsif value < 70 %}
+          <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+        {% else %}
+          <div style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+        {% endif %}
+
+    - measure: average_account_health_one_month_ago
+      type: average
+      sql: COALESCE(${account_health_score},0)
+      value_format_name: decimal_2
+      drill_fields: detail*
+      filters:
+        event_months_ago: 2
+      html: |
+        {% if value < 40 %}
+          <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+        {% elsif value < 70 %}
+          <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+        {% else %}
+          <div style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+        {% endif %}
+
+    - measure: average_account_health_two_months_ago
+      type: average
+      sql: COALESCE(${account_health_score},0)
+      value_format_name: decimal_2
+      drill_fields: detail*
+      filters:
+        event_months_ago: 3
+      html: |
+        {% if value < 40 %}
+          <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+        {% elsif value < 70 %}
+          <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+        {% else %}
+          <div style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+        {% endif %}
+  
+    - measure: average_account_health_change_MoM
+      type: number
+      sql: ${average_account_health_this_month} - COALESCE(${average_account_health_one_month_ago},${average_account_health_two_months_ago})
       drill_fields: detail*
 
     - measure: count_of_red_accounts
@@ -399,7 +426,7 @@
       sql_distinct_key: ${account_id}
       drill_fields: detail*
       filters:
-        account_health_score: '< 50'
+        account_health_score: '< 40'
     
     - measure: percent_red_accounts
       type: number
@@ -414,11 +441,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 20 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
 
     - measure: total_count_of_git_commits
@@ -427,11 +454,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 20 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
 
     - measure: total_count_of_api_calls
@@ -440,11 +467,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 20 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
   
     - measure: total_count_of_query_result_downloads
@@ -453,11 +480,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 20 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
 
     - measure: total_count_of_logins
@@ -466,11 +493,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 20 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
 
     - measure: total_count_of_dashboard_queries
@@ -479,11 +506,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 20 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
 
     - measure: total_count_of_dashboard_downloads
@@ -492,11 +519,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 20 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
 
     - measure: total_count_of_support_chats
@@ -505,11 +532,11 @@
       drill_fields: detail*
       html: |
         {% if value <= 10 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value <= 20 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
   
   
@@ -520,14 +547,14 @@
       value_format_name: percent_2
       drill_fields: detail*
       filters:
-        weeks_ago: 0
+        event_weeks_ago: 0
       html: |
         {% if value <= 0.2 and value >= -0.2 %}
-          <b><p style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value < -0.2 %}
-          <b><p style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <b><p style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</p></b>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
 
   sets:
@@ -540,10 +567,7 @@
     
     export_set:
       - account_id
-      - weeks_ago
-      - event_weeks_ago
       - weeks_since_signup
-      - months_ago
       - event_week
       - event_month
       - account_health_score
@@ -553,30 +577,4 @@
       - user_count_change
       - average_user_count_change_percent
       - average_usage_change_percent
-      - count_of_query_runs
-      - count_of_git_commits
-      - count_of_api_calls
-      - count_of_query_result_downloads
-      - count_of_logins
-      - count_of_dashboard_queries
-      - count_of_dashboard_downloads
-      - count_of_support_chats
-      - total_count_of_query_runs
-      - total_count_of_git_commits
-      - total_count_of_api_calls
-      - total_count_of_query_result_downloads
-      - total_count_of_logins
-      - total_count_of_dashboard_queries
-      - total_count_of_dashboard_downloads
-      - total_count_of_support_chats
       - count_of_accounts
-      - average_account_health
-      - average_account_health_this_week
-      - average_account_health_one_week_ago
-      - average_account_health_two_weeks_ago
-      - average_account_health_change
-      - count_of_red_accounts
-      - percent_red_accounts
-
-
-

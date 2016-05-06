@@ -35,6 +35,16 @@
       sql_on: ${the_switchboard.account_id} = ${license.salesforce_account_id}
       relationship: one_to_many
     
+    - join: daily_event_rollup
+      view_label: "Weekly Event Rollup"
+      fields: [instance_user_id, user_count, usage_minutes, count_of_instances, count_of_licenses, users_per_instance]
+      sql_on: ${license.license_slug} = ${daily_event_rollup.license_slug}
+      relationship: one_to_many
+
+    - join: weekly_event_rollup
+      sql_on: ${the_switchboard.account_id} = ${weekly_event_rollup.account_id}
+      relationship: one_to_many
+    
     - join: event
       view_label: "Usage"
       fields: [user_count]
@@ -118,7 +128,7 @@
       sql_on: ${usage.salesforce_account_id} = ${account.id}
       type: inner   # to omit accounts for whom there is no usage due to no license mapping
       relationship: one_to_one  
-    
+
     - join: account_weekly_usage
       view_label: 'Usage'
       sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
@@ -132,14 +142,12 @@
         DATE_TRUNC('quarter',  ${opportunity.closed_raw}) = DATE_TRUNC('quarter',  ${quota.quota_raw})
       type: full_outer
       relationship: one_to_many
-
     
     - join: quota_aggregated
       view_label: 'Sales Team Quota'
       sql_on: ${opportunity.closed_quarter_string} = ${quota_aggregated.quota_quarter_string} 
       relationship: many_to_one
-
-
+      
 - explore: funnel
   label: '(2) Lead Funnel'
   joins: 
@@ -201,37 +209,32 @@
       sql_on: ${salesrep.id} = ${account.owner_id}
       relationship: many_to_one 
 
-- explore: feature_usage
-  from: events_in_past_180_days
-  label: '(4) Sessions and Feature Usage'
+- explore: weekly_event_rollup
+  from: weekly_event_rollup
+  label: '(4) Feature Usage'
   joins:
-    - join: event_mapping
-      view_label: 'Event'
-      relationship: one_to_one
-      type: inner
-      sql_on: ${feature_usage.id} = ${event_mapping.event_id}
-
-    - join: sessions
-      relationship: many_to_one
-      type: left_outer
-      sql_on: ${event_mapping.unique_session_id} = ${sessions.unique_session_id}
-    
+      
     - join: account
       fields: [export_set*]
-      sql_on: ${sessions.account_id} = ${account.id}
+      sql_on: ${weekly_event_rollup.account_id} = ${account.id}
       relationship: many_to_one
-    
-    - join: account_weekly_usage
-      view_label: 'Account'
-      sql_on: ${account.id} = ${account_weekly_usage.account_id}
+
+    - join: license
+      fields: []
+      sql_on: ${account.id} = ${license.salesforce_account_id}
       relationship: one_to_many
-      fields: [account_health_score, average_account_health]
+
+    - join: daily_event_rollup
+      view_label: "Weekly Event Rollup"
+      fields: [instance_user_id, user_count, usage_minutes, count_of_instances, count_of_licenses, users_per_instance]
+      sql_on: ${license.license_slug} = ${daily_event_rollup.license_slug}
+      relationship: one_to_many
 
     - join: salesrep
-      view_label: 'Account'
-      fields: [business_segment]
-      sql_on: ${salesrep.id} = ${account.owner_id}
-      relationship: many_to_one 
+      view_label: 'Account Owner'
+      fields: [business_segment,id,name]
+      sql_on: ${account.owner_id} = ${salesrep.id}
+      relationship: many_to_one
 
     - join: opportunity
       sql_on: ${account.id} = ${opportunity.account_id}
@@ -253,3 +256,19 @@
       type: full_outer
       relationship: one_to_many
 
+- explore: rolling_30_day_activity_facts
+  view_label: "Active Users"
+  label: '(5) Daily, Weekly, and Monthly Active Users'
+  fields: [ALL_FIELDS*, -account.account_tier]
+  joins:
+    - join: license
+      fields: []
+      sql_on: ${rolling_30_day_activity_facts.license_slug} = ${license.license_slug}
+      relationship: many_to_one
+    
+    - join: account
+      fields: [name, city, state, vertical, vertical_segment]
+      sql_on: ${license.salesforce_account_id} =${account.id}
+      relationship: many_to_one
+  
+      
