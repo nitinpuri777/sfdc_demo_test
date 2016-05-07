@@ -392,7 +392,7 @@
   - measure: total_acv_won_current_quarter
     type: sum
     sql: ${acv}
-    filter:
+    filters:
       is_won: Yes
       closed_quarter: this quarter
     value_format_name: usd_large
@@ -456,6 +456,24 @@
     type: running_total
     sql: ${total_acv_won}
     
+  - measure: meetings_converted_to_close_within_60d
+    type: count_distinct
+    sql: ${meeting.id}
+    hidden: true
+    filters:
+      meeting.status: 'Completed'
+      opp_to_closed_60d: 'Yes' 
+      is_won: 'Yes'
+      
+  - measure: meeting_to_close_conversion_rate_60d
+    label: 'Meeting to Close/Won Conversion within 60 days'
+    view_label: 'Meeting'
+    description: 'What percent of meetings converted to closed within 60 days of the meeting?'
+    type: number
+    value_format: '#.#\%'
+    sql: 100.0 * ${meetings_converted_to_close_within_60d} / nullif(${meeting.meetings_completed},0)
+    drill_fields: [name, meeting.meeting_date, account_representative_meeting.name, opportunity.created_date, opportunity.name, opportunity.stage_name]
+  
 #   - measure: meetings_converted_to_close_within_60d
 #     type: count_distinct
 #     sql: ${meeting.id}
@@ -464,8 +482,7 @@
 #       meeting.status: 'Completed'
 #       opp_to_closed_60d: 'Yes' 
 #       is_won: 'Yes'
-      
-      
+#       
 #   - measure: meeting_to_close_conversion_rate_60d
 #     label: 'Meeting to Close/Won Conversion within 60 days'
 #     view_label: 'Meeting'

@@ -121,11 +121,11 @@
       type: inner   # to omit accounts for whom there is no usage due to no license mapping
       relationship: one_to_one  
 
-    - join: account_weekly_usage
-      view_label: 'Usage'
-      sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
-      relationship: one_to_many
-      fields: [export_set*]
+#     - join: account_weekly_usage
+#       view_label: 'Usage'
+#       sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
+#       relationship: one_to_many
+#       fields: [export_set*]
 
     - join: quota
       view_label: 'Sales Representative'
@@ -266,9 +266,11 @@
       
 - explore: opportunity
   hidden: true
+  fields: [ALL_FIELDS*, -opportunity.meetings_converted_to_close_within_60d,-opportunity.meeting_to_close_conversion_rate_60d]
   joins:
     - join: person
       sql_on: ${person.id} = ${opportunity.owner_id}
       relationship: one_to_many
+    
   
       
