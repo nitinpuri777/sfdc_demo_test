@@ -104,7 +104,10 @@
       - label: Customer Lookup Dashboard
         url: http://demonew.looker.com/dashboards/279?Account%20Name={{ value  }}
         icon_url: http://www.looker.com/favicon.ico
-
+      - label: Salesforce Account
+        url: https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg
+        icon_url: http://www.salesforce.com/favicon.ico
+        
   - dimension: number_of_employees
     type: number
     sql: ${TABLE}.number_of_employees

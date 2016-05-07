@@ -8,7 +8,6 @@
     value_format: '[>=1000000]0.00,,"M";[>=1000]0.00,"K";$0.00'
     
   
-
 # VIEWS TO EXPLORE——i.e., "BASE VIEWS" #
 
 - explore: the_switchboard
@@ -121,7 +120,25 @@
       sql_on: ${usage.salesforce_account_id} = ${account.id}
       type: inner   # to omit accounts for whom there is no usage due to no license mapping
       relationship: one_to_one  
-      
+
+#     - join: account_weekly_usage
+#       view_label: 'Usage'
+#       sql_on: ${the_switchboard.account_id} = ${account_weekly_usage.account_id}
+#       relationship: one_to_many
+#       fields: [export_set*]
+
+    - join: quota
+      view_label: 'Sales Representative'
+      sql_on: |
+        ${salesrep.id} = ${quota.person_id} AND 
+        DATE_TRUNC('quarter',  ${opportunity.closed_raw}) = DATE_TRUNC('quarter',  ${quota.quota_raw})
+      type: full_outer
+      relationship: one_to_many
+    
+    - join: quota_aggregated
+      view_label: 'Sales Team Quota'
+      sql_on: ${opportunity.closed_quarter_string} = ${quota_aggregated.quota_quarter_string} 
+      relationship: many_to_one
       
 - explore: funnel
   label: '(2) Lead Funnel'
@@ -217,6 +234,20 @@
       fields: [export_set*]
       type: inner
 
+#     - join: session_facts
+#       relationship: one_to_one
+#       type: inner
+#       view_label: 'Sessions'
+#       sql_on: ${sessions.unique_session_id} = ${session_facts.unique_session_id}
+
+    - join: quota
+      view_label: 'Sales Representative'
+      sql_on: |
+        ${salesrep.id} = ${quota.person_id} AND 
+        TO_CHAR(CAST(DATE_TRUNC('quarter',  ${opportunity.closed_raw}) AS DATE), 'YYYY-MM') = TO_CHAR(CAST(DATE_TRUNC('quarter',  ${quota.quota_raw}) AS DATE), 'YYYY-MM')
+      type: full_outer
+      relationship: one_to_many
+
 - explore: rolling_30_day_activity_facts
   view_label: "Active Users"
   label: '(5) Daily, Weekly, and Monthly Active Users'
@@ -231,6 +262,15 @@
       fields: [name, city, state, vertical, vertical_segment]
       sql_on: ${license.salesforce_account_id} =${account.id}
       relationship: many_to_one
+      
+      
+- explore: opportunity
+  hidden: true
+  fields: [ALL_FIELDS*, -opportunity.meetings_converted_to_close_within_60d,-opportunity.meeting_to_close_conversion_rate_60d]
+  joins:
+    - join: person
+      sql_on: ${person.id} = ${opportunity.owner_id}
+      relationship: one_to_many
+    
   
       
-            

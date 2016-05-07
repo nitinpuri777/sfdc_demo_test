@@ -1,3 +1,4 @@
+
 - view: opportunity
   fields:
 
@@ -11,7 +12,6 @@
         url: https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg
         icon_url: http://www.salesforce.com/favicon.ico
 
-
   - dimension: account_id
     hidden: true
     sql: ${TABLE}.account_id
@@ -20,6 +20,10 @@
     hidden: true
     sql: company_id
 
+  - dimension: owner_id
+    hidden: true
+    sql: ${TABLE}.owner_id
+    
   - dimension: acv
     type: number
     sql: ${TABLE}.acv
@@ -40,14 +44,20 @@
   - dimension_group: closed
     type: time
     timeframes: [raw, date, week, month, year, time, quarter]
+    convert_tz: false
     sql: ${TABLE}.closed_date
     
-#  - dimension: closed_quarter
-#    sql: EXTRACT(YEAR FROM ${TABLE}.closed_date) || ' - Q' || EXTRACT(QUARTER FROM ${TABLE}.closed_date)
-    
+  - dimension: closed_quarter_string
+    hidden: true
+    sql: EXTRACT(YEAR FROM ${TABLE}.closed_date) || ' - Q' || EXTRACT(QUARTER FROM ${TABLE}.closed_date)
+
+  - dimension: current_quarter
+    hidden: true
+    sql: EXTRACT(YEAR FROM CURRENT_DATE) || ' - Q' || EXTRACT(QUARTER FROM CURRENT_DATE)
+
   - dimension: is_current_quarter
     type: yesno
-    sql: EXTRACT(QUARTER FROM ${TABLE}.closed_date) || EXTRACT(YEAR FROM ${TABLE}.closed_date) = EXTRACT(QUARTER FROM CURRENT_DATE) || EXTRACT(YEAR FROM CURRENT_DATE)    
+    sql: ${closed_quarter_string} = ${current_quarter}
 
   - dimension: closed_day_of_quarter
     type: number
@@ -63,8 +73,20 @@
       91 - (DATEDIFF(
         'day',
         CAST(CONCAT((TO_CHAR(CAST(DATE_TRUNC('quarter', CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', CURRENT_DATE)) AS DATE), 'YYYY-MM')), '-01') as date),
-        CURRENT_DATE))
-        
+        CURRENT_DATE)) - 1
+  
+  - dimension: day_of_current_quarter
+    type: number
+    sql: |
+       (DATEDIFF(
+        'day',
+        CAST(CONCAT((TO_CHAR(CAST(DATE_TRUNC('quarter', CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', CURRENT_DATE)) AS DATE), 'YYYY-MM')), '-01') as date),
+        CURRENT_DATE)) + 1
+
+  - dimension: is_quarter_to_date
+    type: yesno
+    sql: ${closed_day_of_quarter} <= ${day_of_current_quarter}
+      
   - dimension: contract_length
     type: number
     sql: ${TABLE}.contract_length_c
@@ -82,17 +104,10 @@
     type: number
     sql: DATEDIFF(MONTHS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date) )
     
-      
-      
   - dimension:  opp_to_closed_60d 
     hidden: true
     type: yesno
     sql: ${days_open} <=60 AND ${is_closed} = 'yes' AND ${is_won} = 'yes'
-
-#  Always No
-#   - dimension: is_cancelled
-#     type: yesno
-#     sql: ${TABLE}.is_cancelled_c
 
   - dimension: is_closed
     type: yesno
@@ -129,8 +144,8 @@
   - dimension: probablity_tier
     type: tier
     tiers: [0,.01,.20,.40,.60,.80,1]
-#     style: integer
     sql: ${probability}
+    value_format: "#%"
     
   - dimension: probability_group
     sql_case:
@@ -141,12 +156,6 @@
       '20 - 40%': ${probability} > .2
       'Under 20%': ${probability} > 0
       'Lost': ${probability} = 0
-
-
-# Always null
-#   - dimension: renewal_number
-#     type: number
-#     sql: ${TABLE}.renewal_number_c
 
   - dimension: renewal_opportunity_id
     sql: ${TABLE}.renewal_opportunity_id
@@ -255,10 +264,17 @@
   - measure: count_won_percent_change
     label: 'Count Won (% change from last quarter)'
     type: number
-    sql: 1 - 1.0 * ${count_won_current_quarter}/NULLIF(${count_won_last_quarter},0)
-    value_format_name: percent_2
-
-
+    sql: (${count_won_current_quarter} - ${count_won_last_quarter})/NULLIF(${count_won_last_quarter},0)
+    value_format_name: percent_0
+    html: |
+      {% if value < -0.05 %}
+       <p style="color: #353b49; background-color: #ed6168; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% elsif value < 0.05 %}
+       <p style="color: #353b49; background-color: #e9b404; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+       {% else %}
+       <p style="color: #353b49; background-color: #49cec1; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% endif %}
+  
   - measure: total_mrr
     label: 'Total MRR (Closed/Won)'
     type: sum
@@ -276,7 +292,6 @@
     drill_fields: opportunity_set*  
     value_format_name: usd_large
       
-    
   - measure: average_mrr
     label: 'Average MRR (Closed/Won)'
     type: average
@@ -286,14 +301,14 @@
     drill_fields: opportunity_set*
     value_format: '$#,##0'
 
-#   - measure: total_contract_value
-#     label: 'Total Contract Value (Won)'
-#     type: sum
-#     sql: ${contract_value}
-#     filters:
-#       is_won: Yes    
-#     drill_fields: opportunity_set*
-#     value_format: '$#,##0'
+  - measure: total_contract_value
+    label: 'Total Contract Value (Won)'
+    type: sum
+    sql: ${contract_value}
+    filters:
+     is_won: Yes    
+    drill_fields: opportunity_set*
+    value_format: '$#,##0'
     
   - measure: average_contract_value
     label: 'Average Contract Value (Won)'
@@ -320,10 +335,18 @@
     value_format: '#0.00\%'
   
   - measure: win_percentage_change
-    label: 'Win Percentage (change from last quarter)'
+    label: 'Win Percentage Change from Last Quarter'
     type: number
-    sql: ${win_percentage_current_quarter} - ${win_percentage_last_quarter}
-    value_format_name: percent_2
+    sql: (${win_percentage_current_quarter} - ${win_percentage_last_quarter})/${win_percentage_last_quarter}
+    value_format_name: percent_0
+    html: |
+      {% if value < -0.05 %}
+       <p style="color: #353b49; background-color: #ed6168; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% elsif value < 0.05 %}
+       <p style="color: #353b49; background-color: #e9b404; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+       {% else %}
+       <p style="color: #353b49; background-color: #49cec1; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% endif %}
     
   - measure: open_percentage
     type: number
@@ -385,11 +408,19 @@
     drill_fields: opportunity_set*   
 
   - measure: total_acv_won_percent_change
-    label: 'Total ACV Won (% change from last quarter)'
+    label: 'Total ACV Won Change from Last Quarter'
     type: number
-    sql: 1 - 1.0 * ${total_acv_won_current_quarter}/ NULLIF(${total_acv_won_last_quarter},0) 
-    value_format_name: percent_2
-
+    sql: (${total_acv_won_current_quarter} - ${total_acv_won_last_quarter})/ NULLIF(${total_acv_won_last_quarter},0)
+    value_format_name: percent_0
+    html: |
+      {% if value < -0.05 %}
+       <p style="color: #353b49; background-color: #ed6168; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% elsif value < 0.05 %}
+       <p style="color: #353b49; background-color: #e9b404; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+       {% else %}
+       <p style="color: #353b49; background-color: #49cec1; font-size:100%; text-align:center; border-radius: 5px;">{{ rendered_value }}</p>
+      {% endif %}
+  
   - measure: total_acv_lost
     type: sum
     sql: ${acv}   
@@ -421,6 +452,10 @@
     sql: ${total_acv}     
     drill_fields: opportunity_set*
     
+  - measure: total_acv_won_running_sum
+    type: running_total
+    sql: ${total_acv_won}
+    
   - measure: meetings_converted_to_close_within_60d
     type: count_distinct
     sql: ${meeting.id}
@@ -430,7 +465,6 @@
       opp_to_closed_60d: 'Yes' 
       is_won: 'Yes'
       
-      
   - measure: meeting_to_close_conversion_rate_60d
     label: 'Meeting to Close/Won Conversion within 60 days'
     view_label: 'Meeting'
@@ -438,7 +472,8 @@
     type: number
     value_format: '#.#\%'
     sql: 100.0 * ${meetings_converted_to_close_within_60d} / nullif(${meeting.meetings_completed},0)
-    drill_fields: [name, meeting.meeting_date, account_representative_meeting.name, opportunity.created_date, opportunity.name, opportunity.stage_name]      
+    drill_fields: [name, meeting.meeting_date, account_representative_meeting.name, opportunity.created_date, opportunity.name, opportunity.stage_name]
+  
 
 #REP VS TEAM METRICS. Could use extends functionality for this.
     
@@ -545,7 +580,6 @@
     
 # SETS #
 
-
   sets:
     opportunity_set:
       - account.name
@@ -562,6 +596,7 @@
       - created_date
       - created_week
       - created_month
+      - created_quarter
       - closed_date
       - closed_week
       - closed_month      
@@ -584,7 +619,6 @@
       - count
       - total_mrr
       - average_mrr
-#       - total_contract_value
       - average_contract_value
       - count_closed
       - count_won
@@ -595,6 +629,9 @@
       - total_acv
       - total_acv_running_sum
       - count_lost
+      - total_acv_won
+      - total_acv_won_current_quarter
+      - total_acv_won_last_quarter
       
   derived_table:
     sql: |
