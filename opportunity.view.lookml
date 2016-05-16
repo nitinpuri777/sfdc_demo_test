@@ -377,10 +377,12 @@
     
   - filter: rep_name
     suggest_dimension: salesrep.name
+    suggest_explore: the_switchboard
     
   - filter: sales_segment
     suggest_dimension: salesrep.business_segment
-
+    suggest_explore: the_switchboard
+    
   - measure: total_acv_won
     type: sum
     sql: ${acv}   
