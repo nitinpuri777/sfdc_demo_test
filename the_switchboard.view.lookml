@@ -1,3 +1,9 @@
+# Flattening SFDC data is a very effective way to calculate lead attribution, as it takes companies into account, not individuals. 
+# This can also be an effective base Explore for users who aren't familiar with the Salesforce schema and don't know where to start.
+# However, it's too complex a solution for basic queries, because of the number of joins required to build this table.
+# The complexity makes queries less performant and makes debugging SQL harder because of how they are written.
+
+
 - view: opportunity_attributable_campaign_temp
   derived_table:
     sql: |
@@ -235,7 +241,9 @@
         LEFT JOIN ${modified_first_touch.SQL_TABLE_NAME} AS modified_first_touch
         ON modified_first_touch.company_id = second_pass.company_id
     sql_trigger_value: SELECT COUNT(*) FROM salesforce._lead
+    distribution_style: EVEN
     indexes: [first_seen_at, account_id, contact_id, opportunity_id, meeting_id]
+ 
   fields:
   
   - dimension: id

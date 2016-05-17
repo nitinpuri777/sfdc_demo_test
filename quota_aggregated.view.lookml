@@ -1,8 +1,12 @@
+# Similar to the quota table, we created this to get team-level quotas. 
+# For most customers, this data would be stored in a different format, 
+# and a single quota table would likely suffice to give both individual and team-level aggregates.
 
 - view: quota_aggregated
   derived_table:
     persist_for: 24 hours
     sortkeys: quota_quarter
+    distribution_style: ALL
     sql: |
             SELECT 
               quota_quarter 
