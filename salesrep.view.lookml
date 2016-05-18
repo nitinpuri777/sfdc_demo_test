@@ -14,7 +14,7 @@
             WHEN  PERCENT_RANK() OVER(ORDER BY auto_id) BETWEEN 0.25 AND 0.50
             THEN 'Mid-Market'
             ELSE 'Small Business'
-          END AS business_segment
+          END  AS business_segment
       FROM (SELECT *
               , ROW_NUMBER() OVER(ORDER BY 1) AS auto_id
             FROM person)
