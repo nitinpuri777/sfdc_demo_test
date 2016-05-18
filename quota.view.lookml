@@ -1,7 +1,12 @@
+# We're using this derived table to create quotas for our fictional company. 
+# Most companies have this either built into their SFDC data or as a separate table in their database, 
+# and wouldn't build a table out here.
+
 
 - view: quota
   derived_table:
     persist_for: 24 hours
+    distribution_style: ALL
     sortkeys: quota_quarter
     sql: |
             SELECT 

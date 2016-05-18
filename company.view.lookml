@@ -1,3 +1,13 @@
+
+# Because Accounts are not created until a Lead is converted to a Contact (at the conversion to an Opportunity), 
+# there is no inherent way to search across all businesses in your system in one place.
+# 
+#This derived table joins all instances of company names from the account and lead tables to ensure a single list of businesses.
+# First, it cleans company names by stripping spaces and modifiers to create a consistent way of referring to each company.
+# Then, it joins those cleaned names from the account table to the lead table, 
+# and classifies any company that is not yet a customer as a prospect (including any company in the lead table). 
+# This table will regenerate any time a new record is added to the lead table.
+
 - view: company
   derived_table:
     sql: |
@@ -28,6 +38,7 @@
       ON temp_company.company_id = temp_account.company_id
     sql_trigger_value: SELECT COUNT(*) FROM public.lead
     indexes: [company_id, account_id]
+    distribution_style: ALL
   fields:
 
 # DIMENSIONS #
@@ -58,11 +69,14 @@
     type: count
     drill_fields: company_set*
 
+# The following two measures are "filtered measures" which allow a user to bring in two versions of the same measure in a single query
+
   - measure: count_prospect
     type: count
     filters:
       type: 'Prospect'
     drill_fields: company_set*
+
     
   - measure: count_customer
     type: count

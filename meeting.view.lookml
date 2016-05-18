@@ -1,3 +1,8 @@
+# For this demo company, Intro Meetings are the most important task, so we want to pull it out for specific analytics. 
+# Other companies may have other types of tasks that are stronger indicators for their business.
+# No matter which piece of information needs to be pulled out, or which table it's coming from,
+# this is a useful pattern for extracting an important piece of a table to expose for analytics. 
+
 - view: meeting
   derived_table:
     sql: |
@@ -6,12 +11,13 @@
       WHERE type = 'Intro Meeting'
     sql_trigger_value: SELECT COUNT(*) FROM task
     sortkeys: [account_id]
+    distribution_style: ALL
   fields:
   
 # FILTER-ONLY FIELDS #
 
   - filter: meeting_goal
-    description: 'Enter an integer greater than zero.'
+    description: 'Enter an integer greater than zero.' # Descriptions surface on the Explore page to facilitate using fields.
 
 # DIMENSIONS #
 

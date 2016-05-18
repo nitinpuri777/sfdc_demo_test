@@ -1,3 +1,7 @@
+# This derived table divides this fictional company's sales force into teams. 
+# If a company doesn't have a table that divides its users into teams or hasn't input that data into Salesforce,
+# Dividing companies into teams by way of a derived table may still make sense.
+
 - view: salesrep
   derived_table:
     sql: |
@@ -16,6 +20,7 @@
             FROM person)
       WHERE id IN (SELECT DISTINCT owner_id FROM public.account)
     sql_trigger_value: SELECT COUNT(*) FROM person
+    distribution_style: ALL
     sortkeys:  [id]
   fields:
 
@@ -33,15 +38,17 @@
     hidden: true
     sql: ${TABLE}.last_name
 
+# The next two dimensions create links to other dashboards within Looker when clicking on any value from this field on a dashboard
+
   - dimension: name
     sql: ${first_name} || ' ' || ${last_name}
     links: 
       - label: Sales Representative Performance Dashboard
         url: http://demonew.looker.com/dashboards/5?Sales%20Rep={{ value | encode_uri }}&Sales%20Segment={{ salesrep.business_segment._value }}
         icon_url: http://www.looker.com/favicon.ico
-#       - label: Rep Success --will want to activate this link with new demo
-#         url: http://demonew.looker.com/dashboards/331?Sales%20Rep%20Name={{ value | encode_uri }}&Business%20Segment={{ salesrep.business_segment._value }}
-#         icon_url: http://www.looker.com/favicon.ico
+      - label: Rep Success Dashboard 
+        url: http://demonew.looker.com/dashboards/331?Sales%20Rep%20Name={{ value | encode_uri }}&Business%20Segment={{ salesrep.business_segment._value }}
+        icon_url: http://www.looker.com/favicon.ico
 #   
   - dimension: business_segment
     sql: COALESCE(${TABLE}.business_segment, 'Top of Funnel/Not Assigned')
@@ -49,9 +56,9 @@
       - label: Sales Team Summary Dashboard
         url: http://demonew.looker.com/dashboards/4?Business%20Segment={{ value | encode_uri }}
         icon_url: http://www.looker.com/favicon.ico
-#       - label: Sales Rep Comparison Dashboard --will want to activate this link with new demo
-#         url: http://demonew.looker.com/dashboards/323?Business%20Segment={{ value | encode_uri }}
-#         icon_url: http://www.looker.com/favicon.ico
+      - label: Rep Overview Dashboard
+        url: http://demonew.looker.com/dashboards/323?Business%20Segment={{ value | encode_uri }}
+        icon_url: http://www.looker.com/favicon.ico
     suggestions: ['Enterprise','Mid-Market','Small Business', 'Top of Funnel/Not Assigned']
       
   - filter: rep_select
