@@ -2,7 +2,7 @@
 - view: opportunity_dates
   derived_table:
     sql: |
-      SELECT accountid AS account_id
+      SELECT account_id AS account_id
         , MIN(name) AS name
         , MIN(closedate) AS first_opp_date
         , MIN(CASE
