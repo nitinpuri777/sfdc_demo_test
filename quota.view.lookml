@@ -18,7 +18,7 @@
                     then 90 / datediff(day, quota_quarter, current_date) * quota
                     else quota
                     end)
-                      as quota
+                    as quota
             FROM public.quota quota
   fields:
 
