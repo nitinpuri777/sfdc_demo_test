@@ -16,7 +16,7 @@
                     then 93 / datediff(day, quota_quarter, current_date) * quota
                     else quota
                     end)
-                      as sales_team_quota
+                    as sales_team_quota
             FROM public.quota q
             GROUP BY quota_quarter
             ORDER BY quota_quarter asc

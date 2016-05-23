@@ -13,7 +13,7 @@
                                                                     ORDER BY contact.created_at) AS contact_role_sequence_number
                                               FROM account_contact_role
                                               LEFT JOIN contact contact
-                                              ON contact.id = account_contact_role.contactid)
+                                              ON contact.id = account_contact_role.contact_id)
             , first_reference_contact AS (SELECT account_id
                                             , contact_id AS first_reference_contact_id
                                             , name AS first_reference_contact_name

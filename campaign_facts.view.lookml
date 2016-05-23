@@ -34,7 +34,7 @@
                                     END AS last_reference_campaign_id    
                                 FROM public.campaign_member AS campaign_member
                                 LEFT JOIN public.account_contact_role
-                                ON account_contact_role.contactid = campaign_member.contact_id)
+                                ON account_contact_role.contact_id = campaign_member.contact_id)
       SELECT account_id
         , MIN(first_economic_contact_campaign_id) AS first_economic_contact_campaign_id
         , MAX(last_economic_contact_campaign_id) AS last_economic_contact_campaign_id

@@ -240,7 +240,7 @@
         ON opportunity_contact_role.contact_id = second_pass.contact_id
         LEFT JOIN ${modified_first_touch.SQL_TABLE_NAME} AS modified_first_touch
         ON modified_first_touch.company_id = second_pass.company_id
-    sql_trigger_value: SELECT COUNT(*) FROM salesforce._lead
+    sql_trigger_value: SELECT COUNT(*) FROM public.lead
     distribution_style: EVEN
     indexes: [first_seen_at, account_id, contact_id, opportunity_id, meeting_id]
  
