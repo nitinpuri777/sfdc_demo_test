@@ -30,6 +30,7 @@
   - dimension: quota
     type: number
     sql: ${TABLE}.quota
+    value_format_name: usd_0
 
   - dimension_group: quota
     type: time
