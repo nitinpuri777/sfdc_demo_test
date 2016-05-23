@@ -274,6 +274,7 @@
       relationship: one_to_many
       
     - join: salesrep
+      view_label: 'Sales Representative'
       sql_on: ${salesrep.id} = ${opportunity.owner_id}
       relationship: one_to_many
     
