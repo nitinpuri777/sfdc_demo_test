@@ -172,6 +172,10 @@
       Won:  ${stage_name} IN ('Closed Won')
       Lost: ${stage_name} like '%Closed%' 
       Unknown: true
+    links: 
+      - label: Pipeline Analysis Dashboard
+        url: https://demonew.looker.com/dashboards/363
+        icon_url: http://www.looker.com/favicon.ico
       
   - dimension: contract_value
     type: number
