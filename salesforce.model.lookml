@@ -6,7 +6,7 @@
 - value_formats:
   - name: usd_large
     value_format: '[>=1000000]$0.00,,"M";[>=1000]$0.00,"K";$0.00'
-    
+
   
 # VIEWS TO EXPLORE——i.e., "BASE VIEWS" #
 

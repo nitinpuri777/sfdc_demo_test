@@ -1042,6 +1042,21 @@
         {% else %}
           <div style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
         {% endif %}
+        
+    - measure: average_concentration_score
+      type: average
+      sql: ${concentration_score}
+      description: "A score from 1-10 rating the distribution of usage amongst all users (higher is better)"
+      drill_fields: detail*
+      value_format: '0.0'
+      html: |
+        {% if value <= 3 %}
+          <div style="color: white; background-color: darkred; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</div>
+        {% elsif value <= 6 %}
+          <div style="color: black; background-color: goldenrod; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</div>
+        {% else %}
+          <div style="color: white; background-color: darkgreen; margin: 0; font-size: 100%; text-align:center">{{ rendered_value }}</div>
+        {% endif %}
   
     - measure: average_account_health_change_MoM
       type: number
