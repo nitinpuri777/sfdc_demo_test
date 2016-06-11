@@ -378,6 +378,22 @@
     drill_fields: opportunity_set*
     filters:
       type: 'Addon/Upsell'
+      
+  - measure: net_expansion
+    type: number
+    sql: ${total_expansion_acv} - ${total_churn_acv}
+    value_format_name: usd_large
+    drill_fields: opportunity_set*
+    
+  - measure: churn_acv #for Net Expansion Look
+    type: sum
+    sql: -1.0*${acv}
+    value_format_name: usd_large
+    drill_fields: opportunity_set*
+    filters:
+      lost_reason: 'Non-renewal'
+    
+  
     
   - filter: rep_name
     suggest_dimension: salesrep.name
@@ -591,6 +607,7 @@
       - account.name
       - stage_name_funnel
       - type
+      - mrr
     
     export_set:
       - id
