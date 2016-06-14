@@ -5,8 +5,8 @@
 - include: "*.dashboard.lookml"  # include all the dashboards
 - value_formats:
   - name: usd_large
-    value_format: '[>=1000000]$0.00,,"M";[>=1000]0.00,"K";$0.00'
-    
+    value_format: '[>=1000000]$0.00,,"M";[>=1000]$0.00,"K";$0.00'
+
   
 # VIEWS TO EXPLORE——i.e., "BASE VIEWS" #
 
@@ -268,9 +268,28 @@
   hidden: true
   fields: [ALL_FIELDS*, -opportunity.meetings_converted_to_close_within_60d,-opportunity.meeting_to_close_conversion_rate_60d]
   joins:
-    - join: person
-      sql_on: ${person.id} = ${opportunity.owner_id}
+    
+    - join: account
+      sql_on: ${account.id} = ${opportunity.account_id}
       relationship: one_to_many
+      
+    - join: salesrep
+      view_label: 'Sales Representative'
+      sql_on: ${salesrep.id} = ${opportunity.owner_id}
+      relationship: one_to_many
+    
+    - join: quota
+      view_label: 'Sales Representative'
+      sql_on: |
+        ${salesrep.id} = ${quota.person_id} AND 
+        TO_CHAR(CAST(DATE_TRUNC('quarter',  ${opportunity.closed_raw}) AS DATE), 'YYYY-MM') = TO_CHAR(CAST(DATE_TRUNC('quarter',  ${quota.quota_raw}) AS DATE), 'YYYY-MM')
+      type: full_outer
+      relationship: one_to_many
+      
+    - join: quota_aggregated
+      view_label: 'Sales Team Quota'
+      sql_on: ${opportunity.closed_quarter_string} = ${quota_aggregated.quota_quarter_string} 
+      relationship: many_to_one
     
   
       

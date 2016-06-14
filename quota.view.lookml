@@ -24,12 +24,13 @@
 
   - dimension: person_id
     type: string
-    # hidden: true
+    hidden: true
     sql: ${TABLE}.person_id
 
   - dimension: quota
     type: number
     sql: ${TABLE}.quota
+    value_format_name: usd_0
 
   - dimension_group: quota
     type: time
@@ -43,10 +44,6 @@
     hidden: true
     sql: ${person_id} || '_' || ${quota_time}
     
-  - measure: count
-    type: count
-    drill_fields: [person.id, person.first_name, person.last_name]
-
   - measure: sum_quota
     type: sum
     sql: ${quota}

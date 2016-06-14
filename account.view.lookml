@@ -44,6 +44,10 @@
       {% else %}
         {{ rendered_value }}
       {% endif %}
+      
+  - dimension: is_active_customer
+    type: yesno
+    sql: ${current_customer} AND (${account_status} NOT IN ('Unknown', 'Black (Discontinued)')
   
   - dimension: campaign
     hidden: true
