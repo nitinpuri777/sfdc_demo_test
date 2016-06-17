@@ -44,10 +44,6 @@
       {% else %}
         {{ rendered_value }}
       {% endif %}
-      
-  - dimension: is_active_customer
-    type: yesno
-    sql: ${current_customer} AND (${account_status} NOT IN ('Unknown', 'Black (Discontinued)')
   
   - dimension: campaign
     hidden: true
@@ -93,7 +89,6 @@
         WHEN DATEDIFF(day, ${customer_start_raw}, CURRENT_DATE) < 0 THEN DATEDIFF(day, ${customer_start_raw}, CURRENT_DATE)
         ELSE 365 - (DATEDIFF(day, ${customer_start_raw}, CURRENT_DATE) % 365)
       END
-    
 
   - dimension: engagement_stage
     sql_case:
@@ -101,6 +96,18 @@
       'Engaged': ${current_customer} = 'No' AND ${TABLE}.engagement_stage_c IS NOT NULL
       else: 'Prospecting'
 
+  - dimension: is_active_customer
+    type: yesno
+    sql: ${current_customer} AND ${account_status} NOT IN ('Unknown', 'Black (Discontinued)')
+    
+  - dimension: active_customer_name               #used for filter suggestions on customer lookup dashboard to only show active customers
+    type: string
+    sql: |
+      CASE 
+        WHEN ${is_active_customer} = 'YES' THEN ${name}
+        ELSE NULL
+      END
+  
   - dimension: name
     sql: ${TABLE}.name
     links:
@@ -241,3 +248,4 @@
       - owner_id
       - days_to_contract_renewal
       - reminder_email
+      - active_customer_name
