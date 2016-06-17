@@ -165,12 +165,10 @@
     - join: meeting
       sql_on: ${meeting.account_id} = ${company.account_id}
       relationship: one_to_many
-#       type: inner
       
     - join: opportunity
       sql_on: ${opportunity.account_id} = ${company.account_id}
       relationship: one_to_many
-#       type: inner
 
 - explore: historical_snapshot    
   label: '(3) Historical Opportunity Snapshot'
