@@ -27,7 +27,7 @@
           AND opportunity.id <> '006E000000OiPYNIA3'
         GROUP BY 1,2
     sql_trigger_value: SELECT COUNT(*) FROM public.zendesk_ticket
-    distribution_style: ALL
+    distkey: id
     sortkeys: [id]
   fields:
   - dimension: id

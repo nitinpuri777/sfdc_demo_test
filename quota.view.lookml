@@ -6,8 +6,8 @@
 - view: quota
   derived_table:
     persist_for: 24 hours
-    distribution_style: ALL
-    sortkeys: quota_quarter
+    distkey: person_id 
+    sortkeys: [quota_quarter]
     sql: |
             SELECT 
                person_id

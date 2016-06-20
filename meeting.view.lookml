@@ -10,8 +10,8 @@
       FROM task
       WHERE type = 'Intro Meeting'
     sql_trigger_value: SELECT COUNT(*) FROM task
+    distkey: account_id
     sortkeys: [account_id]
-    distribution_style: ALL
   fields:
   
 # FILTER-ONLY FIELDS #

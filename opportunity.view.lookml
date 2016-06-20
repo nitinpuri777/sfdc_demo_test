@@ -664,7 +664,7 @@
       LEFT JOIN public.account AS account
       ON account.id = opportunity.account_id    
     sql_trigger_value: SELECT DATE(CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', GETDATE()))
-    sortkeys: [account_id]
+    sortkeys: [closed_date]
     distkey: account_id  
     
     
