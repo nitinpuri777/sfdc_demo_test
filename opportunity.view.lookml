@@ -219,8 +219,7 @@
     
   - measure: avg_days_open
     type: avg
-    sql: ${days_open}  
-
+    sql: ${days_open} 
     
   - measure: cumulative_total
     type: running_total

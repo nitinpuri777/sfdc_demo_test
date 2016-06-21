@@ -20,7 +20,7 @@
             FROM person)
       WHERE id IN (SELECT DISTINCT owner_id FROM public.account)
     sql_trigger_value: SELECT COUNT(*) FROM person
-    distkey: id
+    distribution_style: ALL
     sortkeys: [id]
   fields:
 

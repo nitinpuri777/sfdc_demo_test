@@ -261,7 +261,6 @@
       sql_on: ${license.salesforce_account_id} =${account.id}
       relationship: many_to_one
       
-      
 - explore: opportunity
   label: "(6) Opportunity"
   fields: [ALL_FIELDS*, -opportunity.meetings_converted_to_close_within_60d,-opportunity.meeting_to_close_conversion_rate_60d]
@@ -292,6 +291,23 @@
       view_label: 'Sales Team Quota'
       sql_on: ${opportunity.closed_quarter_string} = ${quota_aggregated.quota_quarter_string} 
       relationship: many_to_one
-    
+      
+- explore: campaign_attribution
+  label: "(7) Campaign Attribution"
+  view_label: "Lead"
+  fields: [ALL_FIELDS*,-opportunity.meeting_to_close_conversion_rate_60d,-opportunity.meetings_converted_to_close_within_60d]
+  joins:
   
+    - join: campaign
+      view_label: "First Campaign"
+      sql_on: ${campaign_attribution.campaign_id} = ${campaign.id}
+      relationship: many_to_one
+  
+    - join: lead
+      sql_on: ${campaign_attribution.lead_id} = ${lead.id}
+      relationship: one_to_one
+      
+    - join: opportunity
+      sql_on: ${lead.converted_opportunity_id} = ${opportunity.id}
+      relationship: many_to_one
       
