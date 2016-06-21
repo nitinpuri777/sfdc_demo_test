@@ -4,18 +4,18 @@
   title: Customer Success - Customer Lookup
   layout: grid
   rows:
-#     - elements: [account_information]
-#       height: 100
+    - elements: [account_information]
+      height: 100
     - elements: [health, mrr, days_to_renewal, active_users, license_utilization, zd_tickets]
       height: 200
-#     - elements: [product_usage]
-#       height: 100
+    - elements: [product_usage]
+      height: 100
     - elements: [trending_health_score, dau_mau_ratio, usage_by_user]
       height: 400
     - elements: [monthly_feature_usage_report]
       height: 350
-#     - elements: [recent_account_activity]
-#       height: 100
+    - elements: [recent_account_activity]
+      height: 100
     - elements: [opportunity_history, support_tickets_by_week]
       height: 300
 
@@ -27,30 +27,11 @@
 
   elements:
 
-#     - name: account_information
-#       type: "text"
-#       title_text: "Account Information"
-#       subtitle_text: "License, Health and MRR"
-#   
-    #   - name: account_tier
-  #     type: single_value
-  #     model: salesforce
-  #     explore: the_switchboard
-  #     dimensions: [account.account_tier]
-  #     dynamic_fields:
-  #     - table_calculation: account_tier
-  #       label: Account Tier
-  #       expression: ${account.account_tier}
-  #     hidden_fields: [account.account_tier]
-  #     listen:
-  #       account_name: account.name
-  #     sorts: [opportunity.account_tier, account.account_tier]
-  #     limit: 1
-  #     query_timezone: America/Los_Angeles
-  #     show_single_value_title: true
-  #     value_format: ''
-  #     show_comparison: false
-  
+    - name: account_information
+      type: "text"
+      title_text: "Account Information"
+      subtitle_text: "License, Health and MRR"
+
     - name: health
       type: single_value
       model: salesforce
@@ -161,10 +142,10 @@
       show_single_value_title: true
       show_comparison: false
   
-#     - name: product_usage
-#       type: text
-#       title_text: "Product Usage and Engagement"
-#       subtitle_text: "Health Score, DAU-MAU, Usage"
+    - name: product_usage
+      type: text
+      title_text: "Product Usage and Engagement"
+      subtitle_text: "Health Score, DAU-MAU, Usage"
   
     - name: trending_health_score
       type: looker_line
@@ -332,10 +313,10 @@
       table_theme: white
       limit_displayed_rows: false
   
-#     - name: recent_account_activity
-#       type: text
-#       title_text: "Recent Account Activity"
-#       subtitle_text: "Opportunity Events, Support Tickets"
+    - name: recent_account_activity
+      type: text
+      title_text: "Recent Account Activity"
+      subtitle_text: "Opportunity Events, Support Tickets"
   
     - name: opportunity_history
       type: table
