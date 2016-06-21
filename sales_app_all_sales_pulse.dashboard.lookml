@@ -1,5 +1,5 @@
-- dashboard: the_sales_team_pulse
-  title: The Sales Team Pulse
+- dashboard: sales_app_all_sales_pulse
+  title: Sales App - All Sales Pulse
   layout: grid
   rows: 
     - elements: [new_mrr, of_quota_this_time_last_q, new_acv, wins, days_left]
