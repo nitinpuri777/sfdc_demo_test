@@ -2,7 +2,7 @@
 # Because Accounts are not created until a Lead is converted to a Contact (at the conversion to an Opportunity), 
 # there is no inherent way to search across all businesses in your system in one place.
 # 
-#This derived table joins all instances of company names from the account and lead tables to ensure a single list of businesses.
+# This derived table joins all instances of company names from the account and lead tables to ensure a single list of businesses.
 # First, it cleans company names by stripping spaces and modifiers to create a consistent way of referring to each company.
 # Then, it joins those cleaned names from the account table to the lead table, 
 # and classifies any company that is not yet a customer as a prospect (including any company in the lead table). 
