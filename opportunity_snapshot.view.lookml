@@ -94,7 +94,7 @@
   - dimension: close
     type: time
     description: 'At the time of snapshot, what was the projected close date?'
-    timeframes: [date, week, month]
+    timeframes: [date, week, month, quarter]
     sql:  to_date (${TABLE}.close_date, 'YYYY-MM-DD')
 #     sql: ${TABLE}.close_date
 
