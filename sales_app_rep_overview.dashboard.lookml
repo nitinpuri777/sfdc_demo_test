@@ -8,7 +8,15 @@
       height: 550
     - elements: [lead_to_intros, meetings_to_opps, opps_to_wins]
       height: 500
-#  filters
+
+  filters:
+  
+  - name: sales_segment
+    title: 'Sales Segment'
+    type: field_filter
+    explore: opportunity
+    field: salesrep.segment_select
+    
 
   elements:
 
@@ -31,6 +39,8 @@
     query_timezone: America/Los_Angeles
     show_single_value_title: true
     show_comparison: false
+    listen:
+      sales_segment: salesrep.business_segment
 
   - name: most_improved
     title: Most Improved
@@ -49,6 +59,8 @@
     query_timezone: America/Los_Angeles
     show_single_value_title: true
     show_comparison: false
+    listen:
+      sales_segment: salesrep.business_segment
     
   - name: bottom_performer
     title: Bottom Performer
@@ -69,6 +81,8 @@
     query_timezone: America/Los_Angeles
     show_single_value_title: true
     show_comparison: false
+    listen:
+      sales_segment: salesrep.business_segment
 
   - name: rep_comparison
     title: Sales Rep Comparison
@@ -101,6 +115,8 @@
       quota.pace_current_quarter: Quota Pace
     table_theme: gray
     limit_displayed_rows: false
+    listen:
+      sales_segment: salesrep.business_segment
     
   - name: lead_to_intros
     title: Lead to Intro Meetings
@@ -138,6 +154,8 @@
         margin_value: mean, margin_bottom: deviation, color: '#5245ed', label: 'Conversion
           Average: {{mean}}', line_value: mean}]
     show_null_labels: false
+    listen:
+      sales_segment: salesrep.business_segment
   
   - name: meetings_to_opps
     title: Meetings to Opportunities
@@ -175,6 +193,8 @@
         margin_value: mean, margin_bottom: deviation, color: '#1ea8df', label: 'Conversion
           Average: {{mean}}', line_value: mean}]
     show_null_labels: false
+    listen:
+      sales_segment: salesrep.business_segment
 
   - name: opps_to_wins
     title: Opportunities to Closed Won
@@ -212,5 +232,6 @@
         margin_value: mean, margin_bottom: deviation, color: '#b3a0dd', label: 'Conversion
           Average: {{mean}}', line_value: mean}]
     show_null_labels: false
-
+    listen:
+      sales_segment: salesrep.business_segment
 

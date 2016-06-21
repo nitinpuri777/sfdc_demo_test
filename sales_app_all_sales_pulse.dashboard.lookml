@@ -26,15 +26,13 @@
     model: salesforce
     explore: opportunity
     measures: [opportunity.total_mrr]
-    filters:
-      opportunity.closed_quarter: this quarter
     sorts: [opportunity.total_mrr desc]
     limit: 500
     query_timezone: America/Los_Angeles
     show_single_value_title: true
     show_comparison: false
     listen:
-      quarter:
+      quarter: opportunity.closed_quarter
 
 
   - name: wins
