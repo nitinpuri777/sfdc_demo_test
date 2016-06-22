@@ -40,6 +40,7 @@
   - dimension: sales_team_quota
     type: number
     sql: ${TABLE}.sales_team_quota
+    value_format_name: usd_0
   
   - measure: quota_sum
     type: sum
