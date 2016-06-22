@@ -11,7 +11,7 @@
         , CASE
             WHEN  PERCENT_RANK() OVER(ORDER BY auto_id) BETWEEN 0 AND 0.25
             THEN 'Enterprise'
-            WHEN  PERCENT_RANK() OVER(ORDER BY auto_id) BETWEEN 0.25 AND 0.50
+            WHEN  PERCENT_RANK() OVER(ORDER BY auto_id) BETWEEN 0.25 AND 0.5
             THEN 'Mid-Market'
             ELSE 'Small Business'
           END AS business_segment

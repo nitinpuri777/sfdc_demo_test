@@ -935,11 +935,11 @@
       drill_fields: detail*
       html: |
         {% if value < 50 %}
-          <div style="color: black; background-color: #dc7350; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+          <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% elsif value < 70 %}
-          <div style="color: black; background-color: #e9b404; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+          <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% else %}
-          <div style="color: black; background-color: #49cec1; margin: 0; border-radius: 5px; text-align:center">{{ value }}</div>
+          <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
         {% endif %}
 
     - measure: average_account_health_this_week
@@ -1073,7 +1073,7 @@
     - measure: percent_red_accounts
       type: number
       sql: 1.0 * ${count_of_red_accounts} / NULLIF(${count_of_accounts},0)
-      value_format_name: percent_2
+      value_format_name: percent_1
       drill_fields: detail*
 
 ### COUNT BY WEEK
