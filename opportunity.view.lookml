@@ -200,7 +200,7 @@
 
   - measure: count
     type: count
-    drill_fields: opportunity_set*
+    drill_fields: [id, stage_name_funnel, type, mrr]
 #     filters:
 #       account.type: Customer
 #       opportunity.type: New Business
@@ -235,7 +235,7 @@
     type: count
     filters:
       is_closed: No
-    drill_fields: opportunity_set*
+    drill_fields: [id, stage_name_funnel, type, mrr]
     
   - measure: count_lost
     type: count
@@ -603,6 +603,7 @@
 
   sets:
     opportunity_set:
+      - id
       - account.name
       - stage_name_funnel
       - type
