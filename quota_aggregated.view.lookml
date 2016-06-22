@@ -5,8 +5,8 @@
 - view: quota_aggregated
   derived_table:
     persist_for: 24 hours
-    sortkeys: quota_quarter
-    distribution_style: ALL
+    sortkeys: [quota_quarter]
+    distkey: quota_quarter
     sql: |
             SELECT 
               quota_quarter 
