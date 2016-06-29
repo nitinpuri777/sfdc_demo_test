@@ -28,6 +28,7 @@
   elements:
 
     - name: account_information
+      explore: the_switchboard
       type: "text"
       title_text: "Account Information"
       subtitle_text: "License, Health and MRR"
@@ -143,6 +144,7 @@
       show_comparison: false
   
     - name: product_usage
+      explore: the_switchboard
       type: text
       title_text: "Product Usage and Engagement"
       subtitle_text: "Health Score, DAU-MAU, Usage"
@@ -314,6 +316,7 @@
       limit_displayed_rows: false
   
     - name: recent_account_activity
+      explore: the_switchboard
       type: text
       title_text: "Recent Account Activity"
       subtitle_text: "Opportunity Events, Support Tickets"

@@ -883,7 +883,7 @@
     - measure: count_of_accounts
       type: count_distinct
       sql: ${account_id}
-      drill_fields: detail*
+      drill_fields: account_detail*
 
     - measure: average_event_count
       type: average
@@ -993,7 +993,7 @@
     - measure: average_account_health_change
       type: number
       sql: ${average_account_health_this_week} - COALESCE(${average_account_health_one_week_ago},${average_account_health_two_weeks_ago})
-      drill_fields: detail*
+      drill_fields: [account.name,average_account_health_this_week,average_account_health_one_week_ago,average_account_health_two_weeks_ago]
 
     - measure: average_account_health_this_month
       type: average
@@ -1066,7 +1066,7 @@
     - measure: count_of_red_accounts
       type: count_distinct
       sql: ${account_id}
-      drill_fields: detail*
+      drill_fields: account_detail*
       filters:
         account_health: '1. At Risk'
     
@@ -1074,7 +1074,7 @@
       type: number
       sql: 1.0 * ${count_of_red_accounts} / NULLIF(${count_of_accounts},0)
       value_format_name: percent_1
-      drill_fields: detail*
+      drill_fields: [account_detail*,account_health]
 
 ### COUNT BY WEEK
     - measure: total_count_of_query_runs
@@ -1213,6 +1213,15 @@
         {% endif %}
   
   sets:
+    account_detail:
+      - account_id
+      - account.name
+      - account.vertical
+      - account.state
+      - user_count
+      - account.account_tier
+
+
     detail:
       - account.name
       - account_id

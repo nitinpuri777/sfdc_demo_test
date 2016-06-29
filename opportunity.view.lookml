@@ -374,7 +374,7 @@
     type: sum
     sql: ${acv}
     value_format_name: usd_large
-    drill_fields: opportunity_set*
+    drill_fields: [opportunity_set*, acv]
     filters:
       type: 'Addon/Upsell'
       
@@ -382,13 +382,13 @@
     type: number
     sql: ${total_expansion_acv} - ${total_churn_acv}
     value_format_name: usd_large
-    drill_fields: opportunity_set*
+    drill_fields: [opportunity_set*, acv]
     
   - measure: churn_acv #for Net Expansion Look
     type: sum
     sql: -1.0*${acv}
     value_format_name: usd_large
-    drill_fields: opportunity_set*
+    drill_fields: [opportunity_set*, acv]
     filters:
       lost_reason: 'Non-renewal'
     
