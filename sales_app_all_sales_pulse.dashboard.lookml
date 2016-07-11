@@ -94,7 +94,7 @@
     title: of Quota This Time Last Q
     type: single_value
     model: salesforce
-    explore: the_switchboard
+    explore: opportunity
     measures: [quota_aggregated.tracking_to_quota]
     filters:
       opportunity.closed_quarter: last quarter
@@ -178,7 +178,7 @@
     title: Pace (Q over Q)
     type: looker_line
     model: salesforce
-    explore: the_switchboard
+    explore: opportunity
     dimensions: [opportunity.closed_day_of_quarter, opportunity.closed_quarter]
     pivots: [opportunity.closed_quarter]
     measures: [opportunity.total_acv_won, quota_aggregated.quota_sum]
@@ -333,7 +333,7 @@
     title: Recent Deals
     type: table
     model: salesforce
-    explore: the_switchboard
+    explore: opportunity
     dimensions: [account.name, opportunity.closed_date, opportunity.acv]
     filters:
       opportunity.is_won: 'Yes'
@@ -358,7 +358,7 @@
     title: Likely To Close
     type: table
     model: salesforce
-    explore: the_switchboard
+    explore: opportunity
     dimensions: [account.name, opportunity.acv, opportunity.days_open]
     filters:
       opportunity.is_closed: 'No'
@@ -384,7 +384,7 @@
     title: At Risk Deals
     type: table
     model: salesforce
-    explore: the_switchboard
+    explore: opportunity
     dimensions: [account.name, opportunity_zendesk_facts.health, salesrep.name]
     measures: [opportunity.total_acv, opportunity_zendesk_facts.total_days_open]
     filters:
