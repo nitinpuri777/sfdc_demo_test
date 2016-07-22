@@ -23,6 +23,10 @@
     sortkeys: [created_at]
 
   fields:
+  
+  - filter: metric
+    type: string
+    suggestions: [Leads,Opportunities,ACV]
 
   - dimension: lead_id
     type: string
@@ -49,6 +53,23 @@
         then 'Other'
         else ${campaign.grouping}
       end
+      
+  - measure: metric_amount
+    type: number
+    sql: |
+      count(distinct
+        case
+          when ${campaign_attribution_goals.metric} = 'Leads'
+          then ${lead.id}
+          when ${campaign_attribution_goals.metric} = 'Opportunities'
+          then ${opportunity.id}
+        end) +
+      sum(
+        case
+          when ${campaign_attribution_goals.metric} = 'ACV'
+          then ${opportunity.acv}
+          else 0
+        end)
 
   sets:
     detail:

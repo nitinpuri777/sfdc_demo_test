@@ -294,7 +294,7 @@
       
 - explore: campaign_attribution
   label: "(7) Campaign Attribution"
-  view_label: "Lead"
+  view_label: "Campaign Attribution"
   fields: [ALL_FIELDS*,-opportunity.meeting_to_close_conversion_rate_60d,-opportunity.meetings_converted_to_close_within_60d]
   joins:
   

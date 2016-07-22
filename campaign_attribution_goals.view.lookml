@@ -3,7 +3,7 @@
     sql: |
       select
         TO_CHAR(DATE_TRUNC('quarter', CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', campaign_attribution.created_at)), 'YYYY-MM') AS quarter,
-        campaign_attribution.created_at::date AS created_date,
+        CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', campaign_attribution.created_at) AS created_date,
         case
           when campaign.grouping_c not in ('Outbound','Online: Paid','Online: Organic','Offline: Events')
           then 'Other'
@@ -32,14 +32,20 @@
   derived_table:
     sql: |
       select
-        row_number() over () as id,
         goals.quarter_start_date,
         goals.quarter_end_date,
         goals.quarter,
         goals.marketing_channel,
-        prev_lead_count * (1+(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100) as lead_goal,
-        prev_opportunity_count * (1+(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100) as opportunity_goal,
-        prev_acv * (1+(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100) as acv_goal
+        goals.metric,
+        case
+          when goals.metric = 'Leads'
+          then prev_lead_count * (1+(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100)
+          when goals.metric = 'Opportunities'
+          then prev_opportunity_count * (1+(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100)
+          when goals.metric = 'ACV'
+          then prev_acv * (1+(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100)
+          else 0
+        end as goal
       from
       (
         select
@@ -47,6 +53,7 @@
           campaign_attribution_goals.quarter_end_date,
           campaign_attribution_goals.quarter,
           campaign_attribution_goals.marketing_channel,
+          metrics.metric,
           coalesce(lag(campaign_attribution_goals.lead_count) over (partition by campaign_attribution_goals.marketing_channel order by campaign_attribution_goals.quarter),campaign_attribution_goals.lead_count) as prev_lead_count,
           coalesce(lag(campaign_attribution_goals.opportunity_count) over (partition by campaign_attribution_goals.marketing_channel order by campaign_attribution_goals.quarter),campaign_attribution_goals.opportunity_count) as prev_opportunity_count,
           coalesce(lag(campaign_attribution_goals.acv) over (partition by campaign_attribution_goals.marketing_channel order by campaign_attribution_goals.quarter),campaign_attribution_goals.acv) as prev_acv
@@ -66,7 +73,7 @@
           (
             select
               quarter,
-              dateadd(day,1,min(created_date))::date as quarter_start_date,
+              min(created_date)::date as quarter_start_date,
               max(created_date)::date as quarter_end_date
             from
               ${campaign_attribution_stage.SQL_TABLE_NAME}
@@ -75,7 +82,18 @@
             on stage_1.quarter = quarter_dates.quarter
           group by 1,2,3,4
         ) as campaign_attribution_goals
+        cross join
+        (
+          select 'Leads' as metric
+          union all
+          select 'Opportunities' as metric
+          union all
+          select 'ACV' as metric
+        ) as metrics
       ) as goals
+      where
+        {% condition ${campaign_attribution.metric} %} goals.metric {% endcondition %}
+      group by 1,2,3,4,5,6
       
   fields:
   
@@ -83,7 +101,7 @@
     type: string
     primary_key: true
     hidden: true
-    sql: ${TABLE}.id
+    sql: concat(concat(${TABLE}.quarter,${TABLE}.marketing_channel),${TABLE}.metric)
   
   - dimension_group: quarter_start
     type: time
@@ -106,20 +124,15 @@
     
   - dimension: marketing_channel
     type: string
-    hidden: true
     sql: ${TABLE}.marketing_channel
     
-  - measure: lead_goal
-    type: sum
-    sql: ${TABLE}.lead_goal
+  - dimension: metric
+    type: string
+    hidden: true
+    sql: ${TABLE}.metric
     
-  - measure: opportunity_goal
+  - measure: goal
     type: sum
-    sql: ${TABLE}.opportunity_goal
-    
-  - measure: acv_goal
-    type: sum
-    sql: ${TABLE}.acv_goal
-      
+    sql: ${TABLE}.goal
       
       
