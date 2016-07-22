@@ -18,6 +18,9 @@
       ) as a
       where
         a.row_num = 1
+    sql_trigger_value: select current_date
+    distkey: lead_id
+    sortkeys: [created_at]
 
   fields:
 
@@ -35,7 +38,17 @@
   - dimension_group: first_campaign
     type: time
     timeframes: [date,week,month,quarter,year]
+    convert_tz: false
     sql: ${TABLE}.created_at
+    
+  - dimension: marketing_channel
+    type: string
+    sql: |
+      case
+        when ${campaign.grouping} not in ('Outbound','Online: Paid','Online: Organic','Offline: Events')
+        then 'Other'
+        else ${campaign.grouping}
+      end
 
   sets:
     detail:

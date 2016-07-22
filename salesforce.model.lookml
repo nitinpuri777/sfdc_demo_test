@@ -311,3 +311,13 @@
       sql_on: ${lead.converted_opportunity_id} = ${opportunity.id}
       relationship: many_to_one
       
+    - join: campaign_attribution_goals
+      sql_on: |
+        ${campaign_attribution.marketing_channel} = ${campaign_attribution_goals.marketing_channel}
+        and ${campaign_attribution.first_campaign_date} between ${campaign_attribution_goals.quarter_start_date} and ${campaign_attribution_goals.quarter_end_date}
+      relationship: many_to_one
+    
+    
+    
+    
+      
