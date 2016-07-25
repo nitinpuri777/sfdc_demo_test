@@ -1,3 +1,5 @@
+# Creates a table generating goals for ACV, Leads and Opportunities by Marketing Channel
+# Initial Purpose for Marketing App which displays channels, metrics and quarters
 - view: campaign_attribution_stage
   derived_table:
     sql: |
@@ -26,8 +28,12 @@
       where
         CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', campaign_attribution.created_at)::date >= '2015-01-01'
       group by 1,2,3
-      
-      
+    sql_trigger_value: select current_date
+    distkey: quarter
+    sortkeys: [marketing_channel,created_date]
+
+#: Final DT includes templated filter
+#  Uses a Hash to create goals
 - view: campaign_attribution_goals
   derived_table:
     sql: |
@@ -37,15 +43,7 @@
         goals.quarter,
         goals.marketing_channel,
         goals.metric,
-        case
-          when goals.metric = 'Leads'
-          then prev_lead_count * (1+(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100)
-          when goals.metric = 'Opportunities'
-          then prev_opportunity_count * (1+(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100)
-          when goals.metric = 'ACV'
-          then prev_acv * (1+(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100)
-          else 0
-        end as goal
+        goals.prev_metric_amount * (1+(3*(CAST(STRTOL(LEFT(MD5(CONVERT(VARCHAR,concat(quarter,marketing_channel))),6),16) AS DECIMAL(9,0)) % 10)/100)) as goal
       from
       (
         select
@@ -53,10 +51,9 @@
           campaign_attribution_goals.quarter_end_date,
           campaign_attribution_goals.quarter,
           campaign_attribution_goals.marketing_channel,
-          metrics.metric,
-          coalesce(lag(campaign_attribution_goals.lead_count) over (partition by campaign_attribution_goals.marketing_channel order by campaign_attribution_goals.quarter),campaign_attribution_goals.lead_count) as prev_lead_count,
-          coalesce(lag(campaign_attribution_goals.opportunity_count) over (partition by campaign_attribution_goals.marketing_channel order by campaign_attribution_goals.quarter),campaign_attribution_goals.opportunity_count) as prev_opportunity_count,
-          coalesce(lag(campaign_attribution_goals.acv) over (partition by campaign_attribution_goals.marketing_channel order by campaign_attribution_goals.quarter),campaign_attribution_goals.acv) as prev_acv
+          campaign_attribution_goals.metric,
+          coalesce(lag(campaign_attribution_goals.metric_amount)
+            over (partition by campaign_attribution_goals.marketing_channel,campaign_attribution_goals.metric order by campaign_attribution_goals.quarter),campaign_attribution_goals.metric_amount) as prev_metric_amount
         from
         (
           select
@@ -64,9 +61,16 @@
             quarter_dates.quarter_end_date,
             stage_1.quarter,
             stage_1.marketing_channel,
-            sum(stage_1.lead_count) as lead_count,
-            sum(stage_1.opportunity_count) as opportunity_count,
-            sum(stage_1.acv) as acv
+            metrics.metric,
+            sum(case
+              when metrics.metric = 'Leads'
+              then stage_1.lead_count
+              when metrics.metric = 'Opportunities'
+              then stage_1.opportunity_count
+              when metrics.metric = 'ACV'
+              then stage_1.acv
+              else 0
+            end) as metric_amount
           from
             ${campaign_attribution_stage.SQL_TABLE_NAME} as stage_1
           inner join
@@ -80,16 +84,16 @@
             group by 1
           ) as quarter_dates
             on stage_1.quarter = quarter_dates.quarter
-          group by 1,2,3,4
+          cross join
+          (
+            select 'Leads' as metric
+            union all
+            select 'Opportunities' as metric
+            union all
+            select 'ACV' as metric
+          ) as metrics
+            group by 1,2,3,4,5
         ) as campaign_attribution_goals
-        cross join
-        (
-          select 'Leads' as metric
-          union all
-          select 'Opportunities' as metric
-          union all
-          select 'ACV' as metric
-        ) as metrics
       ) as goals
       where
         {% condition ${campaign_attribution.metric} %} goals.metric {% endcondition %}
@@ -124,6 +128,7 @@
     
   - dimension: marketing_channel
     type: string
+    hidden: true
     sql: ${TABLE}.marketing_channel
     
   - dimension: metric

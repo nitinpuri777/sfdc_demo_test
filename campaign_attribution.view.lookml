@@ -1,3 +1,5 @@
+# Simple example of First Touch Attribution associating campaigns with leads
+# Core logic used in Marketing Apps
 - view: campaign_attribution
   derived_table:
     sql: |
@@ -53,11 +55,12 @@
         then 'Other'
         else ${campaign.grouping}
       end
-      
+  # Adjusts metric by using a templated filter indirectly
+  # Requires filter only field 'Metric'   
   - measure: metric_amount
     type: number
     sql: |
-      count(distinct
+      coalesce(count(distinct
         case
           when ${campaign_attribution_goals.metric} = 'Leads'
           then ${lead.id}
@@ -69,7 +72,7 @@
           when ${campaign_attribution_goals.metric} = 'ACV'
           then ${opportunity.acv}
           else 0
-        end)
+        end),0)
 
   sets:
     detail:
