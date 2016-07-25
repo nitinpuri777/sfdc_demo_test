@@ -47,6 +47,20 @@
     convert_tz: false
     sql: ${TABLE}.closed_date
     
+  - dimension: days_between_opportunity_created_and_closed_won
+    type: number
+    sql: |
+      case
+        when ${is_won}
+        then
+          case
+            when DATEDIFF(DAYS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date)) < 0
+            then 0
+            else DATEDIFF(DAYS, ${TABLE}.created_at, COALESCE(${TABLE}.closed_date, current_date))
+          end
+        else null
+      end
+    
   - dimension: closed_quarter_string
     hidden: true
     sql: EXTRACT(YEAR FROM ${TABLE}.closed_date) || ' - Q' || EXTRACT(QUARTER FROM ${TABLE}.closed_date)

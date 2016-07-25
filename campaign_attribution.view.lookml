@@ -28,7 +28,7 @@
   
   - filter: metric
     type: string
-    suggestions: [Leads,Opportunities,ACV]
+    suggestions: [Leads,Opportunities,ACV,Days to Close]
 
   - dimension: lead_id
     type: string
@@ -60,19 +60,36 @@
   - measure: metric_amount
     type: number
     sql: |
-      coalesce(count(distinct
-        case
-          when ${campaign_attribution_goals.metric} = 'Leads'
-          then ${lead.id}
-          when ${campaign_attribution_goals.metric} = 'Opportunities'
-          then ${opportunity.id}
-        end) +
-      sum(
-        case
-          when ${campaign_attribution_goals.metric} = 'ACV'
-          then ${opportunity.acv}
-          else 0
-        end),0)
+      coalesce(
+        sum(
+          case
+            when ${campaign_attribution_goals.metric} = 'ACV'
+            then ${opportunity.acv}
+            else null
+          end)
+        ,
+        sum(
+          case
+            when ${campaign_attribution_goals.metric} = 'Days to Close'
+            then ${opportunity.days_between_opportunity_created_and_closed_won}
+            else 0
+          end) /
+        count(distinct
+          case
+            when ${opportunity.is_won}
+            then ${opportunity.id}
+            else null
+          end)
+        ,
+        count(distinct
+          case
+            when ${campaign_attribution_goals.metric} = 'Leads'
+            then ${lead.id}
+            when ${campaign_attribution_goals.metric} = 'Opportunities'
+            then ${opportunity.id}
+            else null
+          end)
+      )
 
   sets:
     detail:

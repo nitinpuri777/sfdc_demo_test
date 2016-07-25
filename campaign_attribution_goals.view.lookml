@@ -13,6 +13,22 @@
         end as marketing_channel,
         count(distinct campaign_attribution.lead_id) as lead_count,
         count(distinct lead.converted_opportunity_id) as opportunity_count,
+        sum(case
+          when opportunity.is_won
+          then
+            case
+              when DATEDIFF(DAYS, opportunity.created_at, COALESCE(opportunity.closed_date, current_date)) < 0
+              then 0
+              else DATEDIFF(DAYS, opportunity.created_at, COALESCE(opportunity.closed_date, current_date))
+            end
+          else null
+        end) as total_days_to_close_won,
+        count(distinct
+          case
+            when opportunity.is_won
+            then opportunity.id
+            else null
+          end) as closed_won_count,
         sum(opportunity.acv) as acv
       from
         ${campaign_attribution.SQL_TABLE_NAME} AS campaign_attribution
@@ -91,6 +107,8 @@
             select 'Opportunities' as metric
             union all
             select 'ACV' as metric
+            union all
+            select 'Days to Close' as metric
           ) as metrics
             group by 1,2,3,4,5
         ) as campaign_attribution_goals
