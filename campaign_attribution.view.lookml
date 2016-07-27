@@ -55,6 +55,11 @@
         then 'Other'
         else ${campaign.grouping}
       end
+  
+  - dimension: marketing_channel_split
+    type: string
+    sql: concat(${marketing_channel},${first_campaign_week})
+      
   # Adjusts metric by using a templated filter indirectly
   # Requires filter only field 'Metric'   
   - measure: metric_amount
@@ -74,12 +79,17 @@
             then ${opportunity.days_between_opportunity_created_and_closed_won}
             else 0
           end) /
-        count(distinct
+        nullif(count(distinct
           case
-            when ${opportunity.is_won}
-            then ${opportunity.id}
+            when ${campaign_attribution_goals.metric} = 'Days to Close'
+            then 
+              case
+                when ${opportunity.is_won}
+                then ${opportunity.id}
+                else null
+              end
             else null
-          end)
+          end),0)
         ,
         count(distinct
           case
