@@ -44,7 +44,7 @@
       where
         CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', campaign_attribution.created_at)::date >= '2015-01-01'
       group by 1,2,3
-    sql_trigger_value: CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', select current_date)
+    sql_trigger_value: select CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', current_date)
     distkey: quarter
     sortkeys: [marketing_channel,created_date]
 
