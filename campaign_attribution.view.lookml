@@ -20,7 +20,7 @@
       ) as a
       where
         a.row_num = 1
-    sql_trigger_value: select CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', current_date)
+    sql_trigger_value: select CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', current_date)::date
     distkey: lead_id
     sortkeys: [created_at]
 
