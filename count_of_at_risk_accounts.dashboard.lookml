@@ -316,7 +316,7 @@
     type: table
     model: salesforce
     explore: the_switchboard
-    dimensions: [account.name, zendesk_ticket.created_date, zendesk_ticket.id, zendesk_ticket.assignee_name,
+    dimensions: [account.name, zendesk_ticket.created_date, zendesk_ticket.id,
       zendesk_ticket.status, zendesk_ticket.time_to_solve_hours]
     filters:
       account.name: -NULL

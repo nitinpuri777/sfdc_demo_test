@@ -54,7 +54,6 @@
     hidden: true
     sql: ${TABLE}.owner_id
 
-# This contains actual Looker notes, so we should hide it
 #   - dimension: description
 #     sql: ${TABLE}.description
 

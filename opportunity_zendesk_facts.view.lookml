@@ -96,7 +96,7 @@
 #     hidden: true
     type: sum
     sql: ${zendesk_ticket_count}
-    drill_fields: [zendesk_ticket.created_date, zendesk_ticket.id, zendesk_ticket.assignee_name, zendesk_ticket.time_to_solve]
+    drill_fields: [zendesk_ticket.created_date, zendesk_ticket.id, zendesk_ticket.time_to_solve]
     
   - measure: average_tickets
     type: average
@@ -116,4 +116,3 @@
       - id
       - days_open
       - zendesk_ticketcount
-

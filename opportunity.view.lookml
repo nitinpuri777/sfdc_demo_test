@@ -134,16 +134,16 @@
   - dimension: lead_source
     sql: ${TABLE}.lead_source
 
-  - dimension: lost_reason
-    sql: ${TABLE}.lost_reason_c
+#   - dimension: lost_reason
+#     sql: ${TABLE}.lost_reason_c
 
   - dimension: mrr
     type: number
     sql: ${TABLE}.mrr
     value_format_name: usd_large
 
-  - dimension: next_step
-    sql: ${TABLE}.next_step
+#   - dimension: next_step
+#     sql: ${TABLE}.next_step
 
   - dimension: nrr
     type: number
@@ -382,7 +382,8 @@
     value_format_name: usd_large
     drill_fields: opportunity_set*
     filters:
-      lost_reason: 'Non-renewal'
+#       lost_reason: 'Non-renewal'
+      churn_status: '3 - Red, 2 - Orange, 1 - Yellow'
     
   - measure: total_expansion_acv
     type: sum
@@ -404,7 +405,8 @@
     value_format_name: usd_large
     drill_fields: [opportunity_set*, acv]
     filters:
-      lost_reason: 'Non-renewal'
+#       lost_reason: 'Non-renewal'
+      churn_status: '3 - Red, 2 - Orange, 1 - Yellow'
     
   
     
@@ -643,9 +645,9 @@
       - is_current_quarter
       - is_won
       - lead_source
-      - lost_reason
+#       - lost_reason
       - mrr
-      - next_step
+#       - next_step
       - nrr
       - probability
       - stage_name
