@@ -24,14 +24,12 @@
   - dimension: name
     sql: ${TABLE}.name
 
-  - dimension: root_cause
-    sql: REGEXP_REPLACE(${TABLE}.root__cause___c, '(looker|lookml)[^a-zA-Z0-9]*', '')
-
   - dimension: tone
+    hidden: true
     sql: ${TABLE}.tone___c
 
-  - dimension: assignee_name
-    sql: ${TABLE}.zendesk___assignee__name___c
+#   - dimension: assignee_name
+#     sql: ${TABLE}.zendesk___assignee__name___c
     
   - dimension_group: date_time_initially_assigned
     type: time
@@ -63,6 +61,7 @@
     sql: ${TABLE}.zendesk___requester___c
   
   - dimension: status
+    hidden: true
     sql: ${TABLE}.zendesk___status___c
   
     
@@ -71,7 +70,7 @@
 
   - measure: count
     type: count
-    drill_fields: [id, name, assignee_name, status, time_to_solve]
+    drill_fields: [id, name, status, time_to_solve]
 
   - measure: count_of_open_tickets
     type: count
@@ -123,7 +122,7 @@
     type: count
     filters: 
       created_before_opp_closed: Yes
-    drill_fields: [created_date, id, assignee_name, time_to_solve]
+    drill_fields: [created_date, id, time_to_solve]
       
   - measure: average_tickets_per_opp
     type: number
@@ -167,17 +166,17 @@
     hidden: true
     sql: ${TABLE}.request_type___c
 
-  - dimension: action
-    hidden: true
-    sql: ${TABLE}.action___c
-
-  - dimension: bug_number
-    hidden: true
-    sql: ${TABLE}.bug__number___c
-
-  - dimension: category
-    hidden: true
-    sql: ${TABLE}.category___c
+#   - dimension: action
+#     hidden: true
+#     sql: ${TABLE}.action___c
+# 
+#   - dimension: bug_number
+#     hidden: true
+#     sql: ${TABLE}.bug__number___c
+# 
+#   - dimension: category
+#     hidden: true
+#     sql: ${TABLE}.category___c
 
   - dimension: created_by_id
     hidden: true
@@ -249,9 +248,9 @@
     hidden: true
     sql: ${TABLE}.zendesk___date__time__updated___c
 
-  - dimension: group
-    hidden: true
-    sql: ${TABLE}.zendesk___group___c
+#   - dimension: group
+#     hidden: true
+#     sql: ${TABLE}.zendesk___group___c
 
   - dimension: hold_time_calendar
     hidden: true
@@ -290,18 +289,18 @@
     hidden: true
     sql: ${TABLE}.zendesk___resolution__time__business___c
 
-  - dimension: zendesk_domain
-    hidden: true
-    sql: ${TABLE}.zendesk___zendesk_domain___c
-
-  - dimension: ticket_form_id
-    type: number
-    hidden: true
-    sql: ${TABLE}.zendesk___ticket__form__id___c
-
-  - dimension: ticket_form_name
-    hidden: true
-    sql: ${TABLE}.zendesk___ticket__form__name___c
+#   - dimension: zendesk_domain
+#     hidden: true
+#     sql: ${TABLE}.zendesk___zendesk_domain___c
+# 
+#   - dimension: ticket_form_id
+#     type: number
+#     hidden: true
+#     sql: ${TABLE}.zendesk___ticket__form__id___c
+# 
+#   - dimension: ticket_form_name
+#     hidden: true
+#     sql: ${TABLE}.zendesk___ticket__form__name___c
 
   - dimension: ticket_id
     hidden: true
@@ -311,13 +310,13 @@
     hidden: true
     sql: ${TABLE}.zendesk___type___c
 
-  - dimension: topic
-    hidden: true
-    sql: ${TABLE}.topic___c
-
-  - dimension: topic_other
-    hidden: true
-    sql: ${TABLE}.topic_other___c
+#   - dimension: topic
+#     hidden: true
+#     sql: ${TABLE}.topic___c
+# 
+#   - dimension: topic_other
+#     hidden: true
+#     sql: ${TABLE}.topic_other___c
 
 
 ## HIDDEN MEASURES

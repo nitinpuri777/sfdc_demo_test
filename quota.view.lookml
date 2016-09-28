@@ -5,7 +5,7 @@
 
 - view: quota
   derived_table:
-    persist_for: 24 hours
+    sql_trigger_value: SELECT COUNT(1) FROM ${opportunity.SQL_TABLE_NAME}
     distkey: person_id 
     sortkeys: [quota_quarter]
     sql: |

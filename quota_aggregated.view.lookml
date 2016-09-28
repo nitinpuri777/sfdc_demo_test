@@ -4,7 +4,7 @@
 
 - view: quota_aggregated
   derived_table:
-    persist_for: 24 hours
+    sql_trigger_value: SELECT COUNT(1) FROM ${opportunity.SQL_TABLE_NAME}
     sortkeys: [quota_quarter]
     distkey: quota_quarter
     sql: |
