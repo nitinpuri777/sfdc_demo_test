@@ -3,6 +3,7 @@
 - connection: salesforce_demo
 - include: "*.view.lookml"       # include all the views
 - include: "*.dashboard.lookml"  # include all the dashboards
+- persist_for: 12 hours
 - value_formats:
   - name: usd_large
     value_format: '[>=1000000]$0.00,,"M";[>=1000]$0.00,"K";$0.00'
