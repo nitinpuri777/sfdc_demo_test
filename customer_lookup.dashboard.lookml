@@ -31,7 +31,7 @@
 #       type: "text"
 #       title_text: "Account Information"
 #       subtitle_text: "License, Health and MRR"
-#   
+#
     #   - name: account_tier
   #     type: single_value
   #     model: salesforce
@@ -50,7 +50,7 @@
   #     show_single_value_title: true
   #     value_format: ''
   #     show_comparison: false
-  
+
     - name: health
       type: single_value
       model: salesforce
@@ -78,7 +78,7 @@
       comparison_type: change
       comparison_reverse_colors: false
       show_comparison_label: true
-  
+
     - name: mrr
       type: single_value
       model: salesforce
@@ -92,7 +92,7 @@
       show_single_value_title: true
       value_format: $#,##0
       show_comparison: false
-  
+
     - name: days_to_renewal
       type: single_value
       model: salesforce
@@ -105,7 +105,7 @@
       query_timezone: America/Los_Angeles
       show_single_value_title: true
       show_comparison: false
-  
+
     - name: active_users
       type: single_value
       model: salesforce
@@ -118,7 +118,7 @@
       query_timezone: America/Los_Angeles
       show_single_value_title: true
       show_comparison: false
-  
+
     - name: license_utilization
       type: single_value
       model: salesforce
@@ -143,7 +143,7 @@
       show_comparison: true
       comparison_type: value
       show_comparison_label: true
-  
+
     - name: zd_tickets
       title: ZD Tickets (30 days)
       type: single_value
@@ -160,12 +160,12 @@
       query_timezone: America/Los_Angeles
       show_single_value_title: true
       show_comparison: false
-  
+
 #     - name: product_usage
 #       type: text
 #       title_text: "Product Usage and Engagement"
 #       subtitle_text: "Health Score, DAU-MAU, Usage"
-  
+
     - name: trending_health_score
       type: looker_line
       model: salesforce
@@ -209,7 +209,7 @@
       show_null_points: false
       point_style: circle_outline
       interpolation: linear
-  
+
     - name: dau_mau_ratio
       title: DAU-MAU Ratio - Trailing 365 Days
       type: looker_line
@@ -260,7 +260,7 @@
       show_null_points: true
       point_style: none
       interpolation: linear
-  
+
     - name: usage_by_user
       title: Usage by User - Past Week
       type: looker_bar
@@ -296,7 +296,7 @@
           margin_value: mean, margin_bottom: deviation, line_value: median, label: 'Median:
             {{median}} mins', value_format: '#'}]
       show_null_labels: false
-  
+
     - name: monthly_feature_usage_report
       type: table
       model: salesforce
@@ -331,12 +331,12 @@
         weekly_event_rollup.concentration_score: Concentration Score
       table_theme: white
       limit_displayed_rows: false
-  
+
 #     - name: recent_account_activity
 #       type: text
 #       title_text: "Recent Account Activity"
 #       subtitle_text: "Opportunity Events, Support Tickets"
-  
+
     - name: opportunity_history
       type: table
       model: salesforce
@@ -357,7 +357,7 @@
         opportunity.id: Salesforce Lookup
       table_theme: white
       limit_displayed_rows: false
-  
+
     - name: support_tickets_by_week
       type: looker_column
       model: salesforce

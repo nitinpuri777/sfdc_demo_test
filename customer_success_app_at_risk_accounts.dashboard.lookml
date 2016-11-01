@@ -16,7 +16,7 @@
       height: 300
 
   elements:
-  
+
   - name: count_of_at_risk_accounts
     type: single_value
     model: salesforce
@@ -32,7 +32,7 @@
     query_timezone: America/Los_Angeles
     show_single_value_title: true
     show_comparison: false
-    
+
   - name: total_at_risk_customer_mrr
     title: Total At Risk Customer MRR
     type: single_value
@@ -67,7 +67,7 @@
     query_timezone: America/Los_Angeles
     show_single_value_title: true
     show_comparison: false
-    
+
   - name: average_health_of_at_risk_accounts
     title: Average Health of At Risk Accounts
     type: single_value
@@ -179,7 +179,7 @@
     x_axis_scale: auto
     y_axis_scale_mode: linear
     show_null_labels: false
-    
+
   - name: health_score_jumps
     title: Health Score Jumps (Week over Week)
     type: looker_column
@@ -224,7 +224,7 @@
     show_totals_labels: false
     show_silhouette: false
     totals_color: '#808080'
-    
+
   - name: health_score_decliners
     title: Health Score Decliners (Week over Week)
     type: looker_column
@@ -269,7 +269,7 @@
     show_totals_labels: false
     show_silhouette: false
     totals_color: '#808080'
-    
+
   - name: list_of_red_accounts
     title: List of Red Accounts
     type: table
@@ -310,7 +310,7 @@
       weekly_event_rollup.cumulative_weekly_users: Users
     table_theme: white
     limit_displayed_rows: false
-  
+
   - name: negative_zd_tickets
     title: Negative ZD Tickets (30 days)
     type: table

@@ -31,7 +31,7 @@
     - table_calculation: calculation_1
       label: Calculation 1
       expression: running_total(${opportunity.total_acv_won})
-      value_format_name: usd_large
+      value_format_name: usd
     hidden_fields: [opportunity.total_acv_won]
     filters:
       opportunity.is_current_quarter: 'Yes'
@@ -80,7 +80,7 @@
     show_view_names: true
     show_row_numbers: true
     truncate_column_names: false
-  
+
   - name: deals_on_deck
     title: Deals on Deck (Winning)
     type: table
@@ -99,7 +99,7 @@
     show_view_names: true
     show_row_numbers: false
     truncate_column_names: false
-  
+
   - name: pipeline_forecast
     title: Pipeline Forecast
     type: looker_column
@@ -138,7 +138,7 @@
     x_axis_scale: ordinal
     ordering: none
     show_null_labels: false
-  
+
   - name: quarterly_pipeline_dev
     title: Quarterly Pipeline Development Report
     type: looker_area
@@ -179,7 +179,7 @@
         color: purple}]
     point_style: none
     interpolation: linear
-  
+
   - name: performance_by_sales_segment
     title: Sales Segment Performance
     type: looker_column
@@ -214,7 +214,7 @@
     x_axis_scale: auto
     y_axis_orientation: [left, right]
     show_null_labels: false
-  
+
   - name: funnel_by_sales_segment
     title: Lead to Win Funnel by Business Segment
     type: looker_column
@@ -252,7 +252,7 @@
     x_axis_scale: auto
     show_null_labels: false
     show_dropoff: true
-  
+
   - name: acv_by_sales_rep
     title: Current Quarter AVC (Won and Pipeline) by Sales Rep
     type: looker_column
@@ -287,4 +287,3 @@
     x_axis_label_rotation: 0
     ordering: none
     show_null_labels: false
-  

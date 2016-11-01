@@ -16,7 +16,7 @@
       height: 400
 
   elements:
-  
+
   - name: total_active_customers
     type: single_value
     model: salesforce
@@ -46,7 +46,7 @@
     comparison_type: change
     comparison_reverse_colors: false
     show_comparison_label: true
-    
+
   - name: customer_health_count
     type: looker_pie
     model: salesforce
@@ -71,7 +71,7 @@
       2. Standard: '#e9b404'
       3. Safe: '#49cec1'
     show_view_names: true
-  
+
   - name: cmrr
     title: cMRR
     type: single_value
@@ -83,11 +83,11 @@
     - table_calculation: total_cmrr
       label: Total cMRR
       expression: sum(${new_mrr_this_week})
-      value_format_name: usd_large
+      value_format_name: usd
     - table_calculation: new_mrr_this_week
       label: new MRR this week
       expression: ${opportunity.total_mrr}
-      value_format_name: usd_large
+      value_format_name: usd
     hidden_fields: [opportunity.total_mrr]
     filters:
       account.account_status: -Black (Discontinued)
