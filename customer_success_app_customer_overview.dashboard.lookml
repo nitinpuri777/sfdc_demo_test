@@ -83,11 +83,11 @@
     - table_calculation: total_cmrr
       label: Total cMRR
       expression: sum(${new_mrr_this_week})
-      value_format_name: usd
+      value_format_name: usd_large
     - table_calculation: new_mrr_this_week
       label: new MRR this week
       expression: ${opportunity.total_mrr}
-      value_format_name: usd
+      value_format_name: usd_large
     hidden_fields: [opportunity.total_mrr]
     filters:
       account.account_status: -Black (Discontinued)

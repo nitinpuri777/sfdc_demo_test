@@ -30,7 +30,7 @@ view: opportunity {
   dimension: acv {
     type: number
     sql: ${TABLE}.acv ;;
-    value_format_name: usd
+    value_format_name: usd_large
   }
 
   dimension: amount {
@@ -164,7 +164,7 @@ view: opportunity {
   dimension: mrr {
     type: number
     sql: ${TABLE}.mrr ;;
-    value_format_name: usd
+    value_format_name: usd_large
   }
 
   #   - dimension: next_step
@@ -453,7 +453,7 @@ view: opportunity {
     }
 
     drill_fields: [opportunity_set*]
-    value_format_name: usd
+    value_format_name: usd_large
   }
 
   measure: total_pipeline_mrr {
@@ -466,7 +466,7 @@ view: opportunity {
     }
 
     drill_fields: [opportunity_set*]
-    value_format_name: usd
+    value_format_name: usd_large
   }
 
   measure: average_mrr {
@@ -553,14 +553,14 @@ view: opportunity {
   measure: total_acv {
     type: sum
     sql: ${acv} ;;
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [opportunity_set*]
   }
 
   measure: total_churn_acv {
     type: sum
     sql: ${acv} ;;
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [opportunity_set*]
     #       lost_reason: 'Non-renewal'
     filters: {
@@ -572,7 +572,7 @@ view: opportunity {
   measure: total_expansion_acv {
     type: sum
     sql: ${acv} ;;
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [opportunity_set*, acv]
 
     filters: {
@@ -584,7 +584,7 @@ view: opportunity {
   measure: net_expansion {
     type: number
     sql: ${total_expansion_acv} - ${total_churn_acv} ;;
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [opportunity_set*, acv]
   }
 
@@ -592,7 +592,7 @@ view: opportunity {
   measure: churn_acv {
     type: sum
     sql: -1.0*${acv} ;;
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [opportunity_set*, acv]
     #       lost_reason: 'Non-renewal'
     filters: {
@@ -620,7 +620,7 @@ view: opportunity {
       value: "Yes"
     }
 
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [account.name, type, closed_date, total_acv]
   }
 
@@ -638,7 +638,7 @@ view: opportunity {
       value: "this quarter"
     }
 
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [account.name, type, closed_date, total_acv]
   }
 
@@ -656,7 +656,7 @@ view: opportunity {
       value: "last quarter"
     }
 
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [opportunity_set*]
   }
 
@@ -684,7 +684,7 @@ view: opportunity {
       value: "No"
     }
 
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [opportunity_set*]
   }
 
@@ -697,7 +697,7 @@ view: opportunity {
       value: "No"
     }
 
-    value_format_name: usd
+    value_format_name: usd_large
     drill_fields: [opportunity_set*]
   }
 
