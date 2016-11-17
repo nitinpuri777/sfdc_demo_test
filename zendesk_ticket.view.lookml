@@ -70,7 +70,7 @@
 
   - measure: count
     type: count
-    drill_fields: [id, name, status, time_to_solve]
+    drill_fields: [id, name, created_date, time_to_solve]
 
   - measure: count_of_open_tickets
     type: count
