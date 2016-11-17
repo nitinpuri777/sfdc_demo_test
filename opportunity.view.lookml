@@ -134,7 +134,9 @@
   - dimension: lead_source
     sql: ${TABLE}.lead_source
 
-#   - dimension: lost_reason
+  - dimension: lost_reason
+    sql: |
+        1
 #     sql: ${TABLE}.lost_reason_c
 
   - dimension: mrr
