@@ -20,7 +20,13 @@ view: campaign_attribution {
       where
         a.row_num = 1
        ;;
-    sql_trigger_value: select CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', getdate())::date ;;
+
+## As of11/2/2016, SFDC etl to redshift moved to 8pm PST (8PM Santa Cruz, 11PM Eastern, 4AM London)
+## consequently, moving all ETLs to 9:30pm PST (9:30PM PST, 12:30am Eastern, 5:30AM London)
+## note that London time shift by an hour in the week between US and Europe start dates for daylight savings
+    sql_trigger_value: SELECT DATE(DATEADD('minute', 150, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', getdate()))) ;;
+
+
     distribution: "lead_id"
     sortkeys: ["created_at"]
   }

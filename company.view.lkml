@@ -5,7 +5,10 @@
 # First, it cleans company names by stripping spaces and modifiers to create a consistent way of referring to each company.
 # Then, it joins those cleaned names from the account table to the lead table,
 # and classifies any company that is not yet a customer as a prospect (including any company in the lead table).
+
 # This table will regenerate any time a new record is added to the lead table.
+# As of 11/2016, this table is getting moved to a daily rebuild after all ETL jobs are complete.
+# We shouldn't regen based on queries against the leads table, because other tables used in the query might still be old/empty.
 
 view: company {
   derived_table: {
@@ -35,7 +38,11 @@ FROM temp_company
 LEFT JOIN temp_account
 ON temp_company.company_id = temp_account.company_id
  ;;
-    sql_trigger_value: SELECT COUNT(*) FROM public.lead ;;
+## As of11/2/2016, SFDC etl to redshift moved to 8pm PST (8PM Santa Cruz, 11PM Eastern, 4AM London)
+## consequently, moving all ETLs to 9:30pm PST (9:30PM PST, 12:30am Eastern, 5:30AM London)
+## note that London time shift by an hour in the week between US and Europe start dates for daylight savings
+    sql_trigger_value: SELECT DATE(DATEADD('minute', 150, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', getdate()))) ;;
+
     indexes: ["company_id", "account_id"]
     distribution_style: all
   }

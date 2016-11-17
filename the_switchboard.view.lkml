@@ -248,7 +248,15 @@ view: the_switchboard {
   LEFT JOIN ${modified_first_touch.SQL_TABLE_NAME} AS modified_first_touch
   ON modified_first_touch.company_id = second_pass.company_id
  ;;
-    sql_trigger_value: SELECT COUNT(*) FROM public.lead ;;
+
+## As of11/2/2016, SFDC etl to redshift moved to 8pm PST (8PM Santa Cruz, 11PM Eastern, 4AM London)
+## consequently, moving all ETLs to 9:30pm PST (9:30PM PST, 12:30am Eastern, 5:30AM London)
+## note that London time shift by an hour in the week between US and Europe start dates for daylight savings
+## This PDT was previously regenerated using SELECT COUNT(*) FROM public.lead
+## We changed this to a calendered rebuild to avoid accidentally querying tables that are empty while ETL is still running
+
+    sql_trigger_value: SELECT DATE(DATEADD('minute', 150, CONVERT_TIMEZONE('UTC', 'America/Los_Angeles', getdate()))) ;;
+
     distribution_style: even
     indexes: ["first_seen_at", "account_id", "contact_id", "opportunity_id", "meeting_id"]
   }
