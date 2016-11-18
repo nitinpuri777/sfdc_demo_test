@@ -16,7 +16,7 @@
       height: 400
 
   elements:
-  
+
   - name: total_active_customers
     type: single_value
     model: salesforce
@@ -46,7 +46,7 @@
     comparison_type: change
     comparison_reverse_colors: false
     show_comparison_label: true
-    
+
   - name: customer_health_count
     type: looker_pie
     model: salesforce
@@ -71,7 +71,7 @@
       2. Standard: '#e9b404'
       3. Safe: '#49cec1'
     show_view_names: true
-  
+
   - name: cmrr
     title: cMRR
     type: single_value

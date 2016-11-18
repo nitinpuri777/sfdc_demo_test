@@ -1,7 +1,7 @@
 - dashboard: sales_app_rep_success
   title: Sales App - Rep Success
   layout: grid
-  rows: 
+  rows:
     - elements: [rep_tracking_to_quota, team_tracking_to_quota]
       height: 150
     - elements: [open_deal_health, progress_to_quota, trend_comparison]
@@ -12,31 +12,31 @@
       height: 200
     - elements: [meeting_to_close, team_meeting_to_close]
       height: 400
-      
+
   filters:
-  
+
   - name: sales_rep_name
     title: 'Sales Rep Name'
     type: field_filter
     explore: opportunity
     field: salesrep.name
     default_value: Kelsi Casados
-  
+
   - name: business_segment
     title: 'Business Segment'
     type: field_filter
     explore: opportunity
     field: salesrep.segment_select
     default_value: Enterprise
-  
+
   - name: closed_quarter
     title: 'Quarter'
     type: date_filter
     explore: opportunity
     field: opportunity.closed_quarter
     default_value: this quarter
- 
- 
+
+
   elements:
 
   - name: rep_tracking_to_quota
@@ -60,7 +60,7 @@
     listen:
       closed_quarter: opportunity.closed_quarter
       sales_rep_name: salesrep.name
-      
+
 
   - name: team_tracking_to_quota
     title: Team Tracking to Quota
@@ -80,7 +80,7 @@
     comparison_label: Team Quota
     listen:
       closed_quarter: opportunity.closed_quarter
-    
+
   - name: progress_to_quota
     title: Progress to Quota
     type: looker_line
@@ -138,7 +138,7 @@
     listen:
       closed_quarter: opportunity.closed_quarter
       sales_rep_name: salesrep.name
-    
+
   - name: open_deal_health
     title: Open Deal Health
     type: table
@@ -237,7 +237,7 @@
     listen:
       closed_quarter: opportunity.closed_quarter
       sales_rep_name: salesrep.name
-    
+
   - name: recent_wins
     title: Recent Wins
     type: table
@@ -263,7 +263,7 @@
     listen:
       closed_quarter: opportunity.closed_quarter
       sales_rep_name: salesrep.name
-    
+
   - name: acv_won_comparison
     title: ACV Won Comparison
     type: looker_bar
@@ -299,7 +299,7 @@
       closed_quarter: opportunity.closed_quarter
       sales_rep_name: salesrep.rep_select
       business_segment: salesrep.segment_select
-    
+
   - name: win_rate_comparison
     title: Win Rate Comparison
     type: looker_bar
@@ -335,7 +335,7 @@
       closed_quarter: opportunity.closed_quarter
       sales_rep_name: salesrep.rep_select
       business_segment: salesrep.segment_select
-    
+
   - name: pipeline_comparison
     title: Pipeline Comparison
     type: looker_bar
@@ -448,7 +448,6 @@
       closed_quarter: opportunity.closed_quarter
       sales_rep_name: salesrep.name
 
-  
-  
-  
-  
+
+
+

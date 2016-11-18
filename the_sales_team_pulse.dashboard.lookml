@@ -1,7 +1,7 @@
 - dashboard: the_sales_team_pulse
   title: The Sales Team Pulse
   layout: grid
-  rows: 
+  rows:
     - elements: [new_mrr, of_quota_this_time_last_q, new_acv, wins, days_left]
       height: 125
     - elements: [tracking_to_quota, pace_q_over_q]
@@ -12,7 +12,7 @@
       height: 375
 #   tile_size: 100
 
-  filters: 
+  filters:
 
   - name: quarter
     title: 'Quarter'
@@ -60,7 +60,7 @@
     show_comparison_label: false
     listen:
       quarter: opportunity.closed_quarter
-    
+
   - name: days_left
     title: Days Left
     type: single_value
@@ -73,7 +73,7 @@
     show_single_value_title: true
     value_format: ''
     show_comparison: false
-    
+
   - name: new_acv
     title: New ACV
     type: single_value
@@ -90,7 +90,7 @@
     show_comparison_label: false
     listen:
       quarter: opportunity.closed_quarter
-    
+
   - name: of_quota_this_time_last_q
     title: of Quota This Time Last Q
     type: single_value
@@ -106,7 +106,7 @@
     show_single_value_title: true
     value_format: '#%'
     show_comparison: false
-    
+
   - name: tracking_to_quota
     title: Tracking To Quota
     type: looker_line
@@ -174,7 +174,7 @@
     listen:
       quarter: opportunity.closed_quarter
 
-    
+
   - name: pace_q_over_q
     title: Pace (Q over Q)
     type: looker_line
@@ -289,11 +289,11 @@
       label: Total Pipeline
       expression: |-
         sum(pivot_row(${opportunity.total_acv}))
-  
+
         # This field was created to be used to sort the chart. Another reasonable sort value would be the sum of won and winning deals:
-  
+
         #coalesce(pivot_offset(${opportunity.total_acv}, 1), 0) + coalesce(pivot_offset(${opportunity.total_acv}, 2), 0)
-  
+
         #The "coalesce" function is used above to ensure that null values are evaluated to 0 instead of null (which breaks the calculation)
       value_format_name: usd_0
     hidden_fields: [total_pipeline]
@@ -329,7 +329,7 @@
     totals_color: '#808080'
     listen:
       quarter: opportunity.closed_quarter
-  
+
   - name: recent_deals
     title: Recent Deals
     type: table
@@ -354,7 +354,7 @@
     limit_displayed_rows: false
     listen:
       quarter: opportunity.closed_quarter
-    
+
   - name: likely_to_close
     title: Likely To Close
     type: table
@@ -411,7 +411,6 @@
       quarter: opportunity.closed_quarter
 
 
-  
-  
-  
-  
+
+
+

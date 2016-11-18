@@ -10,13 +10,13 @@
       height: 500
 
   filters:
-  
+
   - name: sales_segment
     title: 'Sales Segment'
     type: field_filter
     explore: opportunity
     field: salesrep.segment_select
-    
+
 
   elements:
 
@@ -61,7 +61,7 @@
     show_comparison: false
     listen:
       sales_segment: salesrep.business_segment
-    
+
   - name: bottom_performer
     title: Bottom Performer
     type: single_value
@@ -117,7 +117,7 @@
     limit_displayed_rows: false
     listen:
       sales_segment: salesrep.business_segment
-    
+
   - name: lead_to_intros
     title: Lead to Intro Meetings
     type: looker_bar
@@ -156,7 +156,7 @@
     show_null_labels: false
     listen:
       sales_segment: salesrep.business_segment
-  
+
   - name: meetings_to_opps
     title: Meetings to Opportunities
     type: looker_bar
@@ -234,4 +234,3 @@
     show_null_labels: false
     listen:
       sales_segment: salesrep.business_segment
-
