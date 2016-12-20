@@ -159,7 +159,7 @@ view: account {
         name: "Subject"
         type: string
         required:  yes
-        default: "Upgrade Your Looker to the Latest Version!"
+        default: "Upgrade to the Latest Version!"
       }
       form_param: {
         name: "Body"
@@ -172,8 +172,7 @@ view: account {
 
         Thanks,
         Dillon Morrison
-        Manager | Customer Success
-        Dillon@looker.com"
+        Manager | Customer Success"
       }
       form_param: {
         name: "Send Me a Copy"
@@ -207,8 +206,7 @@ view: account {
 
           Thanks,
           Dillon Morrison
-          Manager | Customer Success
-          Dillon@looker.com"
+          Manager | Customer Success"
         }
         form_param: {
           name: "Send Me a Copy"
@@ -220,31 +218,6 @@ view: account {
           }
         }
       }
-    action: {
-      label: "Update Git Repo"
-      url: "https://desolate-refuge-53336.herokuapp.com/posts"
-      icon_url: "https://sendgrid.com/favicon.ico"
-      form_param: {
-        name: "Subject"
-        type: string
-        required: yes
-        default: "Time to Switch Your Git Repo"
-      }
-      form_param: {
-        name: "Body"
-        type: textarea
-        required: yes
-        default:
-        "Hey Team,
-
-        I saw that you haven’t switched out the default repo to your own yet. Anything I can do to help?
-
-        Thanks,
-        Dillon Morrison
-        Manager | Customer Success
-        Dillon@looker.com"
-      }
-    }
   }
 
   dimension: number_of_employees {
