@@ -31,12 +31,48 @@ view: opportunity {
     type: number
     sql: ${TABLE}.acv ;;
     value_format_name: usd_large
+    action: {
+      label: "Update Salesforce ACV"
+      url: "https://desolate-refuge-53336.herokuapp.com/posts"
+      icon_url: "https://c2.sfdcstatic.com/etc/designs/sfdc-www/en_us/favicon.ico"
+      param: {
+        name: "id"
+        value: "{{ row['opportunities.id'] }}"
+      }
+      param: {
+        name: "Content-Type"
+        value: "application/x-www-form-urlencoded"
+      }
+      form_param: {
+        type: string
+        name: "Update ACV"
+        required:  yes
+      }
+    }
   }
 
   dimension: amount {
     type: number
     sql: ${TABLE}.amount ;;
     value_format: "$#,##0.00"
+    action: {
+      label: "Update Salesforce Amount"
+      url: "https://desolate-refuge-53336.herokuapp.com/posts"
+      icon_url: "https://c2.sfdcstatic.com/etc/designs/sfdc-www/en_us/favicon.ico"
+      param: {
+        name: "id"
+        value: "{{ row['opportunities.id'] }}"
+      }
+      param: {
+        name: "Content-Type"
+        value: "application/x-www-form-urlencoded"
+      }
+      form_param: {
+        type: string
+        name: "Update Amount"
+        required:  yes
+      }
+    }
   }
 
   dimension: campaign_id {
@@ -158,8 +194,10 @@ view: opportunity {
     sql: ${TABLE}.lead_source ;;
   }
 
-  #   - dimension: lost_reason
-  #     sql: ${TABLE}.lost_reason_c
+  dimension: lost_reason {
+    sql: ${TABLE}.lost_reason_c ;;
+    hidden: yes
+  }
 
   dimension: mrr {
     type: number

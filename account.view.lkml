@@ -150,6 +150,101 @@ view: account {
       url: "https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg"
       icon_url: "http://www.salesforce.com/favicon.ico"
     }
+
+    action: {
+      label: "Send License Upgrade Email"
+      url: "https://desolate-refuge-53336.herokuapp.com/posts"
+      icon_url: "https://sendgrid.com/favicon.ico"
+      form_param: {
+        name: "Subject"
+        type: string
+        required:  yes
+        default: "Upgrade Your Looker to the Latest Version!"
+      }
+      form_param: {
+        name: "Body"
+        type: textarea
+        required: yes
+        default:
+        "Hey Team,
+
+        I saw that you haven’t upgraded to the newest version yet. Anything I can do to help?
+
+        Thanks,
+        Dillon Morrison
+        Manager | Customer Success
+        Dillon@looker.com"
+      }
+      form_param: {
+        name: "Send Me a Copy"
+        type: select
+        default: "yes"
+        option: {
+          name: "yes"
+          label: "yes"
+        }
+      }
+    }
+
+      action: {
+        label: "Send Zendesk Followup Email"
+        url: "https://desolate-refuge-53336.herokuapp.com/posts"
+        icon_url: "https://sendgrid.com/favicon.ico"
+        form_param: {
+          name: "Subject"
+          type: string
+          required:  yes
+          default: "Following Up on Your Chat Support Conversation"
+        }
+        form_param: {
+          name: "Body"
+          type: textarea
+          required: yes
+          default:
+          "Hey Team,
+
+          I saw that you reached out to our support team. Is there anything I can do to help?
+
+          Thanks,
+          Dillon Morrison
+          Manager | Customer Success
+          Dillon@looker.com"
+        }
+        form_param: {
+          name: "Send Me a Copy"
+          type: select
+          default: "yes"
+          option: {
+            name: "yes"
+            label: "yes"
+          }
+        }
+      }
+    action: {
+      label: "Update Git Repo"
+      url: "https://desolate-refuge-53336.herokuapp.com/posts"
+      icon_url: "https://sendgrid.com/favicon.ico"
+      form_param: {
+        name: "Subject"
+        type: string
+        required: yes
+        default: "Time to Switch Your Git Repo"
+      }
+      form_param: {
+        name: "Body"
+        type: textarea
+        required: yes
+        default:
+        "Hey Team,
+
+        I saw that you haven’t switched out the default repo to your own yet. Anything I can do to help?
+
+        Thanks,
+        Dillon Morrison
+        Manager | Customer Success
+        Dillon@looker.com"
+      }
+    }
   }
 
   dimension: number_of_employees {
