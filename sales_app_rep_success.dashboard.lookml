@@ -447,7 +447,3 @@
     listen:
       closed_quarter: opportunity.closed_quarter
       sales_rep_name: salesrep.name
-
-
-
-

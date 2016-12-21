@@ -150,6 +150,74 @@ view: account {
       url: "https://blog.internetcreations.com/wp-content/uploads/2012/09/Business-Account_-Internet-Creations-salesforce.com-Enterprise-Edition-1.jpg"
       icon_url: "http://www.salesforce.com/favicon.ico"
     }
+
+    action: {
+      label: "Send License Upgrade Email"
+      url: "https://desolate-refuge-53336.herokuapp.com/posts"
+      icon_url: "https://sendgrid.com/favicon.ico"
+      form_param: {
+        name: "Subject"
+        type: string
+        required:  yes
+        default: "Upgrade to the Latest Version!"
+      }
+      form_param: {
+        name: "Body"
+        type: textarea
+        required: yes
+        default:
+        "Hey Team,
+
+        I saw that you haven’t upgraded to the newest version yet. Anything I can do to help?
+
+        Thanks,
+        Dillon Morrison
+        Manager | Customer Success"
+      }
+      form_param: {
+        name: "Send Me a Copy"
+        type: select
+        default: "yes"
+        option: {
+          name: "yes"
+          label: "yes"
+        }
+      }
+    }
+
+      action: {
+        label: "Send Zendesk Followup Email"
+        url: "https://desolate-refuge-53336.herokuapp.com/posts"
+        icon_url: "https://sendgrid.com/favicon.ico"
+        form_param: {
+          name: "Subject"
+          type: string
+          required:  yes
+          default: "Following Up on Your Chat Support Conversation"
+        }
+        form_param: {
+          name: "Body"
+          type: textarea
+          required: yes
+          default:
+          "Hey Team,
+
+          I saw that you reached out to our support team. Is there anything I can do to help?
+
+          Thanks,
+          Dillon Morrison
+          Manager | Customer Success"
+        }
+        form_param: {
+          name: "Send Me a Copy"
+          type: select
+          default: "yes"
+          option: {
+            name: "yes"
+            label: "yes"
+          }
+        }
+      }
   }
 
   dimension: number_of_employees {
@@ -219,12 +287,12 @@ view: account {
   }
 
   dimension: contact_email {
-    sql: concat('example@', ${name}, '.com') ;;
+    sql: 'example@'|| ${name} || '.com' ;;
   }
 
   dimension: reminder_email {
     sql: ${account.name} ;;
-    html: <a href="mailto:{{ account.contact_email._value }}?subject=Looker and {{account.name._value}} Outstanding Invoices&cc=renee@looker.com&body=Hi Example,%0D%0DI was hoping you might be able to help us track down outstanding Looker invoice #6341, which was sent to example@example.com in the amount of $4,000 and is currently 27 days past due.%0D%0DPlease let us know if there is a different contact we should be reaching out to regarding invoices or if you have a grasp on the plan for payment.%0D%0DYour help is very much appreciated!%0D%0DRegards,%0DSteve" target="_blank">
+    html: <a href="mailto:{{ account.contact_email._value }}?subject={{account.name._value}}: Outstanding Invoices&body=Hi Example,%0D%0DI was hoping you might be able to help us track down outstanding Looker invoice #6341, which was sent to example@example.com in the amount of $4,000 and is currently 27 days past due.%0D%0DPlease let us know if there is a different contact we should be reaching out to regarding invoices or if you have a grasp on the plan for payment.%0D%0DYour help is very much appreciated!%0D%0DRegards,%0DSteve" target="_blank">
         <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" width="16" height="16" />
       </a>
       {{ linked_value }}
