@@ -287,12 +287,12 @@ view: account {
   }
 
   dimension: contact_email {
-    sql: concat('example@', ${name}, '.com') ;;
+    sql: 'example@'|| ${name} || '.com' ;;
   }
 
   dimension: reminder_email {
     sql: ${account.name} ;;
-    html: <a href="mailto:{{ account.contact_email._value }}?subject=Looker and {{account.name._value}} Outstanding Invoices&cc=renee@looker.com&body=Hi Example,%0D%0DI was hoping you might be able to help us track down outstanding Looker invoice #6341, which was sent to example@example.com in the amount of $4,000 and is currently 27 days past due.%0D%0DPlease let us know if there is a different contact we should be reaching out to regarding invoices or if you have a grasp on the plan for payment.%0D%0DYour help is very much appreciated!%0D%0DRegards,%0DSteve" target="_blank">
+    html: <a href="mailto:{{ account.contact_email._value }}?subject={{account.name._value}}: Outstanding Invoices&body=Hi Example,%0D%0DI was hoping you might be able to help us track down outstanding Looker invoice #6341, which was sent to example@example.com in the amount of $4,000 and is currently 27 days past due.%0D%0DPlease let us know if there is a different contact we should be reaching out to regarding invoices or if you have a grasp on the plan for payment.%0D%0DYour help is very much appreciated!%0D%0DRegards,%0DSteve" target="_blank">
         <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" width="16" height="16" />
       </a>
       {{ linked_value }}
