@@ -155,7 +155,7 @@
     hidden_fields: [opportunity.total_churn_acv, opportunity.total_expansion_acv]
     filters:
       opportunity.closed_week: 13 months
-      opportunity.lost_reason: NULL,Non-renewal
+#       opportunity.lost_reason: NULL,Non-renewal
       opportunity.type: Renewal,Addon/Upsell,NULL
     sorts: [opportunity.closed_month]
     limit: 500

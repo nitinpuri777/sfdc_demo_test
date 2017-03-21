@@ -312,7 +312,8 @@
     limit_displayed_rows: false
 
   - name: negative_zd_tickets
-    title: Negative ZD Tickets (30 days)
+#     title: Negative ZD Tickets (30 days)
+    title: ZD Tickets (30 days)
     type: table
     model: salesforce
     explore: the_switchboard
@@ -321,7 +322,7 @@
     filters:
       account.name: -NULL
       zendesk_ticket.created_date: 30 days
-      zendesk_ticket.tone: negative
+#       zendesk_ticket.tone: negative
     sorts: [zendesk_ticket.created_date desc, account.name]
     limit: 15
     column_limit: 50

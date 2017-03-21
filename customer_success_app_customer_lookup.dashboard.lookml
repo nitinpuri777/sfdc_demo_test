@@ -346,14 +346,17 @@
       type: looker_column
       model: salesforce
       explore: the_switchboard
-      dimensions: [zendesk_ticket.created_week, zendesk_ticket.tone]
-      pivots: [zendesk_ticket.tone]
+      dimensions: [zendesk_ticket.created_week, zendesk_ticket.has_been_solved]
+      pivots: [zendesk_ticket.has_been_solved]
       measures: [zendesk_ticket.count]
       listen:
         account_name: account.name
       filters:
         zendesk_ticket.created_week: NOT NULL
-      sorts: [zendesk_ticket.created_date desc, zendesk_ticket.created_week desc, zendesk_ticket.tone desc]
+      sorts: [zendesk_ticket.created_date desc, zendesk_ticket.created_week desc]
+      series_labels:
+        No - Zendesk Ticket Count: Open
+        Yes - Zendesk Ticket Count: Solved
       limit: 500
       column_limit: 50
       query_timezone: America/Los_Angeles
