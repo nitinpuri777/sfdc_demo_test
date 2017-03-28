@@ -49,6 +49,7 @@ view: task {
 
   dimension: call_duration_in_seconds {
     type: number
+    hidden:  yes
     sql: ${TABLE}.call_duration_in_seconds ;;
   }
 
@@ -66,6 +67,7 @@ view: task {
     type: time
     timeframes: [date, week, month]
     convert_tz: no
+    hidden:  yes
     sql: ${TABLE}.completed__date___c ;;
   }
 
@@ -80,15 +82,6 @@ view: task {
     sql: ${TABLE}.created_date ;;
   }
 
-  dimension: demo__analyst__assigned___c {
-    type: string
-    sql: ${TABLE}.demo__analyst__assigned___c ;;
-  }
-
-  dimension: description {
-    type: string
-    sql: ${TABLE}.description ;;
-  }
 
   dimension: is_archived {
     type: yesno
@@ -112,6 +105,7 @@ view: task {
 
   dimension: is_recurrence {
     type: yesno
+    hidden: yes
     sql: ${TABLE}.is_recurrence ;;
   }
 
@@ -159,21 +153,25 @@ view: task {
 
   dimension: recurrence_activity_id {
     type: string
+    hidden: yes
     sql: ${TABLE}.recurrence_activity_id ;;
   }
 
   dimension: recurrence_day_of_month {
     type: number
+    hidden: yes
     sql: ${TABLE}.recurrence_day_of_month ;;
   }
 
   dimension: recurrence_day_of_week_mask {
     type: number
+    hidden: yes
     sql: ${TABLE}.recurrence_day_of_week_mask ;;
   }
 
   dimension_group: recurrence_end_date_only {
     type: time
+    hidden: yes
     timeframes: [date, week, month]
     convert_tz: no
     sql: ${TABLE}.recurrence_end_date_only ;;
@@ -181,26 +179,31 @@ view: task {
 
   dimension: recurrence_instance {
     type: string
+    hidden: yes
     sql: ${TABLE}.recurrence_instance ;;
   }
 
   dimension: recurrence_interval {
     type: number
+    hidden: yes
     sql: ${TABLE}.recurrence_interval ;;
   }
 
   dimension: recurrence_month_of_year {
     type: string
+    hidden: yes
     sql: ${TABLE}.recurrence_month_of_year ;;
   }
 
   dimension: recurrence_regenerated_type {
     type: string
+    hidden: yes
     sql: ${TABLE}.recurrence_regenerated_type ;;
   }
 
   dimension_group: recurrence_start_date_only {
     type: time
+    hidden: yes
     timeframes: [date, week, month]
     convert_tz: no
     sql: ${TABLE}.recurrence_start_date_only ;;
@@ -208,11 +211,13 @@ view: task {
 
   dimension: recurrence_time_zone_sid_key {
     type: string
+    hidden: yes
     sql: ${TABLE}.recurrence_time_zone_sid_key ;;
   }
 
   dimension: recurrence_type {
     type: string
+    hidden: yes
     sql: ${TABLE}.recurrence_type ;;
   }
 
@@ -230,11 +235,6 @@ view: task {
   dimension: status {
     type: string
     sql: ${TABLE}.status ;;
-  }
-
-  dimension: subject {
-    type: string
-    sql: ${TABLE}.subject ;;
   }
 
   dimension_group: system_modstamp {

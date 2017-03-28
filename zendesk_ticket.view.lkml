@@ -72,8 +72,12 @@ view: zendesk_ticket {
   }
 
   dimension: status {
-    hidden: yes
-    sql: ${TABLE}.zendesk___status___c ;;
+    type: string
+    sql: CASE
+          WHEN ${TABLE}.zendesk___date__time__solved___c is not null THEN 'Solved'
+          ELSE 'Open'
+         END
+          ;;
   }
 
   #MEASURES

@@ -198,6 +198,7 @@ view: meeting {
   }
 
   measure: percent_to_goal {
+    description: "Requires that meeting goal filter is populated"
     type: number
     value_format: "#%"
     sql: 1.00 * ${count} / NULLIF({%parameter meeting_goal %}, '') ;;
