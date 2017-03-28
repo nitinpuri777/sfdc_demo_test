@@ -1,13 +1,13 @@
 view: account_facts {
   derived_table: {
     sql: WITH account_contact_role_sequence AS ( SELECT contact.id AS contact_id
-                                          , account_contact_role.accountid AS account_id
+                                          , account_contact_role.account_id AS account_id
                                           , contact.name
                                           , contact.title
                                           , contact.created_at AS created_at
                                           , contact.email
                                           , account_contact_role.role
-                                          , ROW_NUMBER() OVER(PARTITION BY account_contact_role.accountid
+                                          , ROW_NUMBER() OVER(PARTITION BY account_contact_role.account_id
                                                                 , account_contact_role.role
                                                               ORDER BY contact.created_at) AS contact_role_sequence_number
                                         FROM account_contact_role
