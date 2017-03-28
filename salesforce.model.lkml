@@ -1,6 +1,4 @@
 # PRELIMINARIES #
-
-
 connection: "salesforce_demo"
 
 # include all the views
