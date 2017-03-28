@@ -141,7 +141,7 @@ view: account {
 
     link: {
       label: "Customer Lookup Dashboard"
-      url: "http://demonew.looker.com/dashboards/279?Account%20Name={{ value  }}"
+      url: "http://demo.looker.com/dashboards/279?Account%20Name={{ value  }}"
       icon_url: "http://www.looker.com/favicon.ico"
     }
 

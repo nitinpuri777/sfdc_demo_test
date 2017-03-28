@@ -56,13 +56,13 @@ view: salesrep {
 
     link: {
       label: "Sales Representative Performance Dashboard"
-      url: "http://demonew.looker.com/dashboards/5?Sales%20Rep={{ value | encode_uri }}&Sales%20Segment={{ salesrep.business_segment._value }}"
+      url: "http://demo.looker.com/dashboards/5?Sales%20Rep={{ value | encode_uri }}&Sales%20Segment={{ salesrep.business_segment._value }}"
       icon_url: "http://www.looker.com/favicon.ico"
     }
 
     link: {
       label: "Rep Success Dashboard"
-      url: "http://demonew.looker.com/dashboards/331?Sales%20Rep%20Name={{ value | encode_uri }}&Business%20Segment={{ salesrep.business_segment._value }}"
+      url: "http://demo.looker.com/dashboards/331?Sales%20Rep%20Name={{ value | encode_uri }}&Business%20Segment={{ salesrep.business_segment._value }}"
       icon_url: "http://www.looker.com/favicon.ico"
     }
   }
@@ -73,13 +73,13 @@ view: salesrep {
 
     link: {
       label: "Sales Team Summary Dashboard"
-      url: "http://demonew.looker.com/dashboards/4?Business%20Segment={{ value | encode_uri }}"
+      url: "http://demo.looker.com/dashboards/4?Business%20Segment={{ value | encode_uri }}"
       icon_url: "http://www.looker.com/favicon.ico"
     }
 
     link: {
       label: "Rep Overview Dashboard"
-      url: "http://demonew.looker.com/dashboards/323?Business%20Segment={{ value | encode_uri }}"
+      url: "http://demo.looker.com/dashboards/323?Business%20Segment={{ value | encode_uri }}"
       icon_url: "http://www.looker.com/favicon.ico"
     }
 
