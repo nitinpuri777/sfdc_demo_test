@@ -9,14 +9,8 @@ view: quota_aggregated {
     distribution: "quota_quarter"
     sql: SELECT
         quota_quarter
-        ,     sum(
-              case
-              when datediff(day, quota_quarter, current_date) < 93
-              then 93 / datediff(day, quota_quarter, current_date) * quota
-              else quota
-              end)
-              as sales_team_quota
-      FROM public.quota q
+        ,     sum(quota) as sales_team_quota
+      FROM public.quota as quota
       GROUP BY quota_quarter
       ORDER BY quota_quarter asc
        ;;

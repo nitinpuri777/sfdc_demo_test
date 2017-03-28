@@ -45,7 +45,7 @@ view: contact {
   }
 
   dimension: inbound_form_fillout {
-    type: yesno
+    type: string
     sql: ${TABLE}.inbound_form_fillout_c ;;
   }
 

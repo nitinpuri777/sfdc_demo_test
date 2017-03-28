@@ -11,14 +11,8 @@ view: quota {
     sql: SELECT
          person_id
         , quota_quarter
-        ,     (
-              case
-              when datediff(day, quota_quarter, current_date) < 90
-              then 90 / datediff(day, quota_quarter, current_date) * quota
-              else quota
-              end)
-              as quota
-      FROM public.quota quota
+        , quota
+      FROM public.quota as quota
        ;;
   }
 
@@ -47,7 +41,6 @@ view: quota {
     hidden: yes
     sql: ${person_id} || '_' || ${quota_time} ;;
   }
-
   measure: sum_quota {
     type: sum
     sql: ${quota} ;;
