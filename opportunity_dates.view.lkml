@@ -1,17 +1,16 @@
 view: opportunity_dates {
   derived_table: {
     sql: SELECT account_id AS account_id
-        , MIN(name) AS name
-        , MIN(closedate) AS first_opp_date
+        , MIN(closed_date) AS first_opp_date
         , MIN(CASE
-                WHEN stagename = 'Closed Won'
-                THEN closedate
+                WHEN stage_name = 'Closed Won'
+                THEN closed_date
                 ELSE NULL
               END) AS first_opp_won_date
         , MIN(CASE
                 WHEN type = 'Renewal'
-                  AND stagename = 'Active Lead'
-                THEN closedate
+                  AND stage_name = 'Active Lead'
+                THEN closed_date
                 ELSE NULL
               END) AS next_renewal_date
       FROM opportunity
@@ -33,9 +32,6 @@ view: opportunity_dates {
     sql: ${TABLE}.account_id ;;
   }
 
-  dimension: name {
-    sql: ${TABLE}.name ;;
-  }
 
   dimension_group: first_opp {
     type: time
