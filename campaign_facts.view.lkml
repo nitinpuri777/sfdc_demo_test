@@ -1,34 +1,34 @@
 view: account_campaign {
   derived_table: {
-    sql: WITH campaign_summary AS (SELECT DISTINCT account_contact_role.accountid AS account_id
+    sql: WITH campaign_summary AS (SELECT DISTINCT account_contact_role.account_id AS account_id
                             , CASE
                                 WHEN account_contact_role.role = 'Economic Decision Maker'
-                                THEN FIRST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.accountid ORDER BY campaign_member.created_at ROWS UNBOUNDED PRECEDING)
+                                THEN FIRST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.account_id ORDER BY campaign_member.created_at ROWS UNBOUNDED PRECEDING)
                                 ELSE NULL
                               END AS first_economic_contact_campaign_id
                             , CASE
                                 WHEN account_contact_role.role = 'Economic Decision Maker'
-                                THEN LAST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.accountid ORDER BY campaign_member.created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                                THEN LAST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.account_id ORDER BY campaign_member.created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
                                 ELSE NULL
                               END AS last_economic_contact_campaign_id
                             , CASE
                                 WHEN account_contact_role.role = 'Technical Fox'
-                                THEN FIRST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.accountid ORDER BY campaign_member.created_at ROWS UNBOUNDED PRECEDING)
+                                THEN FIRST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.account_id ORDER BY campaign_member.created_at ROWS UNBOUNDED PRECEDING)
                                 ELSE NULL
                               END AS first_technical_campaign_id
                             , CASE
                                 WHEN account_contact_role.role = 'Technical Fox'
-                                THEN LAST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.accountid ORDER BY campaign_member.created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                                THEN LAST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.account_id ORDER BY campaign_member.created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
                                 ELSE NULL
                               END AS last_technical_campaign_id
                             , CASE
                                 WHEN account_contact_role.role = 'Reference Contact'
-                                THEN FIRST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.accountid ORDER BY campaign_member.created_at ROWS UNBOUNDED PRECEDING)
+                                THEN FIRST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.account_id ORDER BY campaign_member.created_at ROWS UNBOUNDED PRECEDING)
                                 ELSE NULL
                               END AS first_reference_campaign_id
                             , CASE
                                 WHEN account_contact_role.role = 'Reference Contact'
-                                THEN LAST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.accountid ORDER BY campaign_member.created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                                THEN LAST_VALUE(campaign_id) OVER(PARTITION BY account_contact_role.account_id ORDER BY campaign_member.created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
                                 ELSE NULL
                               END AS last_reference_campaign_id
                           FROM public.campaign_member AS campaign_member
