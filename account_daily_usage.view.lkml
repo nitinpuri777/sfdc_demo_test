@@ -1103,6 +1103,21 @@ view: weekly_event_rollup {
       ;;
   }
 
+  measure: median_account_health {
+    type: median
+    sql: ${account_health_score} ;;
+    value_format_name: decimal_2
+    drill_fields: [detail*]
+    html: {% if value < 50 %}
+        <div style="color: white; background-color: darkred; font-size: 100%; text-align:center">{{ rendered_value }}</div>
+      {% elsif value < 70 %}
+        <div style="color: black; background-color: goldenrod; font-size: 100%; text-align:center">{{ rendered_value }}</div>
+      {% else %}
+        <div style="color: white; background-color: darkgreen; font-size: 100%; text-align:center">{{ rendered_value }}</div>
+      {% endif %}
+      ;;
+  }
+
   measure: average_account_health_this_week {
     type: average
     sql: ${account_health_score} ;;
