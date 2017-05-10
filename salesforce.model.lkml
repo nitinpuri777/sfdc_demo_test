@@ -17,6 +17,7 @@ named_value_format: usd_large {
 
 explore: the_switchboard {
   label: "(1) The Switchboard"
+  fields: [ALL_FIELDS*,-weekly_event_rollup.median_account_health]
 
   join: first_campaign {
     from: campaign
