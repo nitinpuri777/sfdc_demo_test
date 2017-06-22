@@ -53,13 +53,6 @@ view: salesrep {
 
   dimension: name {
     sql: ${first_name} || ' ' || ${last_name} ;;
-
-    link: {
-      label: "Sales Representative Performance Dashboard"
-      url: "/dashboards/5?Sales%20Rep={{ value | encode_uri }}&Sales%20Segment={{ salesrep.business_segment._value }}"
-      icon_url: "http://www.looker.com/favicon.ico"
-    }
-
     link: {
       label: "Rep Success Dashboard"
       url: "/dashboards/331?Sales%20Rep%20Name={{ value | encode_uri }}&Business%20Segment={{ salesrep.business_segment._value }}"
