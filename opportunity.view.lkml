@@ -317,6 +317,44 @@ view: opportunity {
       url: "https://demo.looker.com/dashboards/363"
       icon_url: "http://www.looker.com/favicon.ico"
     }
+
+    action: {
+      label: "Update Opportunity Stage"
+      url: "https://desolate-refuge-53336.herokuapp.com/posts"
+      icon_url: "https://c2.sfdcstatic.com/etc/designs/sfdc-www/en_us/favicon.ico"
+      param: {
+        name: "id"
+        value: "{{ row['opportunities.id'] }}"
+      }
+      param: {
+        name: "Content-Type"
+        value: "application/x-www-form-urlencoded"
+      }
+      form_param: {
+        name: "Stage"
+        type: select
+        option: {
+          name: "Lead"
+          label: "Lead"
+        }
+        option: {
+          name: "Prospect"
+          label: "Prospect"
+        }
+        option: {
+          name: "Trial"
+          label: "Trial"
+        }
+        option: {
+          name: "Winning"
+          label: "Winning"
+        }
+        option: {
+          name: "Won"
+          label: "Won"
+        }
+      }
+    }
   }
 
   dimension: contract_value {
