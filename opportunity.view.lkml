@@ -314,7 +314,7 @@ view: opportunity {
 
     link: {
       label: "Pipeline Analysis Dashboard"
-      url: "https://demo.looker.com/dashboards/363"
+      url: "/dashboards/363"
       icon_url: "http://www.looker.com/favicon.ico"
     }
 
