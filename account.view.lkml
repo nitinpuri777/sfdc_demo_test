@@ -152,6 +152,83 @@ view: account {
     }
 
     action: {
+      label: "Update ACV"
+      url: "https://localhost:8443/update_acv"
+      icon_url: "http://www.salesforce.com/favicon.ico"
+      param: {
+        name: "id"
+        value: "{{ row['opportunities.id'] }}"
+      }
+      param: {
+        name: "Content-Type"
+        value: "application/x-www-form-urlencoded"
+      }
+      form_param: {
+        name: "update_value"
+        type: string
+      }
+    }
+
+    action: {
+      label: "Update Status"
+      url: "https://localhost:8443/update_status"
+      icon_url: "http://www.salesforce.com/favicon.ico"
+      param: {
+        name: "id"
+        value: "{{ row['opportunities.id'] }}"
+      }
+      param: {
+        name: "Content-Type"
+        value: "application/x-www-form-urlencoded"
+      }
+      form_param: {
+        name: "status"
+        type: select
+        default: "{{ row['opportunities.status'] }}"
+        option: {
+          name: "Active Lead"
+          label: "Active Lead"
+        }
+        option: {
+          name: "Qualified Prospect"
+          label: "Qualified Prospect"
+        }
+        option: {
+          name: "Trial Requested"
+          label: "Trial Requested"
+        }
+        option: {
+          name: "Trial"
+          label: "Trial"
+        }
+        option: {
+          name: "Trial - In progress, positive"
+          label: "Trial - In progress, positive"
+        }
+        option: {
+          name: "Proposal"
+          label: "Proposal"
+        }
+        option: {
+          name: "Negotiation"
+          label: "Negotiation"
+        }
+        option: {
+          name: "Commit- Not Won"
+          label: "Commit- Not Won"
+        }
+        option: {
+          name: "Closed Won"
+          label: "Closed Won"
+        }
+        option: {
+          name: "Closed Lost"
+          label: "Closed Lost"
+        }
+      }
+    }
+
+    action: {
       label: "Send License Upgrade Email"
       url: "https://desolate-refuge-53336.herokuapp.com/posts"
       icon_url: "https://sendgrid.com/favicon.ico"
