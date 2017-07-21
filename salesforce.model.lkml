@@ -1,6 +1,6 @@
 # PRELIMINARIES #
 connection: "salesforce_demo"
-
+label: "2) Salesforce"
 # include all the views
 include: "*.view"
 
