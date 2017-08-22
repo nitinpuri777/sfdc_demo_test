@@ -446,7 +446,7 @@ view: zendesk_ticket_2 {
 
       link: {
         label: "{{value}} - Agent Analytics Dashboard"
-        url: "/dashboards/1893?Agent%20Name=={{ value | encode_uri }}"
+        url: "/dashboards/1894?Agent%20Name={{ value | encode_uri }}"
         icon_url: "http://www.looker.com/favicon.ico"
       }
 
