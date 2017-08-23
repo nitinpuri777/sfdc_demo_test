@@ -5,12 +5,15 @@ view: zendesk_ticket_2 {
   dimension: id {
     primary_key: yes
     sql: ${TABLE}.id ;;
+    html:
+ <img src="http://www.google.com/s2/favicons?domain=www.zendesk.com" height=16 width=16>;;
 
     link: {
       label: "Zendesk Ticket"
-      url: "https://d16cvnquvjw7pr.cloudfront.net/www/img/p-brand/downloads/Logo/Zendesk_logo_on_green_RGB.png"
+      url: "https://www.zendesk.com/login/"
       icon_url: "http://www.google.com/s2/favicons?domain=www.zendesk.com"
     }
+
   }
 
   dimension_group: created {
@@ -84,8 +87,10 @@ view: zendesk_ticket_2 {
 
   measure: count {
     type: count
-    drill_fields: [id, name, created_date, time_to_solve]
-  }
+    drill_fields: [id, agent_name, created_date, priority_sort]
+
+
+ }
 
   measure: count_of_open_tickets {
     type: count
@@ -95,6 +100,14 @@ view: zendesk_ticket_2 {
       field: solved_time
       value: "NULL"
     }
+
+  }
+
+  measure: percent_open{
+    type: number
+    sql: (1.0*${count_of_open_tickets})/NULLIF(${count},0) ;;
+    value_format_name: percent_2
+#     html:  ;;
   }
 
   measure: total_requester_wait_time_business {
@@ -185,9 +198,16 @@ view: zendesk_ticket_2 {
   }
 
 
-  dimension: request_type {
+  dimension: request_type_raw {
     hidden: yes
     sql: ${TABLE}.request_type___c ;;
+  }
+
+  dimension: request_type {
+    sql: case when ${TABLE}.request_type___c in ('bug', 'is_bug') then 'Bug Request'
+    when ${TABLE}.request_type___c in ('feature_request', 'feature_request') then 'Feature Request'
+    when ${TABLE}.request_type___c in ('request_and_bug') then 'Bug and Feature Request'
+    else 'Not Classified' end ;;
   }
 
   #   - dimension: action
@@ -317,6 +337,21 @@ view: zendesk_ticket_2 {
           when ${TABLE}.zendesk___priority___c = 'High' then '4 - High'
           when ${TABLE}.zendesk___priority___c = 'Urgent' then '5 - Urgent'
           when ${TABLE}.zendesk___priority___c is null then '1 - Not Assigned' end;;
+    html:
+    {% if value == '1 - Not Assigned' %}
+    <p style="color: black; background-color: grey; font-size:100%; text-align:center">{{ rendered_value }}</p>
+    {% elsif value == '2 - Low' %}
+    <p style="color: black; background-color: lightgreen; font-size:100%; text-align:center">{{ rendered_value }}</p>
+    {% elsif value == '3 - Normal' %}
+    <p style="color: black; background-color: yellow; font-size:100%; text-align:center">{{ rendered_value }}</p>
+    {% elsif value == '4 - High' %}
+    <p style="color: white; background-color: darkred; font-size:100%; text-align:center">{{ rendered_value }}</p>
+        {% elsif value == '5 - Urgent' %}
+    <p style="color: white; background-color: black; font-size:100%; text-align:center">{{ rendered_value }}</p>
+    {% else %}
+    <p style="color: black; background-color: blue; font-size:100%; text-align:center">{{ rendered_value }}</p>
+    {% endif %};;
+
   }
 
   dimension: reply_time_business {
@@ -452,6 +487,23 @@ view: zendesk_ticket_2 {
 
     }
 
+
+  filter: agent_select {
+    view_label: "Zendesk Ticket"
+    suggest_dimension: agent_name
+  }
+
+  dimension: agent_comparitor {
+    sql:
+    CASE
+      WHEN {% condition agent_select %} ${agent_name} {% endcondition %}
+      THEN ${agent_name}
+      ELSE 'All Other Agents'
+    END ;;
+  }
+
+
+
     dimension: agent_email {
       sql: case when lower(substring(${requester}, 11, 1)) in (0, 1) then 'Amy.Adams@email.com'
           when lower(substring(${requester}, 11, 1)) in (2, 3) then 'Barry.Manilow@email.com'
@@ -500,6 +552,11 @@ view: zendesk_ticket_2 {
           }
         }
         required_fields: [agent_name]
+      }
+
+      measure: count_client {
+        type: count_distinct
+        sql: ${contact.name} ;;
       }
 
     }
