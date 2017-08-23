@@ -84,6 +84,22 @@ view: contact {
     sql: ${TABLE}.title ;;
   }
 
+  dimension: title_abbreviations {
+    type: string
+    sql: CASE
+          WHEN ${title} ILIKE '%eng%'
+          THEN 'Engineer'
+          WHEN ${title} ILIKE '%analyst%'
+          THEN 'Analyst'
+          WHEN ${title} ILIKE '%marketing%'
+          THEN 'Marketing'
+          WHEN ${title} ILIKE '%sales%'
+          THEN 'Sales'
+          ELSE 'Other'
+        END
+          ;;
+  }
+
   #  Numeric field, doesn't seem useful
   #   - dimension: zendesk_organization
   #     sql: ${TABLE}.zendesk_organization
