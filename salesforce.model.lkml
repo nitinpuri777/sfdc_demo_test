@@ -380,3 +380,17 @@ explore: campaign_attribution {
     relationship: many_to_one
   }
 }
+
+## New for Zendesk Demo ##
+
+explore: zendesk_ticket_2 {
+  label: "(8) Zendesk Ticket"
+  view_label: "Zendesk Ticket"
+  fields: [ALL_FIELDS*,-zendesk_ticket_2.created_before_opp_closed, -zendesk_ticket_2.average_tickets_per_opp
+    ,-contact.name, -contact.email]
+
+  join: contact {
+      sql_on: ${contact.id} = ${zendesk_ticket_2.requester} ;;
+      relationship: many_to_one
+    }
+}
