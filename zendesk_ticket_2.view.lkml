@@ -492,7 +492,7 @@ view: zendesk_ticket_2 {
             type: textarea
             required: yes
             default:
-            "Dear {{ zendesk_ticket.agent_name._value }},
+            "Dear {{ zendesk_ticket_2.agent_name._value }},
 
             I have a question regarding one of your Zendesk accounts.
 
