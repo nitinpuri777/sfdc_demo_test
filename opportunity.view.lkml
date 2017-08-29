@@ -626,16 +626,36 @@ view: opportunity {
     drill_fields: [opportunity_set*, acv]
   }
 
-  #for Net Expansion Look
+###  For Net Expansion Look  ###
+
+#   measure: churn_acv {
+#     type: sum
+#     sql: -1.0*${acv} ;;
+#     value_format_name: usd_large
+#     drill_fields: [opportunity_set*, acv]
+#     #       lost_reason: 'Non-renewal'
+#     filters: {
+#       field: churn_status
+#       value: "3 - Red, 2 - Orange, 1 - Yellow"
+#     }
+#   }
+
   measure: churn_acv {
     type: sum
-    sql: -1.0*${acv} ;;
+    sql: -1.0 * ${acv} ;;
     value_format_name: usd_large
     drill_fields: [opportunity_set*, acv]
-    #       lost_reason: 'Non-renewal'
     filters: {
-      field: churn_status
-      value: "3 - Red, 2 - Orange, 1 - Yellow"
+      field: is_won
+      value: "No"
+    }
+    filters: {
+      field: is_closed
+      value: "Yes"
+    }
+    filters: {
+      field: type
+      value: "Renewal"
     }
   }
 
